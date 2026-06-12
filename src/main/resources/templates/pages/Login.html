@@ -1,0 +1,21 @@
+<!doctype html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/Auth}">
+	<head>
+		<title>Login</title>
+	</head>
+
+	<body>
+		<div layout:fragment="content">
+			<h1 class="text-xl">Login</h1>
+
+			<form method="post" action="/login">
+				<input type="text" name="username" placeholder="Email" />
+
+				<input type="password" name="password" placeholder="Password" class="" />
+
+				<button type="submit" class="btn btn-outline">Login</button>
+			</form>
+		</div>
+	</body>
+</html>
+
