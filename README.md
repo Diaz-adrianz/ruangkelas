@@ -47,8 +47,6 @@ Create the application database:
 CREATE DATABASE `db-ruangkelas`;
 ```
 
----
-
 ## Environment Variables
 
 Create a `.env` file in the project root:
