@@ -1,11 +1,17 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" data-theme="light">
 	<head>
 		<title layout:title-pattern="$CONTENT_TITLE">RuangKelas</title>
 		<link rel="stylesheet" th:href="@{/css/main.css}" />
 	</head>
 	<body>
-		<div layout:fragment="content"></div>
+		<div class="min-h-screen flex flex-col items-center justify-center bg-base-200">
+			<div class="flex gap-2 items-center mb-8">
+				<img th:src="@{/images/LogoIpsum.png}" alt="Logo" class="w-8" />
+				<h1 class="text-2xl text-primary font-bold">RuangKelas</h1>
+			</div>
+			<div layout:fragment="content"></div>
+		</div>
 	</body>
 </html>
 

@@ -2,3 +2,51 @@
 @plugin "daisyui";
 
 @source '../resources/templates/';
+
+@plugin "daisyui/theme" {
+	name: 'light';
+	default: true;
+	--color-base-100: oklch(99% 0.002 247);
+	--color-base-200: oklch(97% 0.004 247);
+	--color-base-300: oklch(93% 0.008 247);
+	--color-base-content: oklch(22% 0.02 250);
+	--color-primary: oklch(62% 0.16 200);
+	--color-primary-content: oklch(98% 0.01 200);
+	--color-secondary: oklch(75% 0.16 85);
+	--color-secondary-content: oklch(20% 0.03 85);
+	--color-accent: oklch(90% 0.03 220);
+	--color-accent-content: oklch(25% 0.03 220);
+	--color-neutral: oklch(28% 0.02 250);
+	--color-neutral-content: oklch(98% 0.002 247);
+	--color-info: oklch(65% 0.14 230);
+	--color-info-content: oklch(98% 0.01 230);
+	--color-success: oklch(72% 0.18 145);
+	--color-success-content: oklch(98% 0.01 145);
+	--color-warning: oklch(80% 0.15 85);
+	--color-warning-content: oklch(20% 0.03 85);
+	--color-error: oklch(64% 0.22 25);
+	--color-error-content: oklch(98% 0.01 25);
+	--radius-selector: 0.5rem;
+	--radius-field: 0.5rem;
+	--radius-box: 0.75rem;
+	--size-selector: 0.25rem;
+	--size-field: 0.25rem;
+	--border: 1px;
+	--depth: 0;
+	--noise: 0;
+}
+
+/* override daisyui  */
+.validator:user-invalid ~ .validator-hint,
+.validator:has(:user-invalid) ~ .validator-hint,
+.validator[aria-invalid]:not([aria-invalid='false']) ~ .validator-hint,
+.validator:has([aria-invalid]:not([aria-invalid='false'])) ~ .validator-hint {
+	height: auto;
+}
+
+.validator-hint {
+	height: 0;
+	margin: 0;
+	overflow: hidden;
+}
+

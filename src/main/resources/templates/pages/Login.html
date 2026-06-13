@@ -3,18 +3,75 @@
 	<head>
 		<title>Login</title>
 	</head>
-
 	<body>
-		<div layout:fragment="content">
-			<h1 class="text-xl">Login</h1>
+		<div layout:fragment="content" class="card w-full shadow max-w-sm bg-base-100">
+			<div class="card-body gap-4">
+				<div class="text-center">
+					<h1 class="text-2xl font-bold">Senang Melihatmu Lagi!</h1>
+					<p class="text-base-content/60 text-sm mt-1">Masuk ke akun kamu untuk melanjutkan.</p>
+				</div>
 
-			<form method="post" action="/login">
-				<input type="text" name="username" placeholder="Email" />
+				<!-- ====== ALERTS ======  -->
+				<!-- success  -->
+				<div th:if="${param.success}" class="alert alert-soft alert-success">
+					<span th:text="${param.success}"></span>
+				</div>
 
-				<input type="password" name="password" placeholder="Password" class="" />
+				<!-- error -->
+				<div th:if="${param.error}" class="alert alert-soft alert-error">
+					<span>Email atau password salah.</span>
+				</div>
 
-				<button type="submit" class="btn btn-outline">Login</button>
-			</form>
+				<!-- logout -->
+				<div th:if="${param.logout}" class="alert alert-success alert-soft">
+					<span>Logout berhasil.</span>
+				</div>
+				<!-- ====== ALERTS ======  -->
+
+				<form method="post" th:action="@{/auth/login}" class="flex flex-col gap-4">
+					<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+					<label class="form-control w-full">
+						<div class="label">
+							<span class="label-text">Email</span>
+						</div>
+						<input
+							type="email"
+							name="username"
+							placeholder="johndoe@example.com"
+							class="input input-bordered w-full"
+							required
+						/>
+					</label>
+
+					<label class="form-control w-full">
+						<div class="label">
+							<span class="label-text">Password</span>
+						</div>
+						<input
+							type="password"
+							name="password"
+							placeholder="••••••••"
+							class="input input-bordered w-full"
+							required
+						/>
+					</label>
+
+					<div class="form-control">
+						<label class="label cursor-pointer justify-start gap-2">
+							<input type="checkbox" name="remember-me" class="checkbox checkbox-sm" />
+							<span class="label-text">Ingat aku</span>
+						</label>
+					</div>
+
+					<button type="submit" class="btn btn-primary w-full mt-2">Masuk</button>
+				</form>
+
+				<p class="text-center text-sm text-base-content/60">
+					Belum punya akun?
+					<a href="/auth/register" class="link link-primary">Daftar</a>
+				</p>
+			</div>
 		</div>
 	</body>
 </html>
