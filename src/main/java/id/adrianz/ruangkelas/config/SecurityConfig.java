@@ -1,8 +1,14 @@
 package id.adrianz.ruangkelas.config;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -28,7 +34,19 @@ public class SecurityConfig {
                 .formLogin(form -> form
                 .loginPage("/auth/login")
                 .defaultSuccessUrl("/", true)
-                .failureUrl("/auth/login?error=true")
+                .failureHandler((request, response, exception) -> {
+                    String message;
+                    if (exception instanceof BadCredentialsException) {
+                        message = "Email/username atau password salah";
+                    } else if (exception instanceof DisabledException) {
+                        message = "Akun belum aktif";
+                    } else if (exception instanceof LockedException) {
+                        message = "Akun terkunci";
+                    } else {
+                        message = "Login gagal, coba lagi";
+                    }
+                    response.sendRedirect("/auth/login?error=" + URLEncoder.encode(message, StandardCharsets.UTF_8));
+                })
                 .permitAll()
                 )
                 .logout(logout -> logout
