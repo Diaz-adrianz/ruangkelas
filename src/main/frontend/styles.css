@@ -6,6 +6,7 @@
 @plugin "daisyui/theme" {
 	name: 'light';
 	default: true;
+	--font-sans: 'Plus Jakarta Sans', sans-serif;
 	--color-base-100: oklch(99% 0.002 247);
 	--color-base-200: oklch(97% 0.004 247);
 	--color-base-300: oklch(93% 0.008 247);
