@@ -1,16 +1,49 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<html
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	data-theme="light"
+>
 	<head>
 		<title layout:title-pattern="$CONTENT_TITLE">RuangKelas</title>
+		<link rel="stylesheet" th:href="@{/css/main.css}" />
 	</head>
-
 	<body>
-		<nav>
-			<h2>RuangKelas</h2>
-		</nav>
+		<nav class="navbar border-b border-base-300">
+			<div class="w-full mx-auto max-w-5xl justify-between flex items-center">
+				<div class="flex gap-3 items-center">
+					<img th:src="@{/images/LogoIpsum.png}" alt="Logo" class="w-8" />
+					<h1 class="text-2xl text-primary font-bold">RuangKelas</h1>
+				</div>
 
+				<div sec:authorize="isAuthenticated()" class="dropdown dropdown-end">
+					<div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+						<div class="avatar avatar-placeholder">
+							<div class="bg-neutral text-neutral-content w-10 rounded-full">
+								<span sec:authentication="principal.initials"></span>
+							</div>
+						</div>
+					</div>
+					<div tabindex="0" class="dropdown-content rounded-box border mt-2 border-base-300 bg-base-100 w-52 z-10">
+						<div class="p-4 border-b border-base-300">
+							<p sec:authentication="principal.name" class="text-lg font-bold"></p>
+							<span th:text="'@' + ${#authentication.principal.username}" class="text-sm text-base-content/60"></span>
+						</div>
+						<ul class="menu w-full">
+							<li><a href="/profil">Profil</a></li>
+							<li class="text-error">
+								<form method="post" th:action="@{/auth/logout}">
+									<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+									<button type="submit">Keluar</button>
+								</form>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</nav>
 		<main layout:fragment="content"></main>
-		<script th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js}"></script>
 	</body>
 </html>
 

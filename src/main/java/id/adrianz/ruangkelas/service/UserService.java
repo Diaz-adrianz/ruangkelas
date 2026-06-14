@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import id.adrianz.ruangkelas.dto.RegisterDto;
 import id.adrianz.ruangkelas.model.User;
+import id.adrianz.ruangkelas.model.UserPrincipal;
 import id.adrianz.ruangkelas.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -23,11 +24,7 @@ public class UserService implements UserDetailsService {
         User user = userRepository.findByUsernameOrEmail(username, username)
                 .orElseThrow(() -> new UsernameNotFoundException("Akun tidak ditemukan"));
 
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getUsername())
-                .password(user.getPassword())
-                .disabled(!user.isEnabled())
-                .build();
+        return new UserPrincipal(user);
     }
 
     public User register(RegisterDto request) {
