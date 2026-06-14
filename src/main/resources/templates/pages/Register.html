@@ -41,11 +41,12 @@
 						<legend class="fieldset-legend">Username</legend>
 						<input
 							th:field="*{username}"
-							class="input validator"
+							class="input validator w-full"
 							required
 							type="text"
 							name="username"
 							placeholder="johndoe19"
+							pattern="^[A-Za-z][A-Za-z0-9_]{2,29}$"
 						/>
 						<span class="validator-hint">3 - 30 karakter. Hanya huruf, angka, atau underscore (_)</span>
 					</fieldset>
@@ -54,7 +55,7 @@
 						<legend class="fieldset-legend">Email</legend>
 						<input
 							th:field="*{email}"
-							class="input validator"
+							class="input validator w-full"
 							required
 							type="email"
 							name="email"
@@ -67,7 +68,7 @@
 						<legend class="fieldset-legend">Password</legend>
 						<input
 							th:field="*{password}"
-							class="input validator"
+							class="input validator w-full"
 							required
 							type="password"
 							name="password"
@@ -83,7 +84,7 @@
 						<legend class="fieldset-legend">Nama lengkap</legend>
 						<input
 							th:field="*{name}"
-							class="input validator"
+							class="input validator w-full"
 							required
 							type="text"
 							name="name"
@@ -97,7 +98,7 @@
 						<legend class="fieldset-legend">NIM</legend>
 						<input
 							th:field="*{nim}"
-							class="input validator"
+							class="input validator w-full"
 							type="text"
 							name="nim"
 							placeholder="124705••••"
