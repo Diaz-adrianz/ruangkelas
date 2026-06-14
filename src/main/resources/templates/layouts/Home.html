@@ -7,7 +7,7 @@
 >
 	<head>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title layout:title-pattern="$CONTENT_TITLE">RuangKelas</title>
+		<title layout:title-pattern="$CONTENT_TITLE | RuangKelas">RuangKelas</title>
 		<link rel="stylesheet" th:href="@{/css/styles.css}" />
 	</head>
 	<body>
@@ -27,7 +27,7 @@
 						</div>
 					</div>
 					<div tabindex="0" class="dropdown-content rounded-box border mt-2 border-base-300 bg-base-100 w-52 z-10">
-						<div class="p-4 border-b border-base-300">
+						<div class="px-4 py-2 border-b border-base-300 grid -space-y-px">
 							<p sec:authentication="principal.name" class="text-lg font-bold"></p>
 							<span th:text="'@' + ${#authentication.principal.username}" class="text-sm text-base-content/60"></span>
 						</div>
