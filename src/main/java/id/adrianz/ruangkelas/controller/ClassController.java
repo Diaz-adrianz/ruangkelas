@@ -25,13 +25,6 @@ public class ClassController {
 
     private final ClassService classService;
 
-    @GetMapping
-    public String index(Model model, @AuthenticationPrincipal UserPrincipal principal) {
-        List<Class> classes = classService.getAllForUser(principal.getUser().getId());
-        model.addAttribute("classes", classes);
-        return "pages/Class/Index";
-    }
-
     @GetMapping("/join")
     public String joinForm(Model model, @AuthenticationPrincipal UserPrincipal principal) {
         model.addAttribute("classes", classService.getAllForUser(principal.getUser().getId()));
