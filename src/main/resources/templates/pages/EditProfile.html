@@ -22,13 +22,29 @@
 				<h1 class="typo-heading-xl">Edit Profil</h1>
 			</div>
 
-			<form th:action="@{/profil/edit}" method="post" class="flex flex-col">
+			<!-- ====== ALERTS ======  -->
+			<!-- error -->
+			<div th:if="${error}" class="alert alert-soft alert-error mb-4">
+				<span th:text="${error}"></span>
+			</div>
+
+			<div th:if="${errors}" class="alert alert-warning alert-soft mb-4">
+				<div>
+					<h3 class="font-bold">Validasi gagal.</h3>
+					<ul class="list-disc ps-4">
+						<li th:each="err : ${errors}" th:text="${err.defaultMessage}"></li>
+					</ul>
+				</div>
+			</div>
+			<!-- ====== ALERTS ======  -->
+
+			<form th:action="@{/profil/edit}" th:object="${updateProfileDto}" method="post" class="flex flex-col">
 				<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
 				<fieldset class="fieldset">
 					<legend class="fieldset-legend">Nama lengkap</legend>
 					<input
-						th:field="${user.name}"
+						th:field="*{name}"
 						class="input validator w-full"
 						required
 						type="text"
@@ -42,7 +58,7 @@
 				<fieldset class="fieldset">
 					<legend class="fieldset-legend">NIM</legend>
 					<input
-						th:field="${user.nim}"
+						th:field="*{nim}"
 						class="input validator w-full"
 						type="text"
 						name="nim"
