@@ -10,7 +10,7 @@ import id.adrianz.ruangkelas.service.EmailService;
 import lombok.AllArgsConstructor;
 
 @Controller
-@RequestMapping("/notifikasi")
+@RequestMapping("/notification")
 @AllArgsConstructor
 public class NotificationController {
 
