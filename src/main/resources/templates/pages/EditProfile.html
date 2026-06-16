@@ -1,0 +1,79 @@
+<!doctype html>
+<html
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/Home}"
+>
+	<head>
+		<title>Edit Profil</title>
+	</head>
+
+	<body>
+		<div layout:fragment="content">
+			<div class="max-w-5xl mx-auto py-8">
+
+				<h1 class="text-3xl font-bold mb-6">
+					Edit Profil
+				</h1>
+
+				<form
+					th:action="@{/profil/edit}"
+					method="post"
+					class="space-y-4"
+				>
+
+					<input
+						type="hidden"
+						th:name="${_csrf.parameterName}"
+						th:value="${_csrf.token}"
+					/>
+
+					<div>
+						<label class="label">
+							<span class="label-text">Nama</span>
+						</label>
+
+						<input
+							type="text"
+							name="name"
+							th:value="${user.name}"
+							class="input input-bordered w-full"
+							required
+						/>
+					</div>
+
+					<div>
+						<label class="label">
+							<span class="label-text">NIM</span>
+						</label>
+
+						<input
+							type="text"
+							name="nim"
+							th:value="${user.nim}"
+							class="input input-bordered w-full"
+						/>
+					</div>
+
+					<div class="flex gap-2">
+						<button
+							type="submit"
+							class="btn btn-primary"
+						>
+							Simpan
+						</button>
+
+						<a
+							href="/profil"
+							class="btn btn-outline"
+						>
+							Batal
+						</a>
+					</div>
+
+				</form>
+
+			</div>
+		</div>
+	</body>
+</html>

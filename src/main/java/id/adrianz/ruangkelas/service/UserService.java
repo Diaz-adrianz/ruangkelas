@@ -27,7 +27,7 @@ public class UserService implements UserDetailsService {
         return new UserPrincipal(user);
     }
 
-    public User register(RegisterDto request) {
+        public User register(RegisterDto request) {
         if (userRepository.existsByUsername(request.getEmail())) {
             throw new IllegalArgumentException("Username sudah terdaftar");
         }
@@ -44,5 +44,9 @@ public class UserService implements UserDetailsService {
                 .name(request.getName())
                 .nim(request.getNim())
                 .build());
+    }
+
+    public User save(User user) {
+        return userRepository.save(user);
     }
 }
