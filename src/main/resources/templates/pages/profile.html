@@ -1,0 +1,55 @@
+<!doctype html>
+<html
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/Home}"
+>
+	<head>
+		<title>Profil</title>
+	</head>
+
+	<body>
+		<div layout:fragment="content">
+			<div class="max-w-5xl mx-auto py-8">
+
+				<h1 class="text-3xl font-bold mb-6">
+					Profil Saya
+				</h1>
+
+				<div class="card bg-base-100 border border-base-300">
+					<div class="card-body">
+
+						<div>
+							<p class="text-sm opacity-60">Nama</p>
+							<p class="font-semibold" th:text="${user.name}"></p>
+						</div>
+
+						<div>
+							<p class="text-sm opacity-60">Username</p>
+							<p class="font-semibold" th:text="${user.username}"></p>
+						</div>
+
+						<div>
+							<p class="text-sm opacity-60">Email</p>
+							<p class="font-semibold" th:text="${user.email}"></p>
+						</div>
+
+						<div>
+							<p class="text-sm opacity-60">NIM</p>
+							<p class="font-semibold" th:text="${user.nim}"></p>
+						</div>
+
+						<div class="mt-4">
+							<a href="/profil/edit"
+							   class="btn btn-primary">
+								Edit Profil
+							</a>
+						</div>
+
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</body>
+</html>
