@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/Home}"
+>
+    <head>
+        <title>Edit Kelas</title>
+    </head>
+    <body>
+        <div layout:fragment="content" class="w-full mx-auto max-w-xl py-8 px-4">
+            <div class="mb-6">
+                <a th:href="@{/class}" class="text-sm text-base-content/60 hover:underline">← Kembali</a>
+            </div>
+
+            <h1 class="text-2xl font-bold mb-6">Edit Kelas</h1>
+
+            <div class="card bg-base-100 border border-base-200 rounded-2xl">
+                <div class="card-body flex flex-col gap-4">
+                    <form th:action="@{/class/edit/{id}(id=${kelas.id})}" method="post" class="flex flex-col gap-4">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                        <div class="form-control">
+                            <label class="label"><span class="label-text font-medium">Nama Kelas</span></label>
+                            <input type="text" name="name" class="input input-bordered rounded-xl" th:value="${kelas.name}" required />
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label"><span class="label-text font-medium">Mata Kuliah</span></label>
+                            <select name="courseId" class="select select-bordered rounded-xl" required>
+                                <option th:each="course : ${courses}"
+                                    th:value="${course.id}"
+                                    th:text="${course.name}"
+                                    th:selected="${course.id == kelas.course.id}"></option>
+                            </select>
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label"><span class="label-text font-medium">Tahun Ajaran</span></label>
+                            <input type="text" name="year" class="input input-bordered rounded-xl" th:value="${kelas.year}" required />
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label"><span class="label-text font-medium">Semester</span></label>
+                            <select name="semester" class="select select-bordered rounded-xl" required>
+                                <option th:each="sem : ${semesters}"
+                                    th:value="${sem}"
+                                    th:text="${sem == 'ODD' ? 'Ganjil' : 'Genap'}"
+                                    th:selected="${sem == kelas.semester}"></option>
+                            </select>
+                        </div>
+
+                        <div class="flex gap-2 justify-end mt-2">
+                            <a th:href="@{/class}" class="btn btn-ghost rounded-xl">Batal</a>
+                            <button type="submit" class="btn btn-primary rounded-xl">Simpan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <form th:action="@{/class/delete/{id}(id=${kelas.id})}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="btn btn-error btn-outline rounded-xl w-full"
+                        onclick="return confirm('Yakin hapus kelas ini?')">Hapus Kelas</button>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>
