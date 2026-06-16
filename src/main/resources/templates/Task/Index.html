@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Daftar Tugas - RuangKelas</title>
+    <!-- Menggunakan Tailwind CSS lewat CDN untuk tampilan bagus otomatis -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gray-100 min-h-screen font-sans p-6">
+
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Daftar Tugas Kuliah</h1>
+            <!-- Tombol Tambah Tugas -->
+            <a th:href="@{/tasks/create}" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 font-semibold text-sm">+ Tambah Tugas Baru</a>
+        </div>
+
+        <!-- JIKA DAFTAR TUGAS MASIH KOSONG -->
+        <div th:if="${#lists.isEmpty(tasks)}" class="text-center py-8 text-gray-500">
+            <p class="text-lg">Belum ada tugas yang dibuat.</p>
+            <p class="text-sm">Klik tombol di atas untuk membuat tugas pertama kamu!</p>
+        </div>
+
+        <!-- JIKA DAFTAR TUGAS SUDAH ADA ISI NYA -->
+        <div th:if="${not #lists.isEmpty(tasks)}" class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kelas</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Judul Tugas</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Deskripsi</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <!-- LOOPING DATA TUGAS DARI DATABASE -->
+                    <tr th:each="task : ${tasks}">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" 
+                            th:text="${task.classe != null ? task.classe.name : '-'}">Nama Kelas</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-semibold" th:text="${task.title}">Judul</td>
+                        <td class="px-6 py-4 text-sm text-gray-500" th:text="${task.description}">Deskripsi</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800" th:text="${task.status}">Belum Selesai</span>
+                        </td>
+                        <!-- DI SINI LETAK TOMBOL EDIT DAN HAPUS ITU -->
+                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium space-x-2">
+                            <!-- Tombol Edit -->
+                            <a th:href="@{/tasks/edit/{id}(id=${task.id})}" 
+                               class="text-blue-600 hover:text-blue-900 bg-blue-50 px-3 py-1 rounded border border-blue-200">
+                               Edit
+                            </a>
+                            <!-- Tombol Hapus -->
+                            <a th:href="@{/tasks/delete/{id}(id=${task.id})}" 
+                               class="text-red-600 hover:text-red-900 bg-red-50 px-3 py-1 rounded border border-red-200"
+                               onclick="return confirm('Apakah kamu yakin ingin menghapus tugas ini?')">
+                               Hapus
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>
