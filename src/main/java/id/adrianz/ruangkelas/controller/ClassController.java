@@ -32,12 +32,19 @@ public class ClassController {
         return "Class/Index";
     }
 
+    @GetMapping("/{id}")
+    public String detail(@PathVariable Long id, Model model) {
+        Class kelas = classService.getById(id);
+        model.addAttribute("kelas", kelas);
+        return "Class/Detail";
+    }
+
     @GetMapping("/create")
     public String createForm(Model model) {
         List<Course> courses = classService.getAllCourses();
         model.addAttribute("courses", courses);
         model.addAttribute("semesters", Class.Semester.values());
-        return "Class/Create";
+        return "/Class/Create";
     }
 
     @PostMapping("/create")
@@ -56,7 +63,7 @@ public class ClassController {
     public String editForm(@PathVariable Long id, Model model) {
         Class classe = classService.getById(id);
         List<Course> courses = classService.getAllCourses();
-        model.addAttribute("classe", classe);
+        model.addAttribute("kelas", classe);
         model.addAttribute("courses", courses);
         model.addAttribute("semesters", Class.Semester.values());
         return "Class/Edit";

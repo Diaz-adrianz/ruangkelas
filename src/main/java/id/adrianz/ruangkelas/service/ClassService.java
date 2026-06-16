@@ -70,8 +70,9 @@ public class ClassService {
     }
 
     public void delete(Long id) {
-        classRepository.deleteById(id);
-    }
+    userClassRepository.deleteAll(userClassRepository.findByClasseId(id));
+    classRepository.deleteById(id);
+}
 
     public List<Course> getAllCourses() {
         return courseRepository.findAll();

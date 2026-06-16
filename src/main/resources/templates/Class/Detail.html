@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/Home}"
+>
+    <head>
+        <title th:text="${kelas.name}">Detail Kelas</title>
+    </head>
+    <body>
+        <div layout:fragment="content" class="w-full mx-auto max-w-5xl py-8 px-4">
+            <div class="text-sm text-base-content/60 mb-4">
+                <a th:href="@{/class}" class="hover:underline">Beranda</a>
+                <span> &gt; </span>
+                <span th:text="${kelas.name}"></span>
+            </div>
+
+            <div class="flex justify-between items-start mb-6">
+                <h1 class="text-2xl font-bold" th:text="${kelas.name} + ' – ' + ${kelas.course.name}"></h1>
+
+                <div class="dropdown dropdown-end">
+                    <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01" />
+                        </svg>
+                    </div>
+                    <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box border border-base-300 w-48 mt-2 z-10">
+                        <li><a th:href="@{/class/edit/{id}(id=${kelas.id})}">Edit Kelas</a></li>
+                        <li>
+                            <form th:action="@{/class/delete/{id}(id=${kelas.id})}" method="post">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <button type="submit" class="text-error w-full text-left"
+                                    onclick="return confirm('Yakin hapus kelas ini?')">Hapus Kelas</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2 mb-8">
+                <div class="flex gap-2 items-center">
+                    <span class="text-base-content/60 w-36">Kode kelas</span>
+                    <span th:text="${kelas.id}"></span>
+                </div>
+                <div class="flex gap-2 items-center">
+                    <span class="text-base-content/60 w-36">Mata Kuliah</span>
+                    <span th:text="${kelas.course.name}"></span>
+                </div>
+                <div class="flex gap-2 items-center">
+                    <span class="text-base-content/60 w-36">Tahun Ajaran</span>
+                    <span th:text="${kelas.year}"></span>
+                </div>
+                <div class="flex gap-2 items-center">
+                    <span class="text-base-content/60 w-36">Semester</span>
+                    <span th:text="${kelas.semester == 'ODD' ? 'Ganjil' : 'Genap'}"></span>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
