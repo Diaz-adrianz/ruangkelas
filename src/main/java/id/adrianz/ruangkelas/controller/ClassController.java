@@ -5,18 +5,22 @@ import java.util.List;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import id.adrianz.ruangkelas.dto.CreateClassDto;
 import id.adrianz.ruangkelas.model.Class;
 import id.adrianz.ruangkelas.model.Course;
 import id.adrianz.ruangkelas.model.UserClass;
 import id.adrianz.ruangkelas.model.UserPrincipal;
 import id.adrianz.ruangkelas.service.ClassService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -88,29 +92,41 @@ public class ClassController {
         return "redirect:/class/" + classId;
     }
 
+    // ======= CREATE =======
+    private void createFormData(Model model) {
+        model.addAttribute("courses", classService.getAllCourses());
+        model.addAttribute("semesters", Class.Semester.values());
+    }
+
     @GetMapping("/create")
     public String createForm(Model model) {
-        List<Course> courses = classService.getAllCourses();
-        model.addAttribute("courses", courses);
-        model.addAttribute("semesters", Class.Semester.values());
+        createFormData(model);
+        CreateClassDto createClassDto = new CreateClassDto();
+        model.addAttribute("createClassDto", createClassDto);
+
         return "pages/Class/Create";
     }
 
     @PostMapping("/create")
     public String create(
-            @RequestParam String name,
-            @RequestParam String year,
-            @RequestParam Class.Semester semester,
-            @RequestParam Long courseId,
-            @AuthenticationPrincipal UserPrincipal principal,
-            RedirectAttributes redirectAttributes) {
+            @Valid @ModelAttribute("createClassDto") CreateClassDto request,
+            BindingResult result,
+            Model model,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        if (result.hasErrors()) {
+            createFormData(model);
+            model.addAttribute("errors", result.getFieldErrors());
+            return "pages/Class/create";
+        }
 
         try {
-            classService.create(name, year, semester, courseId, principal.getUser());
+            classService.create(request.getName(), request.getYear(), request.getSemester(), request.getCourseId(), principal.getUser());
         } catch (RuntimeException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/class/create";
+            createFormData(model);
+            model.addAttribute("error", e.getMessage());
+            return "pages/Class/create";
         }
+
         return "redirect:/class";
     }
 
