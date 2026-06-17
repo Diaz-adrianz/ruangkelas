@@ -1,8 +1,11 @@
 # misc
 src/main/resources/static/css/styles.css
+src/main/resources/serviceAccountKey.json
 
 # Environment Variables
 .env
+.env
+firebase-messaging-sw.js
 
 # Build Output
 target/
@@ -40,6 +43,7 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+
 # Frontend
 src/main/frontend/node_modules/
 src/main/frontend/node/
@@ -49,3 +53,6 @@ src/main/frontend/node/
 
 # Logs
 *.log
+
+#node
+node_modules/

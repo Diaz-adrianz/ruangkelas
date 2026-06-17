@@ -28,9 +28,16 @@ public class SecurityConfig {
             throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers(
+                    "/auth/**",
+                    "/css/**",
+                    "/js/**",
+                    "/images/**",
+                    "/firebase-messaging-sw.js",
+                    "/favicon.ico"
+                ).permitAll()
                 .anyRequest().authenticated()
-                )
+            )
                 .formLogin(form -> form
                 .loginPage("/auth/login")
                 .defaultSuccessUrl("/", true)
