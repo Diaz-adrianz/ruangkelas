@@ -13,7 +13,7 @@
 			<div class="breadcrumbs text-sm mb-4">
 				<ul>
 					<li><a href="/">Beranda</a></li>
-					<li><a href="/profil">Profil</a></li>
+					<li><a href="/profile">Profil</a></li>
 					<li>Edit</li>
 				</ul>
 			</div>
@@ -38,7 +38,7 @@
 			</div>
 			<!-- ====== ALERTS ======  -->
 
-			<form th:action="@{/profil/edit}" th:object="${updateProfileDto}" method="post" class="flex flex-col">
+			<form th:action="@{/profile/edit}" th:object="${updateProfileDto}" method="post" class="flex flex-col">
 				<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
 				<fieldset class="fieldset">
@@ -71,8 +71,7 @@
 
 				<div class="flex gap-2 mt-4">
 					<button type="submit" class="btn btn-primary">Simpan</button>
-
-					<a href="/profil" class="btn btn-outline">Batal</a>
+					<a href="/profile" class="btn btn-outline">Batal</a>
 				</div>
 			</form>
 		</div>

@@ -15,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,7 +23,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "user_classes")
+@Table(name = "user_classes", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"user_id", "class_id"})
+})
 @Getter
 @Setter
 @Builder
@@ -32,6 +35,10 @@ public class UserClass {
 
     public enum Role {
         ADMIN, MEMBER
+    }
+
+    public enum Status {
+        PENDING, ACCEPTED
     }
 
     @Id
@@ -49,6 +56,10 @@ public class UserClass {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status;
 
     @Column(nullable = false)
     private LocalDateTime joinedAt;
