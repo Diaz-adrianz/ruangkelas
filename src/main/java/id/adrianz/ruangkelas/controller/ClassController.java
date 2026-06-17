@@ -14,6 +14,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import id.adrianz.ruangkelas.model.Class;
 import id.adrianz.ruangkelas.model.Course;
+import id.adrianz.ruangkelas.model.UserClass;
 import id.adrianz.ruangkelas.model.UserPrincipal;
 import id.adrianz.ruangkelas.service.ClassService;
 import lombok.RequiredArgsConstructor;
@@ -33,10 +34,15 @@ public class ClassController {
 
     @GetMapping("/{id}")
     public String detail(@PathVariable Long id, Model model) {
-        Class kelas = classService.getById(id);
-        model.addAttribute("kelas", kelas);
-        model.addAttribute("members", classService.getMembers(id));
-        model.addAttribute("pendingRequests", classService.getPendingRequests(id));
+        Class classs = classService.getById(id);
+        model.addAttribute("classs", classs);
+
+        // members
+        List<UserClass> members = classService.getMembers(id);
+        List<UserClass> pendingMembers = classService.getPendingRequests(id);
+        model.addAttribute("members", members);
+        model.addAttribute("pendingMembers", pendingMembers);
+
         return "pages/Class/Detail";
     }
 
