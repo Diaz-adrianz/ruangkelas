@@ -1,5 +1,6 @@
 package id.adrianz.ruangkelas.controller;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,12 +12,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import id.adrianz.ruangkelas.dto.TaskDto;
 import id.adrianz.ruangkelas.model.Class;
 import id.adrianz.ruangkelas.model.Task;
+import id.adrianz.ruangkelas.model.UserPrincipal;
 import id.adrianz.ruangkelas.service.ClassService;
 import id.adrianz.ruangkelas.service.TaskService;
 import lombok.RequiredArgsConstructor;
 
 @Controller
-@RequestMapping("/classes/{classId}/tasks")
+@RequestMapping("/class/{classId}/tasks") 
 @RequiredArgsConstructor
 public class TaskController {
 
@@ -34,7 +36,9 @@ public class TaskController {
 
     // 2. Proses Simpan Task Baru
     @PostMapping("/create")
-    public String createTask(@PathVariable Long classId, @ModelAttribute TaskDto taskDto) {
+    public String createTask(@PathVariable Long classId, 
+                             @ModelAttribute TaskDto taskDto,
+                             @AuthenticationPrincipal UserPrincipal principal) { 
         Class classs = classService.getById(classId);
         
         Task task = Task.builder()
@@ -42,12 +46,14 @@ public class TaskController {
                 .title(taskDto.getTitle())
                 .description(taskDto.getDescription())
                 .status("PENDING")
-                .deadline(taskDto.getDeadline()) // Mapping field deadline
+                .deadline(taskDto.getDeadline())
+                .createdBy(principal.getUser()) 
                 .build();
                 
-        // PERBAIKAN: Menggunakan .createTask() sesuai dengan yang ada di TaskService
         taskService.createTask(task); 
-        return "redirect:/classes/" + classId;
+        
+        // PERBAIKAN: Memastikan rute redirect bersifat absolut dari root server
+        return "redirect:/class/" + classId; 
     }
 
     // 3. Tampilan Form Edit Task
@@ -75,17 +81,20 @@ public class TaskController {
         
         task.setTitle(taskDto.getTitle());
         task.setDescription(taskDto.getDescription());
-        task.setDeadline(taskDto.getDeadline()); // Update field deadline
+        task.setDeadline(taskDto.getDeadline());
         
-        // PERBAIKAN: Menggunakan .createTask() sesuai dengan yang ada di TaskService
         taskService.createTask(task); 
-        return "redirect:/classes/" + classId;
+        
+        // PERBAIKAN: Memastikan rute redirect bersifat absolut dari root server
+        return "redirect:/class/" + classId; 
     }
 
     // 5. Proses Hapus Task
     @PostMapping("/{taskId}/delete")
     public String deleteTask(@PathVariable Long classId, @PathVariable Long taskId) {
         taskService.deleteTask(taskId);
-        return "redirect:/classes/" + classId;
+        
+        // PERBAIKAN: Memastikan rute redirect bersifat absolut dari root server
+        return "redirect:/class/" + classId; 
     }
 }

@@ -24,7 +24,7 @@
         
         <div class="bg-gradient-to-r from-teal-600 to-cyan-700 p-8 rounded-2xl text-white shadow-md relative overflow-hidden">
             <div class="relative z-10 space-y-2">
-                <span class="px-2.5 py-1 bg-teal-500/30 text-teal-100 rounded-md text-xs font-bold uppercase tracking-wider" th:text="${classs.semester} + ' - ' + ${classs.academicYear}">Semester</span>
+                <span class="px-2.5 py-1 bg-teal-500/30 text-teal-100 rounded-md text-xs font-bold uppercase tracking-wider" th:text="${classs.semester} + ' - ' + ${classs.year}">Semester</span>
                 <h1 class="text-3xl font-black tracking-tight md:text-4xl" th:text="${classs.name}">Nama Kelas</h1>
                 <p class="text-teal-100 text-sm md:text-base opacity-90">Selamat datang di dashboard kelas utama Anda. Kelola tugas, jadwal, dan anggota di bawah ini.</p>
             </div>
@@ -41,7 +41,7 @@
                             <h3 class="text-lg font-bold text-gray-900">Daftar Tugas / Task</h3>
                             <p class="text-xs text-gray-500">Pantau dan kelola tenggat waktu (deadline) tugas kelas.</p>
                         </div>
-                        <a th:href="@{/classes/{classId}/tasks/create(classId=${classs.id})}" class="px-4 py-2 bg-teal-600 text-white rounded-lg text-xs font-semibold hover:bg-teal-700 transition shadow-sm flex items-center gap-1">
+                        <a th:href="@{/class/{classId}/tasks/create(classId=${classs.id})}" class="px-4 py-2 bg-teal-600 text-white rounded-lg text-xs font-semibold hover:bg-teal-700 transition shadow-sm flex items-center gap-1">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                             Tambah Tugas
                         </a>
@@ -69,10 +69,10 @@
                             </div>
 
                             <div class="flex items-center gap-1 self-end sm:self-center shrink-0">
-                                <a th:href="@{/classes/{classId}/tasks/{taskId}/edit(classId=${classs.id}, taskId=${task.id})}" class="p-2 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition" title="Edit Tugas">
+                                <a th:href="@{/class/{classId}/tasks/{taskId}/edit(classId=${classs.id}, taskId=${task.id})}" class="p-2 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition" title="Edit Tugas">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                 </a>
-                                <form th:action="@{/classes/{classId}/tasks/{taskId}/delete(classId=${classs.id}, taskId=${task.id})}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus tugas ini beserta datanya?');" class="inline">
+                                <form th:action="@{/class/{classId}/tasks/{taskId}/delete(classId=${classs.id}, taskId=${task.id})}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus tugas ini beserta datanya?');" class="inline">
                                     <button type="submit" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Hapus Tugas">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                     </button>
