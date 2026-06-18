@@ -21,7 +21,7 @@ public class ProfileController {
 
     private final UserService userService;
 
-    @GetMapping("/profil")
+    @GetMapping("/profile")
     public String profile(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             Model model) {
@@ -31,7 +31,7 @@ public class ProfileController {
         return "pages/profile";
     }
 
-    @GetMapping("/profil/edit")
+    @GetMapping("/profile/edit")
     public String editProfile(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             Model model) {
@@ -44,7 +44,7 @@ public class ProfileController {
         return "pages/EditProfile";
     }
 
-    @PostMapping("/profil/edit")
+    @PostMapping("/profile/edit")
     public String registerSubmit(@Valid @ModelAttribute("updateProfileDto") UpdateProfileDto request,
             BindingResult result,
             Model model,
@@ -60,7 +60,7 @@ public class ProfileController {
 
         try {
             userService.save(user);
-            return "redirect:/profil";
+            return "redirect:/profile";
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
             return "pages/EditProfile";
