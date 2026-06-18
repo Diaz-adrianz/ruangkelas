@@ -1,5 +1,6 @@
 # misc
 src/main/resources/static/css/styles.css
+src/main/resources/secrets/**
 
 # Environment Variables
 .env
@@ -40,6 +41,7 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+
 # Frontend
 src/main/frontend/node_modules/
 src/main/frontend/node/
@@ -49,3 +51,6 @@ src/main/frontend/node/
 
 # Logs
 *.log
+
+#node
+node_modules/
