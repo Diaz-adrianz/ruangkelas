@@ -1,14 +1,24 @@
 package id.adrianz.ruangkelas.service;
 
-import com.google.firebase.messaging.*;
-import id.adrianz.ruangkelas.model.DeviceToken;
-import id.adrianz.ruangkelas.model.User;
-import id.adrianz.ruangkelas.repository.DeviceTokenRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.google.firebase.messaging.BatchResponse;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingException;
+import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.MulticastMessage;
+import com.google.firebase.messaging.Notification;
+
+import id.adrianz.ruangkelas.model.DeviceToken;
+import id.adrianz.ruangkelas.model.EmailNotification;
+import id.adrianz.ruangkelas.model.NotificationType;
+import id.adrianz.ruangkelas.model.User;
+import id.adrianz.ruangkelas.repository.DeviceTokenRepository;
+import id.adrianz.ruangkelas.repository.NotificationRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -16,25 +26,29 @@ import java.util.List;
 public class NotificationService {
 
     private final DeviceTokenRepository deviceTokenRepository;
+    private final NotificationRepository notificationRepository;
+    private final EmailService emailService;
 
     /**
      * Kirim notifikasi ke semua device milik satu user
      */
     public void sendToUser(User user, String title, String body) {
         List<DeviceToken> tokens = deviceTokenRepository.findByUser(user);
-        if (tokens.isEmpty()) return;
+        if (tokens.isEmpty()) {
+            return;
+        }
 
         List<String> tokenStrings = tokens.stream()
-            .map(DeviceToken::getToken)
-            .toList();
+                .map(DeviceToken::getToken)
+                .toList();
 
         MulticastMessage message = MulticastMessage.builder()
-            .setNotification(Notification.builder()
-                .setTitle(title)
-                .setBody(body)
-                .build())
-            .addAllTokens(tokenStrings)
-            .build();
+                .setNotification(Notification.builder()
+                        .setTitle(title)
+                        .setBody(body)
+                        .build())
+                .addAllTokens(tokenStrings)
+                .build();
 
         try {
             BatchResponse response = FirebaseMessaging.getInstance().sendEachForMulticast(message);
@@ -49,12 +63,12 @@ public class NotificationService {
      */
     public void sendToToken(String token, String title, String body) {
         Message message = Message.builder()
-            .setNotification(Notification.builder()
-                .setTitle(title)
-                .setBody(body)
-                .build())
-            .setToken(token)
-            .build();
+                .setNotification(Notification.builder()
+                        .setTitle(title)
+                        .setBody(body)
+                        .build())
+                .setToken(token)
+                .build();
 
         try {
             String response = FirebaseMessaging.getInstance().send(message);
@@ -63,4 +77,22 @@ public class NotificationService {
             log.error("Gagal kirim notifikasi ke token {}: {}", token, e.getMessage());
         }
     }
+
+    public void createAndSendEmailNotification(Integer userId, String emailTarget, String subject, String message, NotificationType type, Integer referenceId, String referenceType) {
+
+        EmailNotification notification = new EmailNotification();
+        notification.setUserId(userId);
+        notification.setEmail(emailTarget);
+        notification.setSubject(subject);
+        notification.setMessage(message);
+        notification.setType(type);
+        notification.setReferenceId(referenceId);
+        notification.setReferenceType(referenceType);
+        notification.setIsRead(false);
+
+        notificationRepository.save(notification);
+
+        emailService.sendSimpleMessage(emailTarget, subject, message);
+    }
+
 }

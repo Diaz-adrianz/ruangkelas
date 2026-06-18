@@ -1,23 +1,33 @@
 package id.adrianz.ruangkelas.scheduler;
 
-import id.adrianz.ruangkelas.service.NotificationService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.time.LocalDate;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-@Slf4j
+import id.adrianz.ruangkelas.service.EmailService;
+import lombok.AllArgsConstructor;
+
 @Component
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class TaskNotificationScheduler {
 
-    private final NotificationService notificationService;
+    private final EmailService emailService;
 
-    // TODO: Aktifkan setelah entity Tugas & JadwalKuliah dibuat
+    @Scheduled(cron = "0 0 8 * * ?")
+    public void checkUpcomingDeadlines() {
+        LocalDate today = LocalDate.now();
+        LocalDate hMinus3 = today.plusDays(3);
+        LocalDate hMinus1 = today.plusDays(1);
 
-    // @Scheduled(cron = "0 0 7 * * *")
-    // public void notifikasiDeadlineH3() { ... }
+        processDeadline(hMinus3, "Pengingat: Deadline Tugas H-3");
+        processDeadline(hMinus1, "Peringatan: Deadline Tugas H-1");
+    }
 
-    // @Scheduled(cron = "0 * * * * *")
-    // public void notifikasiMataKuliah() { ... }
+    private void processDeadline(LocalDate targetDate, String subject) {
+        String dummyEmail = "siswa@contoh.com";
+        String text = "Harap perhatikan tugas kelas Anda dengan tenggat waktu pada: " + targetDate.toString();
+
+        emailService.sendSimpleMessage(dummyEmail, subject, text);
+    }
 }

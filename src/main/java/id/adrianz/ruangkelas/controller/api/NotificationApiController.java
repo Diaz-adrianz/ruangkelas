@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/notification")
 @RequiredArgsConstructor
-public class NotificationController {
+public class NotificationApiController {
 
     private final FirebaseConfigProperties firebaseConfig;
     private final DeviceTokenRepository deviceTokenRepository;

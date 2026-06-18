@@ -51,3 +51,35 @@
 	overflow: hidden;
 }
 
+@utility typo-display {
+	@apply font-sans text-[40px] leading-[120%] font-extrabold tracking-tight;
+}
+
+@utility typo-heading-xl {
+	@apply font-sans text-[32px] leading-tight font-bold tracking-tight;
+}
+
+@utility typo-heading-lg {
+	@apply font-sans text-2xl leading-snug font-bold;
+}
+
+@utility typo-heading-md {
+	@apply font-sans text-xl leading-snug font-semibold;
+}
+
+@utility typo-body-lg {
+	@apply font-sans text-lg leading-relaxed font-normal;
+}
+
+@utility typo-body-md {
+	@apply font-sans text-base leading-relaxed font-normal;
+}
+
+@utility typo-label {
+	@apply font-sans text-sm leading-snug font-medium;
+}
+
+@utility typo-caption {
+	@apply font-sans text-xs leading-relaxed font-normal;
+}
+
