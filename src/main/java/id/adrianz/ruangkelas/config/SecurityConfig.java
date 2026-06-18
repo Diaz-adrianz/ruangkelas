@@ -29,15 +29,14 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                    "/auth/**",
-                    "/css/**",
-                    "/js/**",
-                    "/images/**",
-                    "/firebase-messaging-sw.js",
-                    "/favicon.ico"
+                        "/auth/**",
+                        "/css/**",
+                        "/js/**",
+                        "/images/**",
+                        "/api/notification/firebase-messaging-sw.js"
                 ).permitAll()
                 .anyRequest().authenticated()
-            )
+                )
                 .formLogin(form -> form
                 .loginPage("/auth/login")
                 .defaultSuccessUrl("/", true)
