@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${classs.name} + ' - Detail Kelas'">Detail Kelas</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen">
+
+    <nav class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center shadow-sm">
+        <div class="flex items-center gap-2">
+            <span class="text-xl font-black text-teal-600 tracking-tight">RuangKelas</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <a th:href="@{/}" class="text-sm font-medium text-gray-600 hover:text-teal-600 transition">Beranda</a>
+            <div class="w-8 h-8 rounded-full bg-teal-700 text-white flex items-center justify-center font-bold text-sm">
+                UIN
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 py-8 space-y-8">
+        
+        <div class="bg-gradient-to-r from-teal-600 to-cyan-700 p-8 rounded-2xl text-white shadow-md relative overflow-hidden">
+            <div class="relative z-10 space-y-2">
+                <span class="px-2.5 py-1 bg-teal-500/30 text-teal-100 rounded-md text-xs font-bold uppercase tracking-wider" th:text="${classs.semester} + ' - ' + ${classs.academicYear}">Semester</span>
+                <h1 class="text-3xl font-black tracking-tight md:text-4xl" th:text="${classs.name}">Nama Kelas</h1>
+                <p class="text-teal-100 text-sm md:text-base opacity-90">Selamat datang di dashboard kelas utama Anda. Kelola tugas, jadwal, dan anggota di bawah ini.</p>
+            </div>
+            <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <div class="lg:col-span-2 space-y-6">
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900">Daftar Tugas / Task</h3>
+                            <p class="text-xs text-gray-500">Pantau dan kelola tenggat waktu (deadline) tugas kelas.</p>
+                        </div>
+                        <a th:href="@{/classes/{classId}/tasks/create(classId=${classs.id})}" class="px-4 py-2 bg-teal-600 text-white rounded-lg text-xs font-semibold hover:bg-teal-700 transition shadow-sm flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            Tambah Tugas
+                        </a>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(tasks)}" class="text-center py-12 border-2 border-dashed border-gray-100 rounded-xl">
+                        <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                        <p class="text-sm text-gray-400 font-medium">Belum ada tugas atau informasi deadline di kelas ini.</p>
+                    </div>
+
+                    <div th:if="${!#lists.isEmpty(tasks)}" class="space-y-4">
+                        <div th:each="task : ${tasks}" class="p-5 border border-gray-100 rounded-xl bg-gray-50/60 hover:bg-gray-50 hover:shadow-sm transition flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            
+                            <div class="space-y-1.5 flex-1">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h4 class="font-bold text-gray-900 text-base" th:text="${task.title}">Judul Tugas</h4>
+                                    <span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded text-[10px] font-bold uppercase tracking-wider" th:text="${task.status}">Status</span>
+                                </div>
+                                <p class="text-sm text-gray-600 line-clamp-2" th:text="${task.description}">Deskripsi Tugas</p>
+                                
+                                <div class="flex items-center gap-1.5 text-xs font-semibold text-red-600 pt-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span th:text="'Batas Waktu: ' + ${#temporals.format(task.deadline, 'dd MMMM yyyy, HH:mm')}">01 January 2026, 23:59</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-1 self-end sm:self-center shrink-0">
+                                <a th:href="@{/classes/{classId}/tasks/{taskId}/edit(classId=${classs.id}, taskId=${task.id})}" class="p-2 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition" title="Edit Tugas">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                </a>
+                                <form th:action="@{/classes/{classId}/tasks/{taskId}/delete(classId=${classs.id}, taskId=${task.id})}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus tugas ini beserta datanya?');" class="inline">
+                                    <button type="submit" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Hapus Tugas">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="space-y-6">
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <h3 class="text-base font-bold text-gray-900 mb-4 flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        Anggota Kelas
+                    </h3>
+                    
+                    <div th:if="${#lists.isEmpty(members)}" class="text-center py-4 text-sm text-gray-400">
+                        Belum ada siswa yang bergabung.
+                    </div>
+
+                    <ul th:if="${!#lists.isEmpty(members)}" class="divide-y divide-gray-100">
+                        <li th:each="member : ${members}" class="py-3 flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center font-semibold text-xs uppercase" th:text="${#strings.substring(member.user.name, 0, 2)}">
+                                M
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-gray-900" th:text="${member.user.name}">Nama Mahasiswa</p>
+                                <p class="text-xs text-gray-500" th:text="${member.role}">STUDENT</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div th:if="${!#lists.isEmpty(pendingMembers)}" class="bg-white p-6 rounded-xl shadow-sm border border-amber-200 bg-amber-50/10">
+                    <h3 class="text-sm font-bold text-amber-800 mb-3">Permintaan Gabung Pending</h3>
+                    <ul class="space-y-3">
+                        <li th:each="pending : ${pendingMembers}" class="flex justify-between items-center gap-2 bg-white p-2.5 rounded-lg border border-gray-100 shadow-xs">
+                            <span class="text-xs font-semibold text-gray-700 truncate" th:text="${pending.user.name}">Nama</span>
+                            <span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded text-[9px] font-bold">WAITING</span>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</body>
+</html>

@@ -1,53 +1,91 @@
 package id.adrianz.ruangkelas.controller;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-import id.adrianz.ruangkelas.model.SubTask;
+import id.adrianz.ruangkelas.dto.TaskDto;
+import id.adrianz.ruangkelas.model.Class;
 import id.adrianz.ruangkelas.model.Task;
+import id.adrianz.ruangkelas.service.ClassService;
 import id.adrianz.ruangkelas.service.TaskService;
+import lombok.RequiredArgsConstructor;
 
-@RestController
-@RequestMapping("/api/tasks")
-@CrossOrigin(origins = "*") // Mengizinkan akses dari frontend manapun
+@Controller
+@RequestMapping("/classes/{classId}/tasks")
+@RequiredArgsConstructor
 public class TaskController {
 
-    @Autowired
-    private TaskService taskService;
+    private final TaskService taskService;
+    private final ClassService classService;
 
-    // Endpoint untuk mendapatkan semua task (GET http://localhost:8080/api/tasks)
-    @GetMapping
-    public List<Task> getAllTasks() {
-        return taskService.getAllTasks();
+    // 1. Tampilan Form Buat Task Baru
+    @GetMapping("/create")
+    public String showCreateForm(@PathVariable Long classId, Model model) {
+        Class classs = classService.getById(classId);
+        model.addAttribute("classs", classs);
+        model.addAttribute("taskDto", new TaskDto());
+        return "pages/Task/Create";
     }
 
-    // Endpoint untuk membuat task baru (POST http://localhost:8080/api/tasks)
-    @PostMapping
-    public Task createTask(@RequestBody Task task) {
-        return taskService.createTask(task);
+    // 2. Proses Simpan Task Baru
+    @PostMapping("/create")
+    public String createTask(@PathVariable Long classId, @ModelAttribute TaskDto taskDto) {
+        Class classs = classService.getById(classId);
+        
+        Task task = Task.builder()
+                .classe(classs)
+                .title(taskDto.getTitle())
+                .description(taskDto.getDescription())
+                .status("PENDING")
+                .deadline(taskDto.getDeadline()) // Mapping field deadline
+                .build();
+                
+        // PERBAIKAN: Menggunakan .createTask() sesuai dengan yang ada di TaskService
+        taskService.createTask(task); 
+        return "redirect:/classes/" + classId;
     }
 
-    // Endpoint untuk menghapus task (DELETE http://localhost:8080/api/tasks/{id})
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteTask(@PathVariable Long id) {
-        taskService.deleteTask(id);
-        return ResponseEntity.ok().body("Task berhasil dihapus");
+    // 3. Tampilan Form Edit Task
+    @GetMapping("/{taskId}/edit")
+    public String showEditForm(@PathVariable Long classId, @PathVariable Long taskId, Model model) {
+        Class classs = classService.getById(classId);
+        Task task = taskService.getTaskById(taskId);
+        
+        TaskDto taskDto = new TaskDto();
+        taskDto.setClassId(classId);
+        taskDto.setTitle(task.getTitle());
+        taskDto.setDescription(task.getDescription());
+        taskDto.setDeadline(task.getDeadline());
+
+        model.addAttribute("classs", classs);
+        model.addAttribute("taskId", taskId);
+        model.addAttribute("taskDto", taskDto);
+        return "pages/Task/Edit";
     }
 
-    // Endpoint untuk menambah subtask ke dalam task tertentu (POST http://localhost:8080/api/tasks/{taskId}/subtasks)
-    @PostMapping("/{taskId}/subtasks")
-    public ResponseEntity<SubTask> addSubTask(@PathVariable Long taskId, @RequestBody SubTask subTask) {
-        SubTask savedSubTask = taskService.addSubTask(taskId, subTask);
-        return ResponseEntity.ok(savedSubTask);
+    // 4. Proses Simpan Update Task
+    @PostMapping("/{taskId}/edit")
+    public String updateTask(@PathVariable Long classId, @PathVariable Long taskId, @ModelAttribute TaskDto taskDto) {
+        Task task = taskService.getTaskById(taskId);
+        
+        task.setTitle(taskDto.getTitle());
+        task.setDescription(taskDto.getDescription());
+        task.setDeadline(taskDto.getDeadline()); // Update field deadline
+        
+        // PERBAIKAN: Menggunakan .createTask() sesuai dengan yang ada di TaskService
+        taskService.createTask(task); 
+        return "redirect:/classes/" + classId;
+    }
+
+    // 5. Proses Hapus Task
+    @PostMapping("/{taskId}/delete")
+    public String deleteTask(@PathVariable Long classId, @PathVariable Long taskId) {
+        taskService.deleteTask(taskId);
+        return "redirect:/classes/" + classId;
     }
 }
