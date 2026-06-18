@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import id.adrianz.ruangkelas.dto.CreateClassDto;
+import id.adrianz.ruangkelas.dto.JoinClassDto;
+import id.adrianz.ruangkelas.dto.UpdateClassDto;
 import id.adrianz.ruangkelas.model.Class;
-import id.adrianz.ruangkelas.model.Course;
 import id.adrianz.ruangkelas.model.UserClass;
 import id.adrianz.ruangkelas.model.UserPrincipal;
 import id.adrianz.ruangkelas.service.ClassService;
@@ -30,138 +30,224 @@ public class ClassController {
 
     private final ClassService classService;
 
-    @GetMapping("/join")
-    public String joinForm(Model model, @AuthenticationPrincipal UserPrincipal principal) {
-        model.addAttribute("classes", classService.getAllForUser(principal.getUser().getId()));
-        return "pages/Class/Join";
+    // ================= INDEX =================
+
+    @GetMapping
+    public String index(@AuthenticationPrincipal UserPrincipal principal, Model model) {
+        List<Class> classes = classService.getAllForUser(principal.getUser().getId());
+        model.addAttribute("classes", classes);
+        return "pages/Class/Index";
     }
 
-    @GetMapping("/{id}")
-    public String detail(@PathVariable Long id, Model model) {
-        Class classs = classService.getById(id);
-        model.addAttribute("classs", classs);
+    // ================= DETAIL =================
 
-        // members
-        List<UserClass> members = classService.getMembers(id);
-        List<UserClass> pendingMembers = classService.getPendingRequests(id);
+    @GetMapping("/{classCode}")
+    public String detail(@PathVariable String classCode,
+                         @AuthenticationPrincipal UserPrincipal principal,
+                         Model model) {
+
+        Class classs = classService.getByCode(classCode);
+        List<UserClass> members = classService.getMembers(classs.getId());
+        List<UserClass> pending = classService.getPendingRequests(classs.getId());
+        boolean isAdmin = classService.isAdmin(classs.getId(), principal.getUser().getId());
+
+        model.addAttribute("classs", classs);
         model.addAttribute("members", members);
-        model.addAttribute("pendingMembers", pendingMembers);
+        model.addAttribute("pendingRequests", pending);
+        model.addAttribute("isAdmin", isAdmin);
+        model.addAttribute("currentUserId", principal.getUser().getId());
 
         return "pages/Class/Detail";
     }
 
-    @PostMapping("/{id}/join")
-    public String join(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal principal,
-            RedirectAttributes redirectAttributes) {
-        try {
-            classService.join(id, principal.getUser());
-        } catch (RuntimeException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/class/join";
-        }
-        return "redirect:/class";
-    }
-
-    @PostMapping("/member/{userClassId}/approve")
-    public String approve(@PathVariable Long userClassId, @RequestParam Long classId) {
-        classService.approve(userClassId);
-        return "redirect:/class/" + classId;
-    }
-
-    @PostMapping("/member/{userClassId}/reject")
-    public String reject(@PathVariable Long userClassId, @RequestParam Long classId) {
-        classService.reject(userClassId);
-        return "redirect:/class/" + classId;
-    }
-
-    @PostMapping("/member/{userClassId}/kick")
-    public String kick(@PathVariable Long userClassId, @RequestParam Long classId) {
-        classService.kick(userClassId);
-        return "redirect:/class/" + classId;
-    }
-
-    @PostMapping("/member/{userClassId}/promote")
-    public String promote(@PathVariable Long userClassId, @RequestParam Long classId) {
-        classService.promote(userClassId);
-        return "redirect:/class/" + classId;
-    }
-
-    @PostMapping("/member/{userClassId}/demote")
-    public String demote(@PathVariable Long userClassId, @RequestParam Long classId) {
-        classService.demote(userClassId);
-        return "redirect:/class/" + classId;
-    }
-
-    // ======= CREATE =======
-    private void createFormData(Model model) {
-        model.addAttribute("courses", classService.getAllCourses());
-        model.addAttribute("semesters", Class.Semester.values());
-    }
+    // ================= CREATE =================
 
     @GetMapping("/create")
     public String createForm(Model model) {
-        createFormData(model);
-        CreateClassDto createClassDto = new CreateClassDto();
-        model.addAttribute("createClassDto", createClassDto);
-
+        model.addAttribute("createClassDto", new CreateClassDto());
+        model.addAttribute("courses", classService.getAllCourses());
+        model.addAttribute("semesters", Class.Semester.values());
         return "pages/Class/Create";
     }
 
     @PostMapping("/create")
-    public String create(
-            @Valid @ModelAttribute("createClassDto") CreateClassDto request,
-            BindingResult result,
-            Model model,
-            @AuthenticationPrincipal UserPrincipal principal) {
+    public String create(@Valid @ModelAttribute("createClassDto") CreateClassDto request,
+                         BindingResult result,
+                         Model model,
+                         @AuthenticationPrincipal UserPrincipal principal) {
+
         if (result.hasErrors()) {
-            createFormData(model);
+            model.addAttribute("courses", classService.getAllCourses());
+            model.addAttribute("semesters", Class.Semester.values());
             model.addAttribute("errors", result.getFieldErrors());
-            return "pages/Class/create";
+            return "pages/Class/Create";
         }
 
         try {
-            classService.create(request.getName(), request.getYear(), request.getSemester(), request.getCourseId(), principal.getUser());
+            classService.create(
+                    request.getName(),
+                    request.getYear(),
+                    request.getSemester(),
+                    request.getCourseId(),
+                    request.getLecturerName(),
+                    principal.getUser()
+            );
         } catch (RuntimeException e) {
-            createFormData(model);
+            model.addAttribute("courses", classService.getAllCourses());
+            model.addAttribute("semesters", Class.Semester.values());
             model.addAttribute("error", e.getMessage());
-            return "pages/Class/create";
+            return "pages/Class/Create";
         }
 
-        return "redirect:/class";
+        return "redirect:/";
     }
 
-    @GetMapping("/edit/{id}")
-    public String editForm(@PathVariable Long id, Model model) {
-        Class kelas = classService.getById(id);
-        List<Course> courses = classService.getAllCourses();
-        model.addAttribute("kelas", kelas);
-        model.addAttribute("courses", courses);
+    // ================= EDIT =================
+
+    @GetMapping("/edit/{classCode}")
+    public String editForm(@PathVariable String classCode, Model model) {
+
+        Class kelas = classService.getByCode(classCode);
+
+        UpdateClassDto dto = new UpdateClassDto();
+        dto.setName(kelas.getName());
+        dto.setYear(kelas.getYear());
+        dto.setSemester(kelas.getSemester());
+        dto.setCourseId(kelas.getCourse().getId());
+        dto.setLecturerName(kelas.getLecturerName());
+
+        model.addAttribute("classCode", classCode);
+        model.addAttribute("updateClassDto", dto);
+        model.addAttribute("courses", classService.getAllCourses());
         model.addAttribute("semesters", Class.Semester.values());
+
         return "pages/Class/Edit";
     }
 
-    @PostMapping("/edit/{id}")
-    public String edit(
-            @PathVariable Long id,
-            @RequestParam String name,
-            @RequestParam String year,
-            @RequestParam Class.Semester semester,
-            @RequestParam Long courseId,
-            @AuthenticationPrincipal UserPrincipal principal,
-            RedirectAttributes redirectAttributes) {
+    @PostMapping("/edit/{classCode}")
+    public String edit(@PathVariable String classCode,
+                       @Valid @ModelAttribute("updateClassDto") UpdateClassDto request,
+                       BindingResult result,
+                       Model model,
+                       @AuthenticationPrincipal UserPrincipal principal) {
+
+        if (result.hasErrors()) {
+            model.addAttribute("classCode", classCode);
+            model.addAttribute("courses", classService.getAllCourses());
+            model.addAttribute("semesters", Class.Semester.values());
+            model.addAttribute("errors", result.getFieldErrors());
+            return "pages/Class/Edit";
+        }
 
         try {
-            classService.update(id, name, year, semester, courseId, principal.getUser().getId());
+            classService.update(
+                    classCode,
+                    request.getName(),
+                    request.getYear(),
+                    request.getSemester(),
+                    request.getCourseId(),
+                    request.getLecturerName(),
+                    principal.getUser().getId()
+            );
         } catch (RuntimeException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/class/edit/" + id;
+            model.addAttribute("classCode", classCode);
+            model.addAttribute("courses", classService.getAllCourses());
+            model.addAttribute("semesters", Class.Semester.values());
+            model.addAttribute("error", e.getMessage());
+            return "pages/Class/Edit";
         }
-        return "redirect:/class";
+
+        return "redirect:/";
     }
 
-    @PostMapping("/delete/{id}")
-    public String delete(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal principal) {
-        classService.delete(id, principal.getUser().getId());
-        return "redirect:/class";
+    // ================= DELETE =================
+
+    @PostMapping("/delete/{classCode}")
+    public String delete(@PathVariable String classCode,
+                         @AuthenticationPrincipal UserPrincipal principal) {
+
+        classService.delete(classCode, principal.getUser().getId());
+        return "redirect:/";
+    }
+
+    // ================= JOIN =================
+
+    @GetMapping("/join")
+    public String joinForm(Model model) {
+        model.addAttribute("joinClassDto", new JoinClassDto());
+        return "pages/Class/Join";
+    }
+
+    @PostMapping("/join")
+    public String join(@Valid @ModelAttribute("joinClassDto") JoinClassDto request,
+                       BindingResult result,
+                       Model model,
+                       @AuthenticationPrincipal UserPrincipal principal) {
+
+        if (result.hasErrors()) {
+            model.addAttribute("errors", result.getFieldErrors());
+            return "pages/Class/Join";
+        }
+
+        try {
+            classService.joinByCode(request.getClassCode(), principal.getUser());
+        } catch (RuntimeException e) {
+            model.addAttribute("error", e.getMessage());
+            return "pages/Class/Join";
+        }
+
+        return "redirect:/";
+    }
+
+    // ================= LEAVE =================
+
+    @PostMapping("/leave/{classCode}")
+    public String leaveClass(@PathVariable String classCode,
+                             @AuthenticationPrincipal UserPrincipal principal) {
+
+        Class kelas = classService.getByCode(classCode);
+        classService.leaveClass(kelas.getId(), principal.getUser().getId());
+        return "redirect:/";
+    }
+
+    // ================= APPROVE / REJECT =================
+
+    @PostMapping("/member/{userClassId}/approve")
+    public String approve(@PathVariable Long userClassId,
+                          @RequestParam String classCode) {
+        classService.approve(userClassId);
+        return "redirect:/class/" + classCode + "#anggota";
+    }
+
+    @PostMapping("/member/{userClassId}/reject")
+    public String reject(@PathVariable Long userClassId,
+                         @RequestParam String classCode) {
+        classService.reject(userClassId);
+        return "redirect:/class/" + classCode + "#anggota";
+    }
+
+    // ================= KICK =================
+
+    @PostMapping("/member/{userClassId}/kick")
+    public String kick(@PathVariable Long userClassId,
+                       @RequestParam String classCode) {
+        classService.kick(userClassId);
+        return "redirect:/class/" + classCode + "#anggota";
+    }
+
+    // ================= PROMOTE / DEMOTE =================
+
+    @PostMapping("/member/{userClassId}/promote")
+    public String promote(@PathVariable Long userClassId,
+                          @RequestParam String classCode) {
+        classService.promote(userClassId);
+        return "redirect:/class/" + classCode + "#anggota";
+    }
+
+    @PostMapping("/member/{userClassId}/demote")
+    public String demote(@PathVariable Long userClassId,
+                         @RequestParam String classCode) {
+        classService.demote(userClassId);
+        return "redirect:/class/" + classCode + "#anggota";
     }
 }

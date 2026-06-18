@@ -5,195 +5,269 @@
 	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
 	layout:decorate="~{layouts/Home}"
 >
-	<head>
-		<title th:text="${classs.name}">Detail Kelas</title>
-	</head>
-	<body>
-		<div layout:fragment="content" class="mx-auto max-w-5xl p-4">
-			<div class="breadcrumbs text-sm mb-4">
-				<ul>
-					<li><a href="/">Beranda</a></li>
-					<li th:text="${classs.name}"></li>
-				</ul>
+<head>
+	<title th:text="${classs.name}">Detail Kelas</title>
+
+	<!-- badge active fix -->
+	<style>
+	.tab:has(input:checked) {
+		color: #009CA4 !important;
+	}
+
+	.tab {
+		font-family: "Plus Jakarta Sans", sans-serif;
+		font-size: 14px;
+		font-weight: 500;
+		line-height: 140%;
+		letter-spacing: -0.02em;
+	}
+</style>
+</head>
+
+<body>
+<div layout:fragment="content" class="mx-auto max-w-5xl p-4">
+
+	<!-- breadcrumb -->
+	<div class="breadcrumbs text-sm mb-4">
+		<ul>
+			<li><a href="/">Beranda</a></li>
+			<li th:text="${classs.name}"></li>
+		</ul>
+	</div>
+
+	<!-- error -->
+	<div th:if="${error}" class="alert alert-soft alert-error mb-4">
+		<span th:text="${error}"></span>
+	</div>
+
+	<!-- header -->
+	<div class="flex items-center justify-between flex-wrap gap-4 mb-4">
+		<h1 class="typo-heading-xl" th:text="${classs.name} + ' - ' + ${classs.course.name}"></h1>
+
+		<div class="dropdown dropdown-end">
+			<div tabindex="0" role="button" class="btn btn-ghost btn-circle btn-sm">
+				<i class="ri-more-2-line text-sm"></i>
 			</div>
 
-			<!-- ====== ALERTS ======  -->
-			<!-- error -->
-			<div th:if="${error}" class="alert alert-soft alert-error mb-4">
-				<span th:text="${error}"></span>
-			</div>
-			<!-- ====== ALERTS ======  -->
+			<ul tabindex="0"
+				class="dropdown-content menu bg-base-100 rounded-box border border-base-300 w-48 mt-2 z-10">
 
-			<div class="flex items-center justify-between flex-wrap gap-4 mb-4">
-				<h1 class="typo-heading-xl" th:text="${classs.name} + ' - ' + ${classs.course.name}"></h1>
-				<div class="dropdown dropdown-end">
-					<div tabindex="0" role="button" class="btn btn-ghost btn-circle btn-sm">
-						<i class="ri-more-2-line text-sm"></i>
-					</div>
-					<ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box border border-base-300 w-48 mt-2 z-10">
-						<li><a th:href="@{/class/edit/{id}(id=${classs.id})}">Edit Kelas</a></li>
-						<li>
-							<form th:action="@{/class/delete/{id}(id=${classs.id})}" method="post">
-								<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-								<button
-									type="submit"
+				<!-- LEAVE CLASS (SEMUA MEMBER BISA) -->
+				<li>
+					<form th:action="@{/class/leave/{classCode}(classCode=${classs.classCode})}" method="post">
+						<input type="hidden"
+							   th:name="${_csrf.parameterName}"
+							   th:value="${_csrf.token}" />
+
+						<button type="submit"
+								class="w-full text-left"
+								onclick="return confirm('Yakin mau keluar kelas?');">
+							Leave Class
+						</button>
+					</form>
+				</li>
+
+				<!-- MENU ADMIN (HANYA ADMIN) -->
+				<th:block th:if="${isAdmin}">
+
+					<li>
+						<a th:href="@{/class/edit/{classCode}(classCode=${classs.classCode})}">
+							Edit Kelas
+						</a>
+					</li>
+
+					<li>
+						<form th:action="@{/class/delete/{classCode}(classCode=${classs.classCode})}" method="post">
+							<input type="hidden"
+								   th:name="${_csrf.parameterName}"
+								   th:value="${_csrf.token}" />
+
+							<button type="submit"
 									class="text-error w-full text-left"
-									onclick="return confirm('Yakin hapus kelas ini?');"
-								>
-									Hapus Kelas
-								</button>
-							</form>
-						</li>
-					</ul>
-				</div>
-			</div>
+									onclick="return confirm('Yakin hapus kelas ini?');">
+								Hapus Kelas
+							</button>
+						</form>
+					</li>
 
-			<div class="flex flex-col gap-2 mb-8">
-				<div class="flex gap-2 items-center">
-					<i class="ri-hashtag opacity-60"></i>
-					<p class="typo-body-md w-1/3 max-w-40 opacity-60">Kode kelas</p>
-					<p class="typo-body-md" th:text="${classs.id}"></p>
-				</div>
-				<div class="flex gap-2 items-center">
-					<i class="ri-file-marked-line opacity-60"></i>
-					<p class="typo-body-md w-1/3 max-w-40 opacity-60">Mata kuliah</p>
-					<p class="typo-body-md" th:text="${classs.course.name}"></p>
-				</div>
-				<div class="flex gap-2 items-center">
-					<i class="ri-calendar-2-line opacity-60"></i>
-					<p class="typo-body-md w-1/3 max-w-40 opacity-60">Tahun Ajaran</p>
-					<p class="typo-body-md" th:text="${classs.year}"></p>
-				</div>
-				<div class="flex gap-2 items-center">
-					<i class="ri-list-ordered-2 opacity-60"></i>
-					<p class="typo-body-md w-1/3 max-w-40 opacity-60">Semester</p>
-					<p class="typo-body-md" th:text="${classs.semester == 'ODD' ? 'Ganjil' : 'Genap'}"></p>
-				</div>
-				<div class="flex gap-2 items-center">
-					<i class="ri-graduation-cap-line opacity-60"></i>
-					<p class="typo-body-md w-1/3 max-w-40 opacity-60">Dosen</p>
-					<p class="typo-body-md">-</p>
-				</div>
-			</div>
+				</th:block>
 
-			<div class="tabs tabs-border">
-				<!-- tasks  -->
-				<label class="tab has-[input:checked]:text-primary">
-					<input type="radio" name="tabs" />
-					Tugas
-				</label>
-				<div class="tab-content pt-4">Tugas</div>
-
-				<!-- schedules  -->
-				<label class="tab has-[input:checked]:text-primary">
-					<input type="radio" name="tabs" />
-					Jadwal
-				</label>
-				<div class="tab-content pt-4">Jadwal</div>
-
-				<!-- documents  -->
-				<label class="tab has-[input:checked]:text-primary">
-					<input type="radio" name="tabs" />
-					Materi Ajar
-				</label>
-				<div class="tab-content pt-4">Materi Ajar</div>
-
-				<!-- members  -->
-				<label class="tab has-[input:checked]:text-primary gap-4">
-					<input type="radio" name="tabs" checked />
-					Anggota
-					<div th:if="${#lists.size(members) > 0}" th:text="${#lists.size(members)}"></div>
-				</label>
-				<div class="tab-content pt-4">
-					<!-- pending  -->
-					<div th:if="${!#lists.isEmpty(pendingMembers)}" class="bg-info/10 rounded-box p-4 mb-6">
-						<p
-							class="typo-label text-info mb-4"
-							th:text="'Permintaan bergabung (' + ${#lists.size(pendingMembers)} + ')'"
-						></p>
-						<div class="flex flex-wrap gap-2">
-							<div
-								th:each="req : ${pendingMembers}"
-								class="card bg-base-100 rounded-xl flex-1 min-w-60 overflow-hidden"
-							>
-								<div class="card-body flex-row items-center justify-between p-4">
-									<p class="typo-body-md grow" th:text="${req.user.name}"></p>
-									<form th:action="@{/class/member/{id}/approve(id=${req.id})}" method="post">
-										<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-										<input type="hidden" name="classId" th:value="${classs.id}" />
-										<button type="submit" class="btn btn-sm btn-success btn-soft">Terima</button>
-									</form>
-									<form th:action="@{/class/member/{id}/reject(id=${req.id})}" method="post">
-										<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-										<input type="hidden" name="classId" th:value="${classs.id}" />
-										<button type="submit" class="btn btn-sm btn-error btn-soft">Tolak</button>
-									</form>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<!-- accepted  -->
-					<div class="flex flex-col gap-2">
-						<div th:each="member : ${members}" class="card bg-base-100 border border-base-300">
-							<div class="card-body flex-row items-center justify-between p-4">
-								<div>
-									<p class="typo-body-md">
-										<span th:text="${member.user.name}"></span>
-										<span th:if="${member.user.username == #authentication.principal.username}">(Saya)</span>
-									</p>
-									<p
-										class="typo-caption text-base-content/60"
-										th:text="${member.role.name() == 'ADMIN' ? 'Admin' : 'Anggota'}"
-									></p>
-								</div>
-
-								<div
-									class="dropdown dropdown-end"
-									th:if="${member.user.username != #authentication.principal.username}"
-								>
-									<div tabindex="0" role="button" class="btn btn-ghost btn-circle btn-sm">
-										<i class="ri-more-2-line text-sm"></i>
-									</div>
-									<ul
-										tabindex="0"
-										class="dropdown-content menu bg-base-100 rounded-box border border-base-300 w-44 mt-2 z-10"
-									>
-										<li th:if="${member.role.name() != 'ADMIN'}">
-											<form th:action="@{/class/member/{id}/promote(id=${member.id})}" method="post">
-												<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-												<input type="hidden" name="classId" th:value="${classs.id}" />
-												<button type="submit" class="w-full text-left">Promote as Admin</button>
-											</form>
-										</li>
-										<li th:if="${member.role.name() == 'ADMIN'}">
-											<form th:action="@{/class/member/{id}/demote(id=${member.id})}" method="post">
-												<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-												<input type="hidden" name="classId" th:value="${classs.id}" />
-												<button type="submit" class="w-full text-left">Demote Admin</button>
-											</form>
-										</li>
-										<li>
-											<form th:action="@{/class/member/{id}/kick(id=${member.id})}" method="post">
-												<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-												<input type="hidden" name="classId" th:value="${classs.id}" />
-												<button
-													type="submit"
-													class="w-full text-error"
-													onclick="return confirm('Yakin keluarkan anggota ini?');"
-												>
-													Kick
-												</button>
-											</form>
-										</li>
-									</ul>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
+			</ul>
 		</div>
-	</body>
-</html>
+	</div>
 
+	<!-- info -->
+	<div class="flex flex-col gap-2 mb-8">
+		<div class="flex gap-2 items-center">
+			<i class="ri-hashtag opacity-60"></i>
+			<p class="typo-body-md w-1/3 max-w-40 opacity-60">Kode kelas</p>
+			<p class="typo-body-md" th:text="${classs.classCode}"></p>
+		</div>
+
+		<div class="flex gap-2 items-center">
+			<i class="ri-file-marked-line opacity-60"></i>
+			<p class="typo-body-md w-1/3 max-w-40 opacity-60">Mata kuliah</p>
+			<p class="typo-body-md" th:text="${classs.course.name}"></p>
+		</div>
+
+		<div class="flex gap-2 items-center">
+			<i class="ri-calendar-2-line opacity-60"></i>
+			<p class="typo-body-md w-1/3 max-w-40 opacity-60">Tahun Ajaran</p>
+			<p class="typo-body-md" th:text="${classs.year}"></p>
+		</div>
+
+		<div class="flex gap-2 items-center">
+			<i class="ri-list-ordered-2 opacity-60"></i>
+			<p class="typo-body-md w-1/3 max-w-40 opacity-60">Semester</p>
+			<p class="typo-body-md" th:text="${classs.semester == 'ODD' ? 'Ganjil' : 'Genap'}"></p>
+		</div>
+
+		<div class="flex gap-2 items-center">
+			<i class="ri-graduation-cap-line opacity-60"></i>
+			<p class="typo-body-md w-1/3 max-w-40 opacity-60">Dosen</p>
+			<p class="typo-body-md"
+			   th:text="${classs.lecturerName != null and !classs.lecturerName.isEmpty()} ? ${classs.lecturerName} : '-'"></p>
+		</div>
+	</div>
+
+	<!-- TABS (FIXED Figma version) -->
+	<div class="tabs tabs-border">
+
+	<label class="tab gap-2">
+		<input type="radio" name="tabs" checked />
+		Tugas
+		<span class="flex items-center justify-center w-5 h-5 rounded-full bg-[#2B2B2B] text-white text-[11px]">
+			0
+		</span>
+	</label>
+
+	<label class="tab gap-2">
+		<input type="radio" name="tabs" />
+		Jadwal
+		<span class="flex items-center justify-center w-5 h-5 rounded-full bg-[#2B2B2B] text-white text-[11px]">
+			0
+		</span>
+	</label>
+
+	<label class="tab gap-2">
+		<input type="radio" name="tabs" />
+		Materi Ajar
+		<span class="flex items-center justify-center w-5 h-5 rounded-full bg-[#2B2B2B] text-white text-[11px]">
+			0
+		</span>
+	</label>
+
+	<label class="tab gap-2">
+		<input type="radio" name="tabs" />
+		Anggota
+
+		<span th:if="${#lists.size(members) > 0}"
+			  class="flex items-center justify-center w-5 h-5 rounded-full bg-[#2B2B2B] text-white text-[11px]"
+			  th:text="${#lists.size(members)}">
+		</span>
+	</label>
+
+		<div class="tab-content pt-4">
+
+			<!-- pending -->
+			<div th:if="${!#lists.isEmpty(pendingRequests)}"
+				 class="bg-info/10 rounded-box p-4 mb-6">
+
+				<p class="typo-label text-info mb-4"
+				   th:text="'Permintaan bergabung (' + ${#lists.size(pendingRequests)} + ')'"></p>
+
+				<div class="flex flex-wrap gap-2">
+					<div th:each="req : ${pendingRequests}"
+						 class="card bg-base-100 rounded-xl flex-1 min-w-60 overflow-hidden">
+
+						<div class="card-body flex-row items-center justify-between p-4">
+							<p class="typo-body-md grow" th:text="${req.user.name}"></p>
+
+							<form th:action="@{/class/member/{id}/approve(id=${req.id})}" method="post">
+								<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+								<input type="hidden" name="classCode" th:value="${classs.classCode}" />
+								<button class="btn btn-sm btn-success btn-soft">Terima</button>
+							</form>
+
+							<form th:action="@{/class/member/{id}/reject(id=${req.id})}" method="post">
+								<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+								<input type="hidden" name="classCode" th:value="${classs.classCode}" />
+								<button class="btn btn-sm btn-error btn-soft">Tolak</button>
+							</form>
+
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- members -->
+			<div class="flex flex-col gap-2">
+
+				<div th:each="member : ${members}"
+					 class="card bg-base-100 border border-base-300">
+
+					<div class="card-body flex-row items-center justify-between p-4">
+
+						<div>
+							<p class="typo-body-md">
+								<span th:text="${member.user.name}"></span>
+								<span th:if="${member.user.username == #authentication.principal.username}">
+									(Saya)
+								</span>
+							</p>
+
+							<p class="typo-caption text-base-content/60"
+							   th:text="${member.role.name() == 'ADMIN' ? 'Admin' : 'Anggota'}"></p>
+						</div>
+
+						<div class="dropdown dropdown-end"
+     						th:if="${isAdmin and member.user.username != #authentication.principal.username}">
+							<div tabindex="0" role="button"
+								 class="btn btn-ghost btn-circle btn-sm">
+								<i class="ri-more-2-line text-sm"></i>
+							</div>
+
+							<ul tabindex="0"
+								class="dropdown-content menu bg-base-100 rounded-box border border-base-300 w-44 mt-2 z-10">
+
+								<li th:if="${member.role.name() != 'ADMIN'}">
+									<form th:action="@{/class/member/{id}/promote(id=${member.id})}" method="post">
+										<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+										<input type="hidden" name="classCode" th:value="${classs.classCode}" />
+										<button class="w-full text-left">Promote as Admin</button>
+									</form>
+								</li>
+
+								<li th:if="${member.role.name() == 'ADMIN'}">
+									<form th:action="@{/class/member/{id}/demote(id=${member.id})}" method="post">
+										<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+										<input type="hidden" name="classCode" th:value="${classs.classCode}" />
+										<button class="w-full text-left">Demote Admin</button>
+									</form>
+								</li>
+
+								<li>
+									<form th:action="@{/class/member/{id}/kick(id=${member.id})}" method="post">
+										<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+										<input type="hidden" name="classCode" th:value="${classs.classCode}" />
+										<button class="w-full text-error"
+												onclick="return confirm('Yakin keluarkan anggota ini?');">
+											Kick
+										</button>
+									</form>
+								</li>
+
+							</ul>
+						</div>
+
+					</div>
+				</div>
+
+			</div>
+
+		</div>
+	</div>
+
+</div>
+</body>
+</html>

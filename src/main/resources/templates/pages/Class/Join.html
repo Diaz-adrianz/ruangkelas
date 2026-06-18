@@ -4,40 +4,57 @@
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
     layout:decorate="~{layouts/Home}"
 >
-    <head>
-        <title>Gabung Kelas</title>
-    </head>
-    <body>
-        <div layout:fragment="content" class="w-full mx-auto max-w-xl py-8 px-4">
-            <div class="mb-6">
-                <a th:href="@{/class}" class="text-sm text-base-content/60 hover:underline">← Kembali</a>
-            </div>
-        <div th:if="${error}" class="alert alert-error mb-4">
-            <span th:text="${error}"></span>
-        </div>
+<head>
+    <title>Gabung Kelas</title>
+</head>
 
-            <h1 class="text-2xl font-bold mb-6">Gabung Kelas</h1>
+<body>
+<div layout:fragment="content" class="w-full mx-auto max-w-xl py-8 px-4">
 
-            <div class="card bg-base-100 border border-base-200 rounded-2xl">
-                <div class="card-body flex flex-col gap-4">
-                    <p class="text-sm text-base-content/60">Pilih kelas yang ingin kamu ikuti. Permintaan akan menunggu persetujuan admin kelas.</p>
+    <div class="mb-6">
+        <a th:href="@{/class}" class="text-sm text-base-content/60 hover:underline">
+            ← Kembali
+        </a>
+    </div>
 
-                    <div class="flex flex-col gap-2">
-                        <div th:each="kelas : ${classes}" class="card bg-base-200/40 border border-base-200 rounded-xl">
-                            <div class="card-body flex-row items-center justify-between py-3 px-4">
-                                <div>
-                                    <p class="font-medium" th:text="${kelas.name}"></p>
-                                    <p class="text-sm text-base-content/60" th:text="${kelas.course.name} + ' • ' + ${kelas.year}"></p>
-                                </div>
-                                <form th:action="@{/class/{id}/join(id=${kelas.id})}" method="post">
-                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                    <button type="submit" class="btn btn-sm btn-primary rounded-xl">Gabung</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+    <div th:if="${error}" class="alert alert-error mb-4">
+        <span th:text="${error}"></span>
+    </div>
+
+    <h1 class="text-2xl font-bold mb-6">Gabung Kelas</h1>
+
+    <div class="card bg-base-100 border border-base-200 rounded-2xl">
+        <div class="card-body flex flex-col gap-4">
+
+            <p class="text-sm text-base-content/60">
+                Masukkan kode kelas untuk bergabung. Permintaan akan menunggu persetujuan admin.
+            </p>
+
+            <!-- FORM JOIN BY CODE -->
+            <form th:action="@{/class/join}"
+                  method="post"
+                  th:object="${joinClassDto}"
+                  class="flex flex-col gap-4">
+
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Kode Kelas</span>
+                    </label>
+
+                    <input type="text"
+                           th:field="*{classCode}"
+                           class="input input-bordered w-full"
+                           placeholder="Contoh: ABC123" />
                 </div>
-            </div>
+
+                <button type="submit" class="btn btn-primary rounded-xl">
+                    Gabung Kelas
+                </button>
+
+            </form>
+
         </div>
-    </body>
+    </div>
+</div>
+</body>
 </html>

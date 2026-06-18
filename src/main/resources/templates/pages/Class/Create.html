@@ -89,6 +89,17 @@
 							</select>
 						</fieldset>
 
+						<fieldset class="fieldset">
+							<legend class="fieldset-legend">Dosen</legend>
+							<input
+								th:field="*{lecturerName}"
+								class="input w-full"
+								type="text"
+								placeholder="Contoh: Pak Budi"
+								maxlength="100"
+							/>
+						</fieldset>
+
 						<div class="flex gap-2 justify-end mt-4">
 							<a th:href="@{/class}" class="btn btn-ghost rounded-xl">Batal</a>
 							<button type="submit" class="btn btn-primary rounded-xl">Buat Kelas</button>
@@ -99,4 +110,3 @@
 		</div>
 	</body>
 </html>
-
