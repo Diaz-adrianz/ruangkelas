@@ -43,7 +43,7 @@
 					<i class="ri-timer-line"></i>
 					<span th:text="'H-' + ${task.daysUntilDeadline}"></span>
 				</div>
-				<div class="dropdown dropdown-end">
+				<div th:if="${isAdmin}" class="dropdown dropdown-end">
 					<div tabindex="0" role="button" class="btn btn-ghost btn-circle btn-sm">
 						<i class="ri-more-2-line text-sm"></i>
 					</div>

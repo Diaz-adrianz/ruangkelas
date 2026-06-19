@@ -55,6 +55,8 @@ public class TaskController {
         }
 
         try {
+            classService.ensureAdmin(classs.getId(), principal.getUser().getId());
+
             Task task = Task.builder()
                     .classe(classs)
                     .title(request.getTitle())
@@ -100,7 +102,9 @@ public class TaskController {
             @Valid @ModelAttribute("updateTaskDto") UpdateTaskDto request, 
             BindingResult result,
             Model model,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            @AuthenticationPrincipal UserPrincipal principal
+        ) {
         Class classs = classService.getByCode(classCode);
         Task task = taskService.getTaskById(taskId);
 
@@ -112,6 +116,7 @@ public class TaskController {
         }
 
         try {
+            classService.ensureAdmin(classs.getId(), principal.getUser().getId());
     
             task.setTitle(request.getTitle());
             task.setDescription(request.getDescription());
@@ -132,8 +137,20 @@ public class TaskController {
 
     // 5. Proses Hapus Task
     @PostMapping("/{taskId}/delete")
-    public String deleteTask(@PathVariable String classCode, @PathVariable Long taskId, RedirectAttributes redirectAttributes) {
-        taskService.deleteTask(taskId);
+    public String deleteTask(@PathVariable String classCode, 
+                            @PathVariable Long taskId, 
+                            RedirectAttributes redirectAttributes,
+                            Model model,
+                            @AuthenticationPrincipal UserPrincipal principal) {
+        try {
+            Class classs = classService.getByCode(classCode);
+
+            classService.ensureAdmin(classs.getId(), principal.getUser().getId());
+            taskService.deleteTask(taskId);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/class/" + classCode + "/tasks/" + taskId;
+        }
 
         // PERBAIKAN: Memastikan rute redirect bersifat absolut dari root server
         redirectAttributes.addFlashAttribute("success", "Tugas berhasil dihapus");
@@ -141,9 +158,14 @@ public class TaskController {
     }
 
     @GetMapping("/{taskId}")
-    public String getMethodName(@PathVariable String classCode, @PathVariable Long taskId, Model model) {
+    public String getMethodName(@PathVariable String classCode, 
+                                @PathVariable Long taskId, 
+                                Model model, 
+                                @AuthenticationPrincipal UserPrincipal principal) {
         Class classs = classService.getByCode(classCode);
+        boolean isAdmin = classService.isAdmin(classs.getId(), principal.getUser().getId());
         model.addAttribute("classs", classs);
+        model.addAttribute("isAdmin", isAdmin);
 
         Task task = taskService.getTaskById(taskId);
         model.addAttribute("task", task);

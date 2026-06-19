@@ -147,7 +147,8 @@
 			</span>
 		</label>
 		<div class="tab-content pt-4">
-			<div class="flex justify-end mb-4">
+
+			<div th:if="${isAdmin}" class="flex justify-end mb-4">
 				<a th:href="@{/class/{classCode}/tasks/create(classCode=${classs.classCode})}" class="btn btn-primary btn-sm">
 					<i class="ri-add-large-line"></i>
 					Tambah Tugas
