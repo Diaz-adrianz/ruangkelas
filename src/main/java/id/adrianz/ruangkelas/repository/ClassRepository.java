@@ -1,6 +1,7 @@
 package id.adrianz.ruangkelas.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,8 +13,20 @@ import id.adrianz.ruangkelas.model.UserClass;
 
 @Repository
 public interface ClassRepository extends JpaRepository<Class, Long> {
-    boolean existsByCourseIdAndNameAndYearAndSemester(Long courseId, String name, String year, Class.Semester semester);
+
+    boolean existsByCourseIdAndNameAndYearAndSemester(
+            Long courseId,
+            String name,
+            String year,
+            Class.Semester semester);
 
     @Query("SELECT uc.classe FROM UserClass uc WHERE uc.user.id = :userId AND uc.status = :status")
-    List<Class> findClassesByUserId(@Param("userId") Long userId, @Param("status") UserClass.Status status);
+    List<Class> findClassesByUserId(
+            @Param("userId") Long userId,
+            @Param("status") UserClass.Status status);
+
+    // Tambahkan di sini
+    Optional<Class> findByClassCode(String classCode);
+
+    boolean existsByClassCode(String classCode);
 }

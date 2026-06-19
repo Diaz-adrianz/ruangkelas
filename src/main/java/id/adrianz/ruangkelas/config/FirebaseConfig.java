@@ -18,6 +18,11 @@ public class FirebaseConfig {
             InputStream serviceAccount =
                 getClass().getClassLoader().getResourceAsStream("secrets/firebase-service-account.json");
 
+            if (serviceAccount == null) {
+                System.out.println("Firebase service account not found, skipping initialization.");
+                return;
+            }
+
             FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                 .build();

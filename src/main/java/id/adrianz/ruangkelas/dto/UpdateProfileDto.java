@@ -1,6 +1,5 @@
 package id.adrianz.ruangkelas.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -8,8 +7,8 @@ import lombok.Data;
 @Data
 public class UpdateProfileDto {
 
-    @NotBlank(message = "Nama lengkap wajib diisi")
-    @Size(min = 3, max = 50, message = "Nama lengkap harus terdiri dari 3 - 50 karakter")
+    @Size(max = 100, message = "Nama dosen maksimal 100 karakter")
+        private String lecturerName;
     @Pattern(
             regexp = "^[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ' .]{2,49}$",
             message = "Nama lengkap hanya boleh berisi huruf, spasi, titik, dan apostrof"
