@@ -31,8 +31,6 @@ import lombok.RequiredArgsConstructor;
 public class ClassController {
 
     private final ClassService classService;
-
-    // TAMBAHAN UNTUK FITUR TASK
     private final TaskService taskService;
 
     @GetMapping("/join")
@@ -54,9 +52,6 @@ public class ClassController {
         model.addAttribute("members", members);
         model.addAttribute("pendingMembers", pendingMembers);
 
-        // ====================================
-        // TAMBAHAN FITUR TASK LIST (#29)
-        // ====================================
         List<Task> tasks = taskService.getTasksByClassId(id);
         model.addAttribute("tasks", tasks);
 

@@ -34,8 +34,8 @@ public class TaskService {
     }
 
     public List<Task> getTasksByClassId(Long classId) {
-    return taskRepository.findByClasseId(classId);
-}
+        return taskRepository.findByClasseIdOrderByDeadlineAsc(classId);
+    }
 
     public Long getClassId(Long taskId) {
 
