@@ -241,8 +241,10 @@ public class ClassController {
 
     @PostMapping("/member/{userClassId}/kick")
     public String kick(@PathVariable Long userClassId,
-                       @RequestParam String classCode) {
+                       @RequestParam String classCode,
+                        RedirectAttributes redirectAttributes) {
         classService.kick(userClassId);
+        redirectAttributes.addFlashAttribute("success", "Anggota berhasil dikeluarkan");
         return "redirect:/class/" + classCode + "#anggota";
     }
 
@@ -250,15 +252,19 @@ public class ClassController {
 
     @PostMapping("/member/{userClassId}/promote")
     public String promote(@PathVariable Long userClassId,
-                          @RequestParam String classCode) {
+                          @RequestParam String classCode,
+                            RedirectAttributes redirectAttributes) {
         classService.promote(userClassId);
+        redirectAttributes.addFlashAttribute("success", "Admin berhasil ditambahkan");
         return "redirect:/class/" + classCode + "#anggota";
     }
 
     @PostMapping("/member/{userClassId}/demote")
     public String demote(@PathVariable Long userClassId,
-                         @RequestParam String classCode) {
+                         @RequestParam String classCode,
+                            RedirectAttributes redirectAttributes) {
         classService.demote(userClassId);
+        redirectAttributes.addFlashAttribute("success", "Admin berhasil dihapus");
         return "redirect:/class/" + classCode + "#anggota";
     }
 }

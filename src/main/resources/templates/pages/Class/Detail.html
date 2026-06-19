@@ -238,7 +238,7 @@
 									<form th:action="@{/class/member/{id}/promote(id=${member.id})}" method="post">
 										<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 										<input type="hidden" name="classCode" th:value="${classs.classCode}" />
-										<button class="w-full text-left">Promote as Admin</button>
+										<button class="w-full text-left">Jadikan Admin</button>
 									</form>
 								</li>
 
@@ -246,7 +246,7 @@
 									<form th:action="@{/class/member/{id}/demote(id=${member.id})}" method="post">
 										<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 										<input type="hidden" name="classCode" th:value="${classs.classCode}" />
-										<button class="w-full text-left">Demote Admin</button>
+										<button class="w-full text-left">Hapus Admin</button>
 									</form>
 								</li>
 
@@ -256,7 +256,7 @@
 										<input type="hidden" name="classCode" th:value="${classs.classCode}" />
 										<button class="w-full text-error"
 												onclick="return confirm('Yakin keluarkan anggota ini?');">
-											Kick
+											Keluarkan
 										</button>
 									</form>
 								</li>
