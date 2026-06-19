@@ -33,8 +33,8 @@ public class TaskService {
         taskRepository.deleteById(id);
     }
 
-    public List<Task> getTasksByClassId(Long classId) {
-        return taskRepository.findByClasseIdOrderByDeadlineAsc(classId);
+    public List<Task> getTasksByClassCode(String classCode) {
+        return taskRepository.findByClasseClassCodeOrderByDeadlineAsc(classCode);
     }
 
     public Long getClassId(Long taskId) {

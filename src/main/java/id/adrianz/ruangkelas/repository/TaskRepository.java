@@ -7,5 +7,5 @@ import java.util.List;
 public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findByClasseId(Long classId);
     
-    List<Task> findByClasseIdOrderByDeadlineAsc(Long classId);
+    List<Task> findByClasseClassCodeOrderByDeadlineAsc(String classeClassCode);
 }

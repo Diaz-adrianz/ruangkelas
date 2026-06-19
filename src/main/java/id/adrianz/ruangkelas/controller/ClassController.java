@@ -18,7 +18,6 @@ import id.adrianz.ruangkelas.dto.CreateClassDto;
 import id.adrianz.ruangkelas.dto.JoinClassDto;
 import id.adrianz.ruangkelas.dto.UpdateClassDto;
 import id.adrianz.ruangkelas.model.Class;
-import id.adrianz.ruangkelas.model.Course;
 import id.adrianz.ruangkelas.model.Task;
 import id.adrianz.ruangkelas.model.UserClass;
 import id.adrianz.ruangkelas.model.UserPrincipal;
@@ -63,7 +62,7 @@ public class ClassController {
         model.addAttribute("isAdmin", isAdmin);
         model.addAttribute("currentUserId", principal.getUser().getId());
 
-        List<Task> tasks = taskService.getTasksByClassId(id);
+        List<Task> tasks = taskService.getTasksByClassCode(classCode);
         model.addAttribute("tasks", tasks);
 
         return "pages/Class/Detail";
