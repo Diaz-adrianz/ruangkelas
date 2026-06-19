@@ -48,6 +48,9 @@ public class User {
     @Column(nullable = true, length = 10)
     private String nim;
 
+    @Column(nullable = true, length = 255)
+    private String profilePicture;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 

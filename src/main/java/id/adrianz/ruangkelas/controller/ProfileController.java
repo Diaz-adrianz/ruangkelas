@@ -1,5 +1,12 @@
 package id.adrianz.ruangkelas.controller;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.UUID;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -7,6 +14,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import id.adrianz.ruangkelas.dto.UpdateProfileDto;
 import id.adrianz.ruangkelas.model.User;
@@ -39,30 +48,68 @@ public class ProfileController {
         UpdateProfileDto dto = new UpdateProfileDto();
         dto.setName(userPrincipal.getUser().getName());
         dto.setNim(userPrincipal.getUser().getNim());
+
         model.addAttribute("updateProfileDto", dto);
 
         return "pages/EditProfile";
     }
 
     @PostMapping("/profile/edit")
-    public String registerSubmit(@Valid @ModelAttribute("updateProfileDto") UpdateProfileDto request,
+    public String registerSubmit(
+            @Valid @ModelAttribute("updateProfileDto") UpdateProfileDto request,
             BindingResult result,
             Model model,
+            @RequestParam(required = false) MultipartFile photo,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
         if (result.hasErrors()) {
             model.addAttribute("errors", result.getFieldErrors());
             return "pages/EditProfile";
         }
 
         User user = userPrincipal.getUser();
+
         user.setName(request.getName());
         user.setNim(request.getNim());
 
         try {
+
+            if (photo != null && !photo.isEmpty()) {
+
+                String uploadDir = "uploads/profile/";
+
+                Files.createDirectories(Paths.get(uploadDir));
+
+                String fileName =
+                        UUID.randomUUID() + "_" + photo.getOriginalFilename();
+
+                Path path = Paths.get(uploadDir, fileName);
+
+                Files.copy(
+                        photo.getInputStream(),
+                        path,
+                        StandardCopyOption.REPLACE_EXISTING);
+
+                user.setProfilePicture(
+                        "/uploads/profile/" + fileName);
+            }
+
             userService.save(user);
+
             return "redirect:/profile";
+
+        } catch (IOException e) {
+
+            model.addAttribute(
+                    "error",
+                    "Gagal mengupload foto profil");
+
+            return "pages/EditProfile";
+
         } catch (IllegalArgumentException e) {
+
             model.addAttribute("error", e.getMessage());
+
             return "pages/EditProfile";
         }
     }
