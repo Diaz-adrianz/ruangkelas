@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Edit Jadwal</title>
+</head>
+<body>
+
+<h2>Edit Jadwal</h2>
+
+<form th:action="@{'/admin/jadwal/update/' + ${schedule.id}}" method="post">
+
+    <input type="text"
+           name="namaMatkul"
+           th:value="${schedule.namaMatkul}" />
+
+    <input type="date"
+           name="tanggalKuliah"
+           th:value="${schedule.tanggalKuliah}" />
+
+    <input type="text"
+           name="hari"
+           th:value="${schedule.hari}" />
+
+    <input type="time"
+           name="jamMulai"
+           th:value="${schedule.jamMulai}" />
+
+    <input type="time"
+           name="jamSelesai"
+           th:value="${schedule.jamSelesai}" />
+
+    <input type="text"
+           name="ruangan"
+           th:value="${schedule.ruangan}" />
+
+    <input type="text"
+           name="namaDosen"
+           th:value="${schedule.namaDosen}" />
+
+    <button type="submit">
+        Simpan Perubahan
+    </button>
+
+</form>
+
+</body>
+</html>

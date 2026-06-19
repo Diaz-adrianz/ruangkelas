@@ -22,4 +22,7 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     // 4. (Opsional) Mengurutkan jadwal berdasarkan waktu secara otomatis
     // Jika kamu menambahkan field 'jamMulai' di model, ini sangat berguna
     List<Schedule> findAllByOrderByJamMulaiAsc();
+
+   List<Schedule> findByKelas_Id(Long classId);
+
 }

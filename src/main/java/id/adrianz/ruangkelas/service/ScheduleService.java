@@ -24,6 +24,8 @@ public class ScheduleService {
         return scheduleRepository.findAll();
     }
 
+    
+
     // Mengambil jadwal berdasarkan ID
     public Optional<Schedule> getScheduleById(Long id) {
         return scheduleRepository.findById(id);
@@ -49,4 +51,10 @@ public class ScheduleService {
     public void deleteSchedule(Long id) {
         scheduleRepository.deleteById(id);
     }
+
+    // Tambahkan method ini di dalam kelas ScheduleService
+public List<Schedule> getSchedulesByClassCode(Long classId) {
+    // Pastikan Anda memiliki repository yang mendukung pencarian ini
+    return scheduleRepository.findByKelas_Id(classId);
+}
 }

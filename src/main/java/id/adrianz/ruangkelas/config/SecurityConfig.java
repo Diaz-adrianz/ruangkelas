@@ -29,11 +29,12 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                        "/auth/**",
-                        "/css/**",
-                        "/js/**",
-                        "/images/**",
-                        "/api/notification/firebase-messaging-sw.js"
+                    "/auth/**",
+                    "/css/**",
+                    "/js/**",
+                    "/images/**",
+                    "/api/jadwal/**",
+                    "/api/notification/firebase-messaging-sw.js"
                 ).permitAll()
                 .anyRequest().authenticated()
                 )
