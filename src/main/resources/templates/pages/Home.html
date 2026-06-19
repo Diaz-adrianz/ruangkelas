@@ -6,17 +6,18 @@
 	<body>
 		<div layout:fragment="content">
 			<div class="mx-auto max-w-5xl p-4">
+				<!-- ALERT SUCCESS -->
+				<div th:if="${success}" class="alert alert-success mb-4">
+					<span th:text="${success}"></span>
+				</div>
+
+				<!-- ALERT ERROR -->
+				<div th:if="${error}" class="alert alert-error mb-4">
+					<span th:text="${error}"></span>
+				</div>
+
 				<div class="flex items-center justify-between mb-4">
 					<h1 class="typo-heading-lg">Kelas Saya</h1>
-					<!-- ALERT SUCCESS -->
-					<div th:if="${success}" class="alert alert-success mb-3">
-    					<span th:text="${success}"></span>
-					</div>
-
-					<!-- ALERT ERROR -->
-				<div th:if="${error}" class="alert alert-error mb-3">
-    				<span th:text="${error}"></span>
-				</div>
 
 					<div class="dropdown dropdown-end">
 						<div tabindex="0" role="button" class="btn btn-ghost btn-circle">

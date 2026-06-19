@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import id.adrianz.ruangkelas.dto.CreateClassDto;
 import id.adrianz.ruangkelas.dto.JoinClassDto;
@@ -182,7 +183,8 @@ public class ClassController {
     public String join(@Valid @ModelAttribute("joinClassDto") JoinClassDto request,
                        BindingResult result,
                        Model model,
-                       @AuthenticationPrincipal UserPrincipal principal) {
+                       @AuthenticationPrincipal UserPrincipal principal, 
+                       RedirectAttributes redirectAttributes) {
 
         if (result.hasErrors()) {
             model.addAttribute("errors", result.getFieldErrors());
@@ -196,6 +198,7 @@ public class ClassController {
             return "pages/Class/Join";
         }
 
+        redirectAttributes.addFlashAttribute("success", "Permintaan bergabung telah dikirim");
         return "redirect:/";
     }
 

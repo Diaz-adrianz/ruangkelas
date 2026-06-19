@@ -9,48 +9,53 @@
 </head>
 
 <body>
-<div layout:fragment="content" class="w-full mx-auto max-w-xl py-8 px-4">
+<div layout:fragment="content" class="mx-auto max-w-5xl p-4">
 
-    <div class="mb-6">
-        <a th:href="@{/class}" class="text-sm text-base-content/60 hover:underline">
-            ← Kembali
-        </a>
+    <div class="breadcrumbs text-sm mb-4">
+        <ul>
+            <li><a href="/">Beranda</a></li>
+            <li>Gabung kelas</li>
+        </ul>
     </div>
+
 
     <div th:if="${error}" class="alert alert-error mb-4">
         <span th:text="${error}"></span>
     </div>
 
-    <h1 class="text-2xl font-bold mb-6">Gabung Kelas</h1>
+    <div class="mb-4">
+        <h1 class="typo-heading-xl">Gabung Kelas</h1>
+        <p class="typo-body-md text-base-content/60">
+            Masukkan kode kelas untuk bergabung. Permintaan akan menunggu persetujuan admin.
+        </p>
+    </div>
 
-    <div class="card bg-base-100 border border-base-200 rounded-2xl">
-        <div class="card-body flex flex-col gap-4">
-
-            <p class="text-sm text-base-content/60">
-                Masukkan kode kelas untuk bergabung. Permintaan akan menunggu persetujuan admin.
-            </p>
+    <div class="card bg-base-100 border border-base-300">
+        <div class="card-body">
 
             <!-- FORM JOIN BY CODE -->
             <form th:action="@{/class/join}"
                   method="post"
                   th:object="${joinClassDto}"
-                  class="flex flex-col gap-4">
+                  class="flex flex-col ">
 
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text">Kode Kelas</span>
-                    </label>
+                <fieldset class="fieldset">     
+                    <legend class="fieldset-legend">Kode Kelas</legend>
+                    <input
+                        th:field="*{classCode}"
+                        class="input validator w-full"
+                        required
+                        type="text"
+                        placeholder="Contoh: ABC123"
+                    />
+                    <span class="validator-hint">Wajib diisi</span>
+                </fieldset>
 
-                    <input type="text"
-                           th:field="*{classCode}"
-                           class="input input-bordered w-full"
-                           placeholder="Contoh: ABC123" />
+                <div class="mt-4 flex justify-end">
+                    <button type="submit" class="btn btn-primary">
+                        Gabung Kelas
+                    </button>
                 </div>
-
-                <button type="submit" class="btn btn-primary rounded-xl">
-                    Gabung Kelas
-                </button>
-
             </form>
 
         </div>
