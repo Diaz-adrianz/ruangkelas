@@ -12,7 +12,7 @@
 			<div class="breadcrumbs text-sm mb-4">
 				<ul>
 					<li><a href="/">Beranda</a></li>
-					<li><a th:href="@{/class/{id}(id=${classs.id})}" th:text="${classs.name}"></a></li>
+					<li><a th:href="@{/class/{classCode}(classCode=${classs.classCode})}" th:text="${classs.name}"></a></li>
 					<li>Buat tugas</li>
 				</ul>
 			</div>
@@ -32,6 +32,7 @@
 					</ul>
 				</div>
 			</div>
+			<!-- ====== ALERTS ======  -->
 
 			<div class="flex items-center justify-between flex-wrap gap-4 mb-4">
 				<h1 class="typo-heading-xl">Buat Tugas Baru</h1>
@@ -40,7 +41,7 @@
 			<div class="card bg-base-100 border-base-300 border">
 				<div class="card-body">
 					<form
-						th:action="@{/class/{classId}/tasks/create(classId=${classs.id})}"
+						th:action="@{/class/{classCode}/tasks/create(classCode=${classs.classCode})}"
 						th:object="${createTaskDto}"
 						method="post"
 						class="flex flex-col"

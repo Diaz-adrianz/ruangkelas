@@ -12,11 +12,11 @@
 			<div class="breadcrumbs text-sm mb-4">
 				<ul>
 					<li><a href="/">Beranda</a></li>
-					<li><a th:href="@{/class/{classId}(classId=${classs.id})}" th:text="${classs.name}"></a></li>
-					<li><a th:href="@{/class/{classId}(classId=${classs.id})}">Tugas</a></li>
+					<li><a th:href="@{/class/{classCode}(classCode=${classs.classCode})}" th:text="${classs.name}"></a></li>
+					<li><a th:href="@{/class/{classCode}(classCode=${classs.classCode})}">Tugas</a></li>
 					<li>
 						<a
-							th:href="@{/class/{classId}/tasks/{taskId}(classIdd=${classs.id}, taskId=${task.id})}"
+							th:href="@{/class/{classCode}/tasks/{taskId}(classCode=${classs.classCode}, taskId=${task.id})}"
 							th:text="${task.title}"
 						></a>
 					</li>
@@ -47,7 +47,7 @@
 			<div class="card bg-base-100 border-base-300 border">
 				<div class="card-body">
 					<form
-						th:action="@{/class/{classId}/tasks/{taskId}/edit(classId=${classs.id}, taskId=${task.id})}"
+						th:action="@{/class/{classCode}/tasks/{taskId}/edit(classCode=${classs.classCode}, taskId=${task.id})}"
 						th:object="${updateTaskDto}"
 						method="post"
 						class="flex flex-col"
@@ -89,7 +89,7 @@
 						</fieldset>
 
 						<div class="flex gap-2 justify-end mt-4">
-							<a th:href="@{/class/{id}(id=${classs.id})}" class="btn btn-ghost">Batal</a>
+							<a th:href="@{/class/{classCode}(classCode=${classs.classCode})}" class="btn btn-ghost">Batal</a>
 							<button type="submit" class="btn btn-primary">Simpan</button>
 						</div>
 					</form>

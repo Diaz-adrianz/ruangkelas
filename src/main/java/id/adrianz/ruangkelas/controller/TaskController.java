@@ -22,7 +22,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Controller
-@RequestMapping("/class/{classId}/tasks")
+@RequestMapping("/class/{classCode}/tasks")
 @RequiredArgsConstructor
 public class TaskController {
 
@@ -31,8 +31,8 @@ public class TaskController {
 
     // 1. Tampilan Form Buat Task Baru
     @GetMapping("/create")
-    public String showCreateForm(@PathVariable Long classId, Model model) {
-        Class classs = classService.getById(classId);
+    public String showCreateForm(@PathVariable String classCode, Model model) {
+        Class classs = classService.getByCode(classCode);
         model.addAttribute("classs", classs);
         model.addAttribute("createTaskDto", new CreateTaskDto());
         return "pages/Task/Create";
@@ -40,13 +40,13 @@ public class TaskController {
 
     // 2. Proses Simpan Task Baru
     @PostMapping("/create")
-    public String createTask(@PathVariable Long classId,
+    public String createTask(@PathVariable String classCode,
             @Valid @ModelAttribute("createTaskDto") CreateTaskDto request,
             BindingResult result,
             Model model,
             RedirectAttributes redirectAttributes,
             @AuthenticationPrincipal UserPrincipal principal) {
-        Class classs = classService.getById(classId);
+        Class classs = classService.getByCode(classCode);
 
         if (result.hasErrors()) {
             model.addAttribute("classs", classs);
@@ -73,13 +73,13 @@ public class TaskController {
 
         // PERBAIKAN: Memastikan rute redirect bersifat absolut dari root server
         redirectAttributes.addFlashAttribute("success", "Tugas berhasil ditambahkan");
-        return "redirect:/class/" + classId;
+        return "redirect:/class/" + classCode;
     }
 
     // 3. Tampilan Form Edit Task
     @GetMapping("/{taskId}/edit")
-    public String showEditForm(@PathVariable Long classId, @PathVariable Long taskId, Model model) {
-        Class classs = classService.getById(classId);
+    public String showEditForm(@PathVariable String classCode, @PathVariable Long taskId, Model model) {
+        Class classs = classService.getByCode(classCode);
         Task task = taskService.getTaskById(taskId);
 
         UpdateTaskDto updateTaskDto = new UpdateTaskDto();
@@ -95,13 +95,13 @@ public class TaskController {
 
     // 4. Proses Simpan Update Task
     @PostMapping("/{taskId}/edit")
-    public String updateTask(@PathVariable Long classId, 
+    public String updateTask(@PathVariable String classCode, 
             @PathVariable Long taskId,
             @Valid @ModelAttribute("updateTaskDto") UpdateTaskDto request, 
             BindingResult result,
             Model model,
             RedirectAttributes redirectAttributes) {
-        Class classs = classService.getById(classId);
+        Class classs = classService.getByCode(classCode);
         Task task = taskService.getTaskById(taskId);
 
         if (result.hasErrors()) {
@@ -127,22 +127,22 @@ public class TaskController {
 
         // PERBAIKAN: Memastikan rute redirect bersifat absolut dari root server
         redirectAttributes.addFlashAttribute("success", "Tugas berhasil diedit");
-        return "redirect:/class/" + classId + "/tasks/" + taskId;
+        return "redirect:/class/" + classCode + "/tasks/" + taskId;
     }
 
     // 5. Proses Hapus Task
     @PostMapping("/{taskId}/delete")
-    public String deleteTask(@PathVariable Long classId, @PathVariable Long taskId, RedirectAttributes redirectAttributes) {
+    public String deleteTask(@PathVariable String classCode, @PathVariable Long taskId, RedirectAttributes redirectAttributes) {
         taskService.deleteTask(taskId);
 
         // PERBAIKAN: Memastikan rute redirect bersifat absolut dari root server
         redirectAttributes.addFlashAttribute("success", "Tugas berhasil dihapus");
-        return "redirect:/class/" + classId;
+        return "redirect:/class/" + classCode;
     }
 
     @GetMapping("/{taskId}")
-    public String getMethodName(@PathVariable Long classId, @PathVariable Long taskId, Model model) {
-        Class classs = classService.getById(classId);
+    public String getMethodName(@PathVariable String classCode, @PathVariable Long taskId, Model model) {
+        Class classs = classService.getByCode(classCode);
         model.addAttribute("classs", classs);
 
         Task task = taskService.getTaskById(taskId);
