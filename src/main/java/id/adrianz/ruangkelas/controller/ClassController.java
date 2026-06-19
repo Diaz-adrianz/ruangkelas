@@ -206,10 +206,12 @@ public class ClassController {
 
     @PostMapping("/leave/{classCode}")
     public String leaveClass(@PathVariable String classCode,
-                             @AuthenticationPrincipal UserPrincipal principal) {
+                             @AuthenticationPrincipal UserPrincipal principal,
+                            RedirectAttributes redirectAttributes) {        
 
         Class kelas = classService.getByCode(classCode);
         classService.leaveClass(kelas.getId(), principal.getUser().getId());
+        redirectAttributes.addFlashAttribute("success", "Kamu telah keluar dari kelas \"" + kelas.getName() + "\"");
         return "redirect:/";
     }
 
