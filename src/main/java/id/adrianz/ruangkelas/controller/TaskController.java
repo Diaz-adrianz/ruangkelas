@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import id.adrianz.ruangkelas.dto.CreateTaskDto;
-import id.adrianz.ruangkelas.dto.TaskDto;
+import id.adrianz.ruangkelas.dto.UpdateTaskDto;
 import id.adrianz.ruangkelas.model.Class;
 import id.adrianz.ruangkelas.model.Task;
 import id.adrianz.ruangkelas.model.UserPrincipal;
@@ -82,31 +82,52 @@ public class TaskController {
         Class classs = classService.getById(classId);
         Task task = taskService.getTaskById(taskId);
 
-        TaskDto taskDto = new TaskDto();
-        taskDto.setClassId(classId);
-        taskDto.setTitle(task.getTitle());
-        taskDto.setDescription(task.getDescription());
-        taskDto.setDeadline(task.getDeadline());
+        UpdateTaskDto updateTaskDto = new UpdateTaskDto();
+        updateTaskDto.setTitle(task.getTitle());
+        updateTaskDto.setDescription(task.getDescription());
+        updateTaskDto.setDeadline(task.getDeadline());
 
         model.addAttribute("classs", classs);
-        model.addAttribute("taskId", taskId);
-        model.addAttribute("taskDto", taskDto);
+        model.addAttribute("task", task);
+        model.addAttribute("updateTaskDto", updateTaskDto);
         return "pages/Task/Edit";
     }
 
     // 4. Proses Simpan Update Task
     @PostMapping("/{taskId}/edit")
-    public String updateTask(@PathVariable Long classId, @PathVariable Long taskId, @ModelAttribute TaskDto taskDto) {
+    public String updateTask(@PathVariable Long classId, 
+            @PathVariable Long taskId,
+            @Valid @ModelAttribute("updateTaskDto") UpdateTaskDto request, 
+            BindingResult result,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+        Class classs = classService.getById(classId);
         Task task = taskService.getTaskById(taskId);
 
-        task.setTitle(taskDto.getTitle());
-        task.setDescription(taskDto.getDescription());
-        task.setDeadline(taskDto.getDeadline());
+        if (result.hasErrors()) {
+            model.addAttribute("classs", classs);
+            model.addAttribute("task", task);
+            model.addAttribute("errors", result.getFieldErrors());
+            return "pages/Task/Edit";
+        }
 
-        taskService.createTask(task);
+        try {
+    
+            task.setTitle(request.getTitle());
+            task.setDescription(request.getDescription());
+            task.setDeadline(request.getDeadline());
+    
+            taskService.createTask(task);
+        } catch (Exception e) {
+            model.addAttribute("classs", classs);
+            model.addAttribute("task", task);
+            model.addAttribute("error", e.getMessage());
+            return "pages/Task/Edit";
+        }
 
         // PERBAIKAN: Memastikan rute redirect bersifat absolut dari root server
-        return "redirect:/class/" + classId;
+        redirectAttributes.addFlashAttribute("success", "Tugas berhasil diedit");
+        return "redirect:/class/" + classId + "/tasks/" + taskId;
     }
 
     // 5. Proses Hapus Task

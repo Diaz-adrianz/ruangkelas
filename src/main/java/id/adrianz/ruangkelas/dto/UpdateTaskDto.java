@@ -11,8 +11,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-public class CreateTaskDto {
-
+public class UpdateTaskDto {
     @NotBlank(message = "Judul wajib diisi")
     @Size(min = 3, max = 100, message = "Judul harus terdiri dari 3 - 100 karakter")
     private String title;
