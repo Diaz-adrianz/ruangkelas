@@ -36,7 +36,11 @@
 	</div>
 
 	<!-- error -->
-	<div th:if="${error}" class="alert alert-soft alert-error mb-4">
+	<div th:if="${success}" class="alert alert-success mb-4">
+		<span th:text="${success}"></span>
+	</div>
+
+	<div th:if="${error}" class="alert alert-error mb-4">
 		<span th:text="${error}"></span>
 	</div>
 

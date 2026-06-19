@@ -217,15 +217,19 @@ public class ClassController {
 
     @PostMapping("/member/{userClassId}/approve")
     public String approve(@PathVariable Long userClassId,
-                          @RequestParam String classCode) {
+                          @RequestParam String classCode, 
+                          RedirectAttributes redirectAttributes) {
         classService.approve(userClassId);
+        redirectAttributes.addFlashAttribute("success", "Permintaan bergabung berhasil diterima");
         return "redirect:/class/" + classCode + "#anggota";
     }
 
     @PostMapping("/member/{userClassId}/reject")
     public String reject(@PathVariable Long userClassId,
-                         @RequestParam String classCode) {
+                         @RequestParam String classCode,
+                        RedirectAttributes redirectAttributes) {
         classService.reject(userClassId);
+        redirectAttributes.addFlashAttribute("success", "Permintaan bergabung berhasil ditolak");
         return "redirect:/class/" + classCode + "#anggota";
     }
 
