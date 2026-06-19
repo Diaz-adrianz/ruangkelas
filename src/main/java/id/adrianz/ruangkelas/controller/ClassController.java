@@ -130,7 +130,8 @@ public class ClassController {
                        @Valid @ModelAttribute("updateClassDto") UpdateClassDto request,
                        BindingResult result,
                        Model model,
-                       @AuthenticationPrincipal UserPrincipal principal) {
+                       @AuthenticationPrincipal UserPrincipal principal,
+                        RedirectAttributes redirectAttributes) {
 
         if (result.hasErrors()) {
             model.addAttribute("classCode", classCode);
@@ -158,7 +159,8 @@ public class ClassController {
             return "pages/Class/Edit";
         }
 
-        return "redirect:/";
+        redirectAttributes.addFlashAttribute("success", "Kelas berhasil diedit");
+        return "redirect:/class/" + classCode;
     }
 
     // ================= DELETE =================

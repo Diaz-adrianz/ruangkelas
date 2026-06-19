@@ -56,21 +56,6 @@
 			<ul tabindex="0"
 				class="dropdown-content menu bg-base-100 rounded-box border border-base-300 w-48 mt-2 z-10">
 
-				<!-- LEAVE CLASS (SEMUA MEMBER BISA) -->
-				<li>
-					<form th:action="@{/class/leave/{classCode}(classCode=${classs.classCode})}" method="post">
-						<input type="hidden"
-							   th:name="${_csrf.parameterName}"
-							   th:value="${_csrf.token}" />
-
-						<button type="submit"
-								class="w-full text-left text-error"
-								onclick="return confirm('Yakin mau keluar kelas?');">
-							Keluar kelas
-						</button>
-					</form>
-				</li>
-
 				<!-- MENU ADMIN (HANYA ADMIN) -->
 				<th:block th:if="${isAdmin}">
 
@@ -95,6 +80,21 @@
 					</li>
 
 				</th:block>
+
+				<!-- LEAVE CLASS (SEMUA MEMBER BISA) -->
+				<li>
+					<form th:action="@{/class/leave/{classCode}(classCode=${classs.classCode})}" method="post">
+						<input type="hidden"
+							   th:name="${_csrf.parameterName}"
+							   th:value="${_csrf.token}" />
+
+						<button type="submit"
+								class="w-full text-left text-error"
+								onclick="return confirm('Yakin mau keluar kelas?');">
+							Keluar kelas
+						</button>
+					</form>
+				</li>
 
 			</ul>
 		</div>
