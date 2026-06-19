@@ -28,7 +28,13 @@ public class SecurityConfig {
             throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers(
+                        "/auth/**",
+                        "/css/**",
+                        "/js/**",
+                        "/images/**",
+                        "/api/notification/firebase-messaging-sw.js"
+                ).permitAll()
                 .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

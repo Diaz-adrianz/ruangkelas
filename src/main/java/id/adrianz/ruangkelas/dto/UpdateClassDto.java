@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-public class CreateClassDto {
+public class UpdateClassDto {
 
     @NotNull(message = "Mata kuliah wajib dipilih")
     private Long courseId;
