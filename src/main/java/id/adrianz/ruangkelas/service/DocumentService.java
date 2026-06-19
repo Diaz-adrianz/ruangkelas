@@ -64,7 +64,26 @@ public class DocumentService {
                 ));
 
         String originalFilename = file.getOriginalFilename();
+        String extension = getExtension(originalFilename);
+
+        List<String> allowedTypes = List.of(
+                "pdf",
+                "ppt",
+                "pptx",
+                "doc",
+                "docx",
+                "xls",
+                "xlsx"
+        );
+
+        if (!allowedTypes.contains(extension)) {
+            throw new IllegalArgumentException(
+                    "Format file tidak didukung."
+            );
+        }
+
         String uniqueFileName = UUID.randomUUID() + "_" + originalFilename;
+        String fileType = file.getContentType();
 
         Path uploadPath = Paths.get(uploadDir);   // ✅ pakai field, bukan static
         if (!Files.exists(uploadPath)) {
@@ -76,6 +95,7 @@ public class DocumentService {
         Document document = Document.builder()
                 .clazz(clazz)
                 .title(title)
+                .fileType(getExtension(originalFilename))
                 .fileName(uniqueFileName)
                 .filePath(filePath.toString())
                 .fileSize(file.getSize())
@@ -97,4 +117,27 @@ public class DocumentService {
 
         documentRepository.delete(document);
     }
+
+    private String getExtension(String filename) {
+        if (filename == null || !filename.contains(".")) {
+            return "";
+        }
+
+        return filename.substring(
+                filename.lastIndexOf(".") + 1
+        ).toLowerCase();
+    }
+
+    public String formatFileSize(Long size) {
+
+    if (size < 1024) {
+        return size + " B";
+    }
+
+    if (size < 1024 * 1024) {
+        return String.format("%.1f KB", size / 1024.0);
+    }
+
+    return String.format("%.1f MB", size / (1024.0 * 1024.0));
+}
 }

@@ -21,6 +21,7 @@ import id.adrianz.ruangkelas.model.Class;
 import id.adrianz.ruangkelas.model.UserClass;
 import id.adrianz.ruangkelas.model.UserPrincipal;
 import id.adrianz.ruangkelas.service.ClassService;
+import id.adrianz.ruangkelas.service.DocumentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -30,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 public class ClassController {
 
     private final ClassService classService;
+    private final DocumentService documentService;
 
     // ================= INDEX =================
 
@@ -57,6 +59,16 @@ public class ClassController {
         model.addAttribute("pendingRequests", pending);
         model.addAttribute("isAdmin", isAdmin);
         model.addAttribute("currentUserId", principal.getUser().getId());
+
+        model.addAttribute(
+            "documents",
+            documentService.getDocumentsByClass(classs.getId())
+        );
+
+        model.addAttribute(
+            "documentService",
+            documentService
+        );
 
         return "pages/Class/Detail";
     }

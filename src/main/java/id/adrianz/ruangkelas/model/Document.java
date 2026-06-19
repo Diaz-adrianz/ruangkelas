@@ -40,6 +40,8 @@ public class Document {
 
     private String fileName;
 
+    private String fileType;
+
     private String filePath;
 
     private Long fileSize;
