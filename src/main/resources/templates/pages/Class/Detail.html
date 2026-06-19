@@ -73,14 +73,10 @@
 			</div>
 
 			<div class="tabs tabs-border">
-				<label class="tab has-[input:checked]:text-primary">
+				<label class="tab has-[input:checked]:text-primary gap-4">
 					<input type="radio" name="tabs" checked />
 					Tugas
-					<div
-						th:if="${tasks != null && #lists.size(tasks) > 0}"
-						th:text="${#lists.size(tasks)}"
-						class="badge badge-sm ml-2 bg-primary text-primary-content"
-					></div>
+					<div th:if="${tasks != null && #lists.size(tasks) > 0}" th:text="${#lists.size(tasks)}"></div>
 				</label>
 				<div class="tab-content pt-4">
 					<div class="flex justify-end mb-4">
@@ -105,7 +101,7 @@
                                     <p class="typo-body-md" th:text="${task.title}"></h3>
                                     <p
                                         class="typo-caption text-base-content/60"
-                                        th:text="'Tenggat ' + ${#temporals.format(task.deadline, 'EEEE, dd MMM yyyy HH:mm')}"
+                                        th:text="'Batas waktu ' + ${#temporals.format(task.deadline, 'EEEE, dd MMM yyyy HH:mm')}"
                                     ></p>
                                 </div>
 

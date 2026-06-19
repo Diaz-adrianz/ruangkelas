@@ -118,4 +118,16 @@ public class TaskController {
         redirectAttributes.addFlashAttribute("success", "Tugas berhasil dihapus");
         return "redirect:/class/" + classId;
     }
+
+    @GetMapping("/{taskId}")
+    public String getMethodName(@PathVariable Long classId, @PathVariable Long taskId, Model model) {
+        Class classs = classService.getById(classId);
+        model.addAttribute("classs", classs);
+
+        Task task = taskService.getTaskById(taskId);
+        model.addAttribute("task", task);
+
+        return "pages/Task/Detail";
+    }
+    
 }
