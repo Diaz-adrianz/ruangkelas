@@ -24,7 +24,8 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "classes", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"course_id", "name", "year", "semester"})
+    @UniqueConstraint(columnNames = {"course_id", "name", "year", "semester"}),
+    @UniqueConstraint(columnNames = {"class_code"})
 })
 @Getter
 @Setter
@@ -54,6 +55,13 @@ public class Class {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Semester semester;
+
+    // Kode unik untuk gabung kelas, mis. "X7K9QA"
+    @Column(name = "class_code", nullable = false, length = 8, unique = true)
+    private String classCode;
+
+    @Column(nullable = true, length = 100)
+    private String lecturerName;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

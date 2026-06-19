@@ -18,6 +18,9 @@
 			rel="stylesheet"
 		/>
 		<link href="https://cdn.jsdelivr.net/npm/remixicon@4.9.0/fonts/remixicon.css" rel="stylesheet" />
+
+		<meta name="_csrf" th:content="${_csrf.token}" />
+		<meta name="_csrf_header" th:content="${_csrf.headerName}" />
 	</head>
 	<body class="bg-base-200 min-h-screen">
 		<nav class="navbar border-b bg-base-100 border-base-300">
@@ -51,6 +54,104 @@
 			</div>
 		</nav>
 		<main layout:fragment="content"></main>
+
+		<script th:inline="javascript">
+			const firebaseConfig = {
+				apiKey: /*[[${firebaseConfig.apiKey}]]*/ '',
+				authDomain: /*[[${firebaseConfig.authDomain}]]*/ '',
+				projectId: /*[[${firebaseConfig.projectId}]]*/ '',
+				storageBucket: /*[[${firebaseConfig.storageBucket}]]*/ '',
+				messagingSenderId: /*[[${firebaseConfig.messagingSenderId}]]*/ '',
+				appId: /*[[${firebaseConfig.appId}]]*/ '',
+			};
+			const vapidKey = /*[[${firebaseConfig.vapidKey}]]*/ '';
+		</script>
+
+		<script type="module">
+			import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+			import {
+				getMessaging,
+				getToken,
+				onMessage,
+			} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';
+
+			const app = initializeApp(firebaseConfig);
+			const messaging = getMessaging(app);
+
+			async function setupPushNotification() {
+				// Cek support browser
+				if (!('serviceWorker' in navigator) || !('Notification' in window)) {
+					return;
+				}
+
+				try {
+					// Minta izin notifikasi
+					const permission = await Notification.requestPermission();
+					if (permission !== 'granted') {
+						return;
+					}
+
+					// Register service worker
+					let registration = await navigator.serviceWorker.getRegistration('/');
+					if (!registration) {
+						registration = await navigator.serviceWorker.register('/api/notification/firebase-messaging-sw.js', {
+							scope: '/',
+						});
+					}
+
+					await navigator.serviceWorker.ready;
+
+					// Ambil FCM token
+					const token = await getToken(messaging, {
+						vapidKey: vapidKey,
+						serviceWorkerRegistration: registration,
+					});
+
+					if (token) {
+						await saveToken(token);
+					}
+				} catch {
+					// silent
+				}
+			}
+
+			// Kirim token ke backend Spring Boot
+			async function saveToken(token) {
+				try {
+					const csrf = document.querySelector('meta[name="_csrf"]').content;
+					const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+					const response = await fetch('/api/notification/register-token', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							[csrfHeader]: csrf,
+						},
+						body: JSON.stringify({ token }),
+					});
+				} catch {
+					// silent
+				}
+			}
+
+			// Handle notifikasi saat app sedang aktif (foreground)
+			onMessage(messaging, (payload) => {
+				const title = payload.notification?.title || 'Notifikasi Baru';
+				const body = payload.notification?.body || '';
+
+				if (Notification.permission === 'granted') {
+					navigator.serviceWorker.ready.then((registration) => {
+						registration.showNotification(title, {
+							body,
+							icon: '/images/Logo.svg',
+						});
+					});
+				}
+			});
+
+			// Jalankan
+			setupPushNotification();
+		</script>
 	</body>
 </html>
 

@@ -1,19 +1,18 @@
 package id.adrianz.ruangkelas.scheduler;
 
-import id.adrianz.ruangkelas.service.EmailService;
+import java.time.LocalDate;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
+import id.adrianz.ruangkelas.service.EmailService;
+import lombok.AllArgsConstructor;
 
 @Component
+@AllArgsConstructor
 public class TaskNotificationScheduler {
 
     private final EmailService emailService;
-
-    public TaskNotificationScheduler(EmailService emailService) {
-        this.emailService = emailService;
-    }
 
     @Scheduled(cron = "0 0 8 * * ?")
     public void checkUpcomingDeadlines() {
@@ -28,7 +27,7 @@ public class TaskNotificationScheduler {
     private void processDeadline(LocalDate targetDate, String subject) {
         String dummyEmail = "siswa@contoh.com";
         String text = "Harap perhatikan tugas kelas Anda dengan tenggat waktu pada: " + targetDate.toString();
-        
+
         emailService.sendSimpleMessage(dummyEmail, subject, text);
     }
 }
