@@ -320,6 +320,14 @@
                       <td>
                         <div class="flex gap-2">
                           <a
+                            th:href="@{/document/view/{id}(id=${document.id})}"
+                            target="_blank"
+                            class="btn btn-sm btn-outline"
+                          >
+                            Lihat
+                          </a>
+
+                          <a
                             th:href="@{/document/download/{id}(id=${document.id})}"
                             class="btn btn-sm btn-outline btn-primary"
                           >
@@ -327,9 +335,28 @@
                           </a>
 
                           <th:block th:if="${isAdmin}">
-                            <button class="btn btn-sm btn-outline btn-error">
-                              Hapus
-                            </button>
+                            <form
+                              th:action="@{/document/delete/{id}(id=${document.id})}"
+                              method="post"
+                              onsubmit="
+                                return confirm(
+                                  'Yakin ingin menghapus dokumen ini?',
+                                );
+                              "
+                            >
+                              <input
+                                type="hidden"
+                                name="classId"
+                                th:value="${classs.id}"
+                              />
+
+                              <button
+                                type="submit"
+                                class="btn btn-sm btn-outline btn-error"
+                              >
+                                Hapus
+                              </button>
+                            </form>
                           </th:block>
                         </div>
                       </td>

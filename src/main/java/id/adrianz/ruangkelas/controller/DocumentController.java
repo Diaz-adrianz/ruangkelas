@@ -1,6 +1,7 @@
 package id.adrianz.ruangkelas.controller;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -125,4 +126,29 @@ public String upload(
                 .body(resource);
     }
 
+    @GetMapping("/view/{id}")
+    public ResponseEntity<Resource> view(
+        @PathVariable Long id) throws Exception {
+
+            var document = documentService.getById(id);
+
+            Path path = Paths.get(document.getFilePath());
+
+            Resource resource = new UrlResource(path.toUri());
+
+            String contentType = Files.probeContentType(path);
+
+            return ResponseEntity.ok()
+            .header(
+                    HttpHeaders.CONTENT_DISPOSITION,
+                    "inline; filename=\"" +
+                            document.getFileName() +
+                            "\""
+            )
+            .header(
+                    HttpHeaders.CONTENT_TYPE,
+                    "application/pdf"
+            )
+            .body(resource);
+        }
 }
