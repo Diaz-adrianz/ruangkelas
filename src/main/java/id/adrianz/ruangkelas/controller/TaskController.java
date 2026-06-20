@@ -115,11 +115,12 @@ public class TaskController {
         try {
             classService.ensureAdmin(classs.getId(), principal.getUser().getId());
     
-            task.setTitle(request.getTitle());
-            task.setDescription(request.getDescription());
-            task.setDeadline(request.getDeadline());
+            Task updatedTaskData = new Task();
+            updatedTaskData.setTitle(request.getTitle());
+            updatedTaskData.setDescription(request.getDescription());
+            updatedTaskData.setDeadline(request.getDeadline());
     
-            taskService.createTask(task);
+            taskService.updateTask(taskId, updatedTaskData); 
         } catch (Exception e) {
             model.addAttribute("classs", classs);
             model.addAttribute("task", task);
@@ -131,7 +132,6 @@ public class TaskController {
         return "redirect:/class/" + classCode + "/tasks/" + taskId;
     }
 
-    // 5. Proses Hapus Task
     @PostMapping("/{taskId}/delete")
     public String deleteTask(@PathVariable String classCode, 
                             @PathVariable Long taskId, 
@@ -165,10 +165,11 @@ public class TaskController {
         Task task = taskService.getTaskById(taskId);
         model.addAttribute("task", task);
 
-        var comments = commentService.getCommentsByTaskId(taskId); 
-        model.addAttribute("comments", comments); 
+        // 🌟 DI SINI PERUBAHAN UTAMANYA: Menggunakan method penampung baru
+        var comments = commentService.getComments(taskId, principal.getUser());
+        model.addAttribute("comments", comments);
+        model.addAttribute("currentUserId", principal.getUser().getId());
 
         return "pages/Task/Detail";
     }
-    
 }
