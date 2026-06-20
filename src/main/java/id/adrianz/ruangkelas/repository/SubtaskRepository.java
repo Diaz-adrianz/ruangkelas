@@ -1,13 +1,15 @@
 package id.adrianz.ruangkelas.repository;
 
 import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import id.adrianz.ruangkelas.model.Subtask;
+
+import id.adrianz.ruangkelas.model.SubTask;
 
 @Repository
-public interface SubtaskRepository extends JpaRepository<Subtask, Long> {
+public interface SubTaskRepository extends JpaRepository<SubTask, Long> {
 
-    List<Subtask> findByTaskId(Long taskId);
+    List<SubTask> findByTaskId(Long taskId);
 
 }
