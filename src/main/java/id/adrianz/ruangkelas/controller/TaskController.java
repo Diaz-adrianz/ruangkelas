@@ -29,7 +29,6 @@ public class TaskController {
     private final TaskService taskService;
     private final ClassService classService;
 
-    // 1. Tampilan Form Buat Task Baru
     @GetMapping("/create")
     public String showCreateForm(@PathVariable String classCode, Model model) {
         Class classs = classService.getByCode(classCode);
@@ -38,7 +37,6 @@ public class TaskController {
         return "pages/Task/Create";
     }
 
-    // 2. Proses Simpan Task Baru
     @PostMapping("/create")
     public String createTask(@PathVariable String classCode,
             @Valid @ModelAttribute("createTaskDto") CreateTaskDto request,
@@ -73,12 +71,10 @@ public class TaskController {
             return "pages/Task/create";
         }
 
-        // PERBAIKAN: Memastikan rute redirect bersifat absolut dari root server
         redirectAttributes.addFlashAttribute("success", "Tugas berhasil ditambahkan");
         return "redirect:/class/" + classCode;
     }
 
-    // 3. Tampilan Form Edit Task
     @GetMapping("/{taskId}/edit")
     public String showEditForm(@PathVariable String classCode, @PathVariable Long taskId, Model model) {
         Class classs = classService.getByCode(classCode);
@@ -95,8 +91,7 @@ public class TaskController {
         return "pages/Task/Edit";
     }
 
-    // 4. Proses Simpan Update Task
-    @PostMapping("/{taskId}/edit")
+   @PostMapping("/{taskId}/edit")
     public String updateTask(@PathVariable String classCode, 
             @PathVariable Long taskId,
             @Valid @ModelAttribute("updateTaskDto") UpdateTaskDto request, 
@@ -118,11 +113,12 @@ public class TaskController {
         try {
             classService.ensureAdmin(classs.getId(), principal.getUser().getId());
     
-            task.setTitle(request.getTitle());
-            task.setDescription(request.getDescription());
-            task.setDeadline(request.getDeadline());
+            Task updatedTaskData = new Task();
+            updatedTaskData.setTitle(request.getTitle());
+            updatedTaskData.setDescription(request.getDescription());
+            updatedTaskData.setDeadline(request.getDeadline());
     
-            taskService.createTask(task);
+            taskService.updateTask(taskId, updatedTaskData); 
         } catch (Exception e) {
             model.addAttribute("classs", classs);
             model.addAttribute("task", task);
@@ -130,12 +126,10 @@ public class TaskController {
             return "pages/Task/Edit";
         }
 
-        // PERBAIKAN: Memastikan rute redirect bersifat absolut dari root server
         redirectAttributes.addFlashAttribute("success", "Tugas berhasil diedit");
         return "redirect:/class/" + classCode + "/tasks/" + taskId;
     }
 
-    // 5. Proses Hapus Task
     @PostMapping("/{taskId}/delete")
     public String deleteTask(@PathVariable String classCode, 
                             @PathVariable Long taskId, 
@@ -152,7 +146,6 @@ public class TaskController {
             return "redirect:/class/" + classCode + "/tasks/" + taskId;
         }
 
-        // PERBAIKAN: Memastikan rute redirect bersifat absolut dari root server
         redirectAttributes.addFlashAttribute("success", "Tugas berhasil dihapus");
         return "redirect:/class/" + classCode;
     }

@@ -9,10 +9,10 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.MulticastMessage;
-import com.google.firebase.messaging.Notification;
 
 import id.adrianz.ruangkelas.model.DeviceToken;
 import id.adrianz.ruangkelas.model.EmailNotification;
+import id.adrianz.ruangkelas.model.Notification;
 import id.adrianz.ruangkelas.model.NotificationType;
 import id.adrianz.ruangkelas.model.User;
 import id.adrianz.ruangkelas.repository.DeviceTokenRepository;
@@ -29,9 +29,6 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final EmailService emailService;
 
-    /**
-     * Kirim notifikasi ke semua device milik satu user
-     */
     public void sendToUser(User user, String title, String body) {
         List<DeviceToken> tokens = deviceTokenRepository.findByUser(user);
         if (tokens.isEmpty()) {
@@ -42,28 +39,34 @@ public class NotificationService {
                 .map(DeviceToken::getToken)
                 .toList();
 
+        if (tokenStrings.size() == 1) {
+            sendToToken(tokenStrings.get(0), title, body);
+        } else {
+            sendMulticastNotification(tokenStrings, title, body);
+        }
+    }
+
+    private void sendMulticastNotification(List<String> tokens, String title, String body) {
         MulticastMessage message = MulticastMessage.builder()
-                .setNotification(Notification.builder()
+                .setNotification(com.google.firebase.messaging.Notification.builder()
                         .setTitle(title)
                         .setBody(body)
                         .build())
-                .addAllTokens(tokenStrings)
+                .addAllTokens(tokens)
                 .build();
 
         try {
             BatchResponse response = FirebaseMessaging.getInstance().sendEachForMulticast(message);
-            log.info("Notifikasi terkirim: {}/{}", response.getSuccessCount(), tokens.size());
+            log.info("Notifikasi multicast terkirim. Sukses: {}, Gagal: {}", 
+                    response.getSuccessCount(), response.getFailureCount());
         } catch (FirebaseMessagingException e) {
-            log.error("Gagal kirim notifikasi ke user {}: {}", user.getId(), e.getMessage());
+            log.error("Gagal kirim notifikasi multicast: {}", e.getMessage());
         }
     }
 
-    /**
-     * Kirim ke satu token saja (misal broadcast web)
-     */
     public void sendToToken(String token, String title, String body) {
         Message message = Message.builder()
-                .setNotification(Notification.builder()
+                .setNotification(com.google.firebase.messaging.Notification.builder()
                         .setTitle(title)
                         .setBody(body)
                         .build())
@@ -79,7 +82,6 @@ public class NotificationService {
     }
 
     public void createAndSendEmailNotification(Integer userId, String emailTarget, String subject, String message, NotificationType type, Integer referenceId, String referenceType) {
-
         EmailNotification notification = new EmailNotification();
         notification.setUserId(userId);
         notification.setEmail(emailTarget);
@@ -95,4 +97,11 @@ public class NotificationService {
         emailService.sendSimpleMessage(emailTarget, subject, message);
     }
 
+    public List<Notification> getAllNotificationsByUserId(Long userId) {
+        return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    }
+
+    public void markAllNotificationsAsRead(Long userId) {
+        notificationRepository.markAllAsReadByUserId(userId);
+    }
 }

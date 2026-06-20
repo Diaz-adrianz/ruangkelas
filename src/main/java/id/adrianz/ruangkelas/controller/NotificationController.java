@@ -1,33 +1,49 @@
 package id.adrianz.ruangkelas.controller;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import id.adrianz.ruangkelas.model.Notification;
+import id.adrianz.ruangkelas.model.User;
+import id.adrianz.ruangkelas.repository.UserRepository;
+import id.adrianz.ruangkelas.service.NotificationService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
-import id.adrianz.ruangkelas.service.EmailService;
-import lombok.AllArgsConstructor;
+import java.util.List;
 
-@Controller
-@RequestMapping("/notification")
-@AllArgsConstructor
+@RestController
+@RequestMapping("/api/notifications")
+@RequiredArgsConstructor
 public class NotificationController {
 
-    private final EmailService emailService;
+    private final NotificationService notificationService;
+    private final UserRepository userRepository;
 
-    @GetMapping("/tes-email")
-    @ResponseBody
-    public String testEmail(@RequestParam(required = false) String to) {
-        if (to == null || to.isBlank()) {
-            return "Email penerima diperlukan";
+    @GetMapping
+    public ResponseEntity<List<Notification>> getAllUserNotifications(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).build();
         }
 
-        String subject = "Test Email Spring Boot UAS";
-        String text = "Halo! Ini adalah email percobaan dari aplikasi Deadlin kelompok 3.";
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+        
+        List<Notification> notifications = notificationService.getAllNotificationsByUserId(user.getId());
+        return ResponseEntity.ok(notifications);
+    }
 
-        emailService.sendSimpleMessage(to, subject, text);
+    @PutMapping("/status")
+    public ResponseEntity<String> markAllAsRead(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).build();
+        }
 
-        return "Email berhasil dikirim ke " + to;
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+
+        notificationService.markAllNotificationsAsRead(user.getId());
+        return ResponseEntity.ok("Semua notifikasi berhasil ditandai sebagai sudah dibaca");
     }
 }

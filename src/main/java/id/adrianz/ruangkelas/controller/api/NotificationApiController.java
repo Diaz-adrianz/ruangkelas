@@ -17,6 +17,7 @@ import id.adrianz.ruangkelas.model.DeviceToken;
 import id.adrianz.ruangkelas.model.User;
 import id.adrianz.ruangkelas.repository.DeviceTokenRepository;
 import id.adrianz.ruangkelas.repository.UserRepository;
+import id.adrianz.ruangkelas.scheduler.TaskNotificationScheduler;
 import id.adrianz.ruangkelas.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 
@@ -29,6 +30,7 @@ public class NotificationApiController {
     private final DeviceTokenRepository deviceTokenRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    
 
     @GetMapping("/firebase-messaging-sw.js")
     public ResponseEntity<String> firebaseSwJs() {
@@ -103,4 +105,5 @@ public class NotificationApiController {
         notificationService.sendToToken(token, title, message);
         return ResponseEntity.ok(Map.of("message", "Notifikasi terkirim"));
     }
+
 }
