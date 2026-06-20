@@ -18,9 +18,11 @@ import id.adrianz.ruangkelas.dto.CreateClassDto;
 import id.adrianz.ruangkelas.dto.JoinClassDto;
 import id.adrianz.ruangkelas.dto.UpdateClassDto;
 import id.adrianz.ruangkelas.model.Class;
+import id.adrianz.ruangkelas.model.Task;
 import id.adrianz.ruangkelas.model.UserClass;
 import id.adrianz.ruangkelas.model.UserPrincipal;
 import id.adrianz.ruangkelas.service.ClassService;
+import id.adrianz.ruangkelas.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -30,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 public class ClassController {
 
     private final ClassService classService;
+    private final TaskService taskService;
 
     // ================= INDEX =================
 
@@ -39,6 +42,7 @@ public class ClassController {
         model.addAttribute("classes", classes);
         return "pages/Class/Index";
     }
+
 
     // ================= DETAIL =================
 
@@ -57,6 +61,9 @@ public class ClassController {
         model.addAttribute("pendingRequests", pending);
         model.addAttribute("isAdmin", isAdmin);
         model.addAttribute("currentUserId", principal.getUser().getId());
+
+        List<Task> tasks = taskService.getTasksByClassCode(classCode);
+        model.addAttribute("tasks", tasks);
 
         return "pages/Class/Detail";
     }
@@ -102,6 +109,7 @@ public class ClassController {
 
         return "redirect:/";
     }
+
 
     // ================= EDIT =================
 
@@ -151,6 +159,7 @@ public class ClassController {
                     request.getLecturerName(),
                     principal.getUser().getId()
             );
+
         } catch (RuntimeException e) {
             model.addAttribute("classCode", classCode);
             model.addAttribute("courses", classService.getAllCourses());

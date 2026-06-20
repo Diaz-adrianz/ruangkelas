@@ -36,11 +36,11 @@
 	</div>
 
 	<!-- error -->
-	<div th:if="${success}" class="alert alert-success mb-4">
+	<div th:if="${success}" class="alert alert-soft alert-success mb-4">
 		<span th:text="${success}"></span>
 	</div>
 
-	<div th:if="${error}" class="alert alert-error mb-4">
+	<div th:if="${error}" class="alert alert-soft alert-error mb-4">
 		<span th:text="${error}"></span>
 	</div>
 
@@ -97,6 +97,7 @@
 				</li>
 
 			</ul>
+
 		</div>
 	</div>
 
@@ -137,39 +138,95 @@
 	<!-- TABS (FIXED Figma version) -->
 	<div class="tabs tabs-border">
 
-	<label class="tab gap-2">
-		<input type="radio" name="tabs" checked />
-		Tugas
-		<span class="flex items-center justify-center w-5 h-5 rounded-full bg-[#2B2B2B] text-white text-[11px]">
-			0
-		</span>
-	</label>
+		<label class="tab gap-2">
+			<input type="radio" name="tabs" checked />
+			Tugas
+			<span th:if="${#lists.size(tasks) > 0}"
+				class="flex items-center justify-center w-5 h-5 rounded-full bg-[#2B2B2B] text-white text-[11px]"
+				th:text="${#lists.size(tasks)}">
+			</span>
+		</label>
+		<div class="tab-content pt-4">
 
-	<label class="tab gap-2">
-		<input type="radio" name="tabs" />
-		Jadwal
-		<span class="flex items-center justify-center w-5 h-5 rounded-full bg-[#2B2B2B] text-white text-[11px]">
-			0
-		</span>
-	</label>
+			<div th:if="${isAdmin}" class="flex justify-end mb-4">
+				<a th:href="@{/class/{classCode}/tasks/create(classCode=${classs.classCode})}" class="btn btn-primary btn-sm">
+					<i class="ri-add-large-line"></i>
+					Tambah Tugas
+				</a>
+			</div>
 
-	<label class="tab gap-2">
-		<input type="radio" name="tabs" />
-		Materi Ajar
-		<span class="flex items-center justify-center w-5 h-5 rounded-full bg-[#2B2B2B] text-white text-[11px]">
-			0
-		</span>
-	</label>
+			<div th:if="${#lists.isEmpty(tasks)}" class="text-center py-12 text-base-content/60 typo-body-md">
+				Belum ada tugas yang dibuat di kelas ini.
+			</div>
 
-	<label class="tab gap-2">
-		<input type="radio" name="tabs" />
-		Anggota
+			<div th:if="${!#lists.isEmpty(tasks)}" class="flex flex-col gap-2">
+				<a
+					th:each="task : ${tasks}"
+					th:href="@{/class/{classCode}/tasks/{taskId}(classCode=${classs.classCode}, taskId=${task.id})}"
+					class="card bg-base-100 border border-base-300 hover:shadow-lg transition-shadow cursor-pointer"
+				>
+					<div class="card-body p-4 flex-row items-center justify-between gap-4">
+						<div>
+							<p class="typo-body-md" th:text="${task.title}"></h3>
+							<p
+								class="typo-caption text-base-content/60"
+								th:text="'Batas waktu ' + ${#temporals.format(task.deadline, 'EEEE, dd MMM yyyy HH:mm')}"
+							></p>
+						</div>
 
-		<span th:if="${#lists.size(members) > 0}"
-			  class="flex items-center justify-center w-5 h-5 rounded-full bg-[#2B2B2B] text-white text-[11px]"
-			  th:text="${#lists.size(members)}">
-		</span>
-	</label>
+						<span
+							th:if="${task.daysUntilDeadline >= 4 and task.daysUntilDeadline <= 7}"
+							class="badge badge-info ps-2"
+						>
+							<i class="ri-timer-line"></i>
+							<span th:text="'H-' + ${task.daysUntilDeadline}"></span>
+						</span>
+
+						<span
+							th:if="${task.daysUntilDeadline >= 2 and task.daysUntilDeadline <= 3}"
+							class="badge badge-warning ps-2"
+						>
+							<i class="ri-timer-line"></i>
+							<span th:text="'H-' + ${task.daysUntilDeadline}"></span>
+						</span>
+
+						<span
+							th:if="${task.daysUntilDeadline >= 0 and task.daysUntilDeadline <= 1}"
+							class="badge badge-error ps-2"
+						>
+							<i class="ri-timer-line"></i>
+							<span th:text="'H-' + ${task.daysUntilDeadline}"></span>
+						</span>
+					</div>
+				</a>
+			</div>
+		</div>
+
+		<label class="tab gap-2">
+			<input type="radio" name="tabs" />
+			Jadwal
+			<span class="flex items-center justify-center w-5 h-5 rounded-full bg-[#2B2B2B] text-white text-[11px]">
+				0
+			</span>
+		</label>
+
+		<label class="tab gap-2">
+			<input type="radio" name="tabs" />
+			Materi Ajar
+			<span class="flex items-center justify-center w-5 h-5 rounded-full bg-[#2B2B2B] text-white text-[11px]">
+				0
+			</span>
+		</label>
+
+		<label class="tab gap-2">
+			<input type="radio" name="tabs" />
+			Anggota
+
+			<span th:if="${#lists.size(members) > 0}"
+				class="flex items-center justify-center w-5 h-5 rounded-full bg-[#2B2B2B] text-white text-[11px]"
+				th:text="${#lists.size(members)}">
+			</span>
+		</label>
 
 		<div class="tab-content pt-4">
 
