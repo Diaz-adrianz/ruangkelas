@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/Home}"
+>
+<head>
+    <title>Gabung Kelas</title>
+</head>
+
+<body>
+<div layout:fragment="content" class="mx-auto max-w-5xl p-4">
+
+    <div class="breadcrumbs text-sm mb-4">
+        <ul>
+            <li><a href="/">Beranda</a></li>
+            <li>Gabung kelas</li>
+        </ul>
+    </div>
+
+
+    <div th:if="${error}" class="alert alert-error mb-4">
+        <span th:text="${error}"></span>
+    </div>
+
+    <div class="mb-4">
+        <h1 class="typo-heading-xl">Gabung Kelas</h1>
+        <p class="typo-body-md text-base-content/60">
+            Masukkan kode kelas untuk bergabung. Permintaan akan menunggu persetujuan admin.
+        </p>
+    </div>
+
+    <div class="card bg-base-100 border border-base-300">
+        <div class="card-body">
+
+            <!-- FORM JOIN BY CODE -->
+            <form th:action="@{/class/join}"
+                  method="post"
+                  th:object="${joinClassDto}"
+                  class="flex flex-col ">
+
+                <fieldset class="fieldset">     
+                    <legend class="fieldset-legend">Kode Kelas</legend>
+                    <input
+                        th:field="*{classCode}"
+                        class="input validator w-full"
+                        required
+                        type="text"
+                        placeholder="Contoh: ABC123"
+                    />
+                    <span class="validator-hint">Wajib diisi</span>
+                </fieldset>
+
+                <div class="mt-4 flex justify-end">
+                    <button type="submit" class="btn btn-primary">
+                        Gabung Kelas
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+</body>
+</html>
