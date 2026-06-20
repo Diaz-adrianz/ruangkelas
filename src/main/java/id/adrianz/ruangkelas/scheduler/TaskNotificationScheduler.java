@@ -24,14 +24,14 @@ public class TaskNotificationScheduler {
     private final NotificationService notificationService;
     private final UserClassRepository userClassRepository;
 
-    @Scheduled(cron = "0 0 8 * * ?")
+    @Scheduled(cron = "0 0 7 * * ?")  
     public void checkUpcomingDeadlines() {
         LocalDate today = LocalDate.now();
         LocalDate hMinus3 = today.plusDays(3);
         LocalDate hMinus1 = today.plusDays(1);
 
-        processDeadline(hMinus3, "Pengingat: Deadline Tugas H-3", NotificationType.TASK_REMINDER);
-        processDeadline(hMinus1, "Peringatan: Deadline Tugas H-1", NotificationType.TASK_REMINDER);
+        processDeadline(hMinus3, "Pengingat: Deadline Tugas H-3", NotificationType.DEADLINE_REMINDER);
+        processDeadline(hMinus1, "Peringatan: Deadline Tugas H-1", NotificationType.DEADLINE_REMINDER);
     }
 
     private void processDeadline(LocalDate targetDate, String subject, NotificationType type) {
@@ -42,18 +42,23 @@ public class TaskNotificationScheduler {
 
         for (Task task : tasks) {
             List<UserClass> members = userClassRepository.findByClasseId(task.getClasse().getId());
-            
+
+            String pushBody = "Tugas '" + task.getTitle() + "' akan segera berakhir pada: " + task.getDeadline();
+
             for (UserClass member : members) {
                 User user = member.getUser();
+
                 notificationService.createAndSendEmailNotification(
-                    Math.toIntExact(user.getId()), 
-                    user.getEmail(), 
-                    subject + " - " + task.getTitle(), 
-                    "Harap perhatikan, tugas '" + task.getTitle() + "' akan segera berakhir pada: " + task.getDeadline().toString(), 
-                    type, 
-                    Math.toIntExact(task.getId()), 
+                    Math.toIntExact(user.getId()),
+                    user.getEmail(),
+                    subject + " - " + task.getTitle(),
+                    pushBody,
+                    type,
+                    Math.toIntExact(task.getId()),
                     "TASK"
                 );
+
+                notificationService.sendToUser(user, subject, pushBody);
             }
         }
     }
