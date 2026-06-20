@@ -5,11 +5,59 @@
 	</head>
 	<body>
 		<div layout:fragment="content">
-			<h1>Dashboard</h1>
+			<div class="mx-auto max-w-5xl p-4">
+				<!-- ALERT SUCCESS -->
+				<div th:if="${success}" class="alert alert-success mb-4">
+					<span th:text="${success}"></span>
+				</div>
 
-			<p>Welcome to RuangKelas.</p>
-			<div class="card">
-				<div class="card-body">This is some text within a card body.</div>
+				<!-- ALERT ERROR -->
+				<div th:if="${error}" class="alert alert-error mb-4">
+					<span th:text="${error}"></span>
+				</div>
+
+				<div class="flex items-center justify-between mb-4">
+					<h1 class="typo-heading-lg">Kelas Saya</h1>
+
+					<div class="dropdown dropdown-end">
+						<div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+							<i class="ri-add-large-line"></i>
+						</div>
+						<ul
+							tabindex="0"
+							class="dropdown-content menu bg-base-100 rounded-box border border-base-300 w-48 mt-2 z-10"
+						>
+							<li><a th:href="@{/class/join}">Gabung Kelas</a></li>
+							<li><a th:href="@{/class/create}">Buat Kelas Baru</a></li>
+						</ul>
+					</div>
+				</div>
+
+				<div th:if="${#lists.isEmpty(classes)}" class="text-center py-12 text-base-content/60">
+					Belum ada kelas. Buat kelas pertamamu!
+				</div>
+
+				<div class="flex flex-col gap-2">
+					<a
+						th:each="kelas : ${classes}"
+						th:href="@{/class/{code}(code=${kelas.classCode})}"
+						class="card bg-base-100 border border-base-300 hover:shadow-lg transition-shadow cursor-pointer"
+					>
+						<div class="card-body p-4">
+							<h2 class="typo-heading-md mb-2" th:text="${kelas.name}"></h2>
+							<div class="flex gap-2 flex-wrap">
+								<span class="badge badge-soft badge-primary">
+									<i class="ri-file-marked-line"></i>
+									<span th:text="${kelas.course.name}"></span>
+								</span>
+								<span class="badge badge-soft badge-primary">
+									<i class="ri-calendar-2-line"></i>
+									<span th:text="${kelas.year} + ' - ' + ${kelas.semester == 'ODD' ? 'Ganjil' : 'Genap'}"></span>
+								</span>
+							</div>
+						</div>
+					</a>
+				</div>
 			</div>
 		</div>
 	</body>

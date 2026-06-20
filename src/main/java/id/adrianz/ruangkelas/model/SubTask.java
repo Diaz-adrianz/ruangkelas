@@ -1,21 +1,22 @@
 package id.adrianz.ruangkelas.model;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Transient;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,45 +24,49 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "classes", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"course_id", "name", "year", "semester"}),
-    @UniqueConstraint(columnNames = {"class_code"})
-})
+@Table(name = "subtasks")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Class {
+public class SubTask {
 
-    public enum Semester {
-        ODD, EVEN
+    @Transient
+    public long getDaysUntilDeadline() {
+        return ChronoUnit.DAYS.between(
+                LocalDate.now(),
+                deadline.toLocalDate());
     }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * Relasi ke Task
+     * FK: task_id
+     */
     @ManyToOne
-    @JoinColumn(name = "course_id", nullable = false)
-    private Course course;
+    @JoinColumn(name = "task_id", nullable = false)
+    private Task task;
 
-    @Column(nullable = false, length = 100)
-    private String name;
+    /**
+     * User pembuat subtask
+     * FK: created_by
+     */
+    @ManyToOne
+    @JoinColumn(name = "created_by", nullable = false)
+    private User createdBy;
 
-    @Column(nullable = false, length = 10)
-    private String year;
+    @Column(nullable = false, length = 255)
+    private String title;
 
-    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     @Column(nullable = false)
-    private Semester semester;
-
-    // Kode unik untuk gabung kelas, mis. "X7K9QA"
-    @Column(name = "class_code", nullable = false, length = 8, unique = true)
-    private String classCode;
-
-    @Column(nullable = true, length = 100)
-    private String lecturerName;
+    private LocalDateTime deadline;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

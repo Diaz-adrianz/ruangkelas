@@ -1,21 +1,21 @@
 package id.adrianz.ruangkelas.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,46 +23,48 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "user_classes", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"user_id", "class_id"})
-})
+@Table(name = "tasks")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserClass {
+public class Task {
 
-    public enum Role {
-        ADMIN, MEMBER
-    }
-
-    public enum Status {
-        PENDING, ACCEPTED
+    @Transient
+    public long getDaysUntilDeadline() {
+        return ChronoUnit.DAYS.between(
+            LocalDate.now(),
+            deadline.toLocalDate());
     }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Relasi ke kelas
     @ManyToOne
     @JoinColumn(name = "class_id", nullable = false)
     private Class classe;
 
+    // User yang membuat tugas
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "created_by", nullable = false)
+    private User createdBy;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role;
+    @Column(nullable = false, length = 255)
+    private String title;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Status status;
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
+    // Deadline tugas
     @Column(nullable = false)
-    private LocalDateTime joinedAt;
+    private LocalDateTime deadline;
+
+    // Bisa dipertahankan jika sudah digunakan tim
+    @Column(nullable = false, length = 50)
+    private String status;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
