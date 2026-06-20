@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import id.adrianz.ruangkelas.model.Class;
+import id.adrianz.ruangkelas.model.UserClass;
 import id.adrianz.ruangkelas.model.UserPrincipal;
 import id.adrianz.ruangkelas.service.ClassService;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,10 @@ public class HomeController {
     @GetMapping
     public String index(Model model, @AuthenticationPrincipal UserPrincipal principal) {
         List<Class> classes = classService.getAllForUser(principal.getUser().getId());
+        List<UserClass> rejections = classService.getRejectedForUser(principal.getUser().getId());
+
         model.addAttribute("classes", classes);
+        model.addAttribute("rejections", rejections);
 
         return "pages/Home";
     }
