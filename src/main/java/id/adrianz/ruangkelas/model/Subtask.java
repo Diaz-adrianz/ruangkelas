@@ -43,18 +43,10 @@ public class SubTask {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * Relasi ke Task
-     * FK: task_id
-     */
     @ManyToOne
     @JoinColumn(name = "task_id", nullable = false)
     private Task task;
 
-    /**
-     * User pembuat subtask
-     * FK: created_by
-     */
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
