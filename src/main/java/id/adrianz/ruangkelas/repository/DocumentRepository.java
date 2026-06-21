@@ -13,7 +13,7 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
     List<Document> findByClazz(Class clazz);
 
     // Ambil semua dokumen berdasarkan class ID langsung (lebih efisien)
-    List<Document> findByClazz_Id(Long classId);
+    List<Document> findByClazz_IdOrderByCreatedAtDesc(Long classId);
 
     // Cek apakah fileName sudah ada (untuk validasi duplikasi file)
     boolean existsByFileName(String fileName);

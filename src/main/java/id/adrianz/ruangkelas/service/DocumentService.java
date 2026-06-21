@@ -48,7 +48,7 @@ public class DocumentService {
 
     @Transactional(readOnly = true)
     public List<Document> getDocumentsByClass(Long classId) {
-        return documentRepository.findByClazz_Id(classId);
+        return documentRepository.findByClazz_IdOrderByCreatedAtDesc(classId);
     }
 
     // -------------------------------------------------------------------------
