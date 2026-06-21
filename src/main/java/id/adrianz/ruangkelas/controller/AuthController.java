@@ -51,7 +51,7 @@ public class AuthController {
         try {
             userService.register(request);
             model.addAttribute("registerDto", new RegisterDto());
-            model.addAttribute("success", "Pendaftaran akun berhasil");
+            model.addAttribute("success", "Pendaftaran akun berhasil. Cek email untuk verifikasi");
             return "pages/Register";
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());

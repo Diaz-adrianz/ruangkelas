@@ -48,6 +48,12 @@ public class User {
     @Column(nullable = true, length = 10)
     private String nim;
 
+    @Column(nullable = true)
+    private String verificationToken;
+
+    @Column(nullable = true)
+    private LocalDateTime tokenExpiresAt;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
