@@ -1,7 +1,6 @@
 package id.adrianz.ruangkelas.controller;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -10,7 +9,6 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,58 +26,39 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DocumentController {
 
-private final DocumentService documentService;
-private final ClassService classService;
+    private final DocumentService documentService;
+    private final ClassService classService;
 
-// =====================
-// LIST DOCUMENT
-// =====================
+    // =====================
+    // UPLOAD DOCUMENT
+    // =====================
 
-@GetMapping("/class/{classId}")
-public String listDocuments(
-        @PathVariable Long classId,
-        Model model) {
+    @PostMapping("/upload")
+    public String upload(
+            @RequestParam Long classId,
+            @RequestParam String title,
+            @RequestParam MultipartFile file,
+            RedirectAttributes redirectAttributes) {
 
-    model.addAttribute(
-            "documents",
-            documentService.getDocumentsByClass(classId));
+        try {
+            documentService.save(classId, title, file);
+            redirectAttributes.addFlashAttribute(
+                    "success",
+                    "Dokumen berhasil diupload");
+        } catch (IOException | IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    e.getMessage());
+        }
 
-    model.addAttribute("classId", classId);
+        String classCode = classService.getById(classId).getClassCode();
 
-    return "pages/Class/Detail";
-}
-
-// =====================
-// UPLOAD DOCUMENT
-// =====================
-
-@PostMapping("/upload")
-public String upload(
-        @RequestParam Long classId,
-        @RequestParam String title,
-        @RequestParam MultipartFile file,
-        RedirectAttributes redirectAttributes) {
-
-    try {
-        documentService.save(classId, title, file);
-        redirectAttributes.addFlashAttribute(
-                "success",
-                "Dokumen berhasil diupload");
-    } catch (IOException e) {
-        redirectAttributes.addFlashAttribute(
-                "error",
-                e.getMessage());
+        return "redirect:/class/" + classCode;
     }
 
-    String classCode =
-        classService.getById(classId).getClassCode();
-
-    return "redirect:/class/" + classCode;
-}
-
-// =====================
-// DELETE DOCUMENT
-// =====================
+    // =====================
+    // DELETE DOCUMENT
+    // =====================
 
     @PostMapping("/delete/{id}")
     public String delete(
@@ -98,19 +77,16 @@ public String upload(
                     e.getMessage());
         }
 
-        String classCode =
-            classService.getById(classId).getClassCode();
+        String classCode = classService.getById(classId).getClassCode();
 
         return "redirect:/class/" + classCode;
     }
 
     @GetMapping("/download/{id}")
-        public ResponseEntity<Resource> download(
-        @PathVariable Long id) throws Exception {
+    public ResponseEntity<Resource> download(
+            @PathVariable Long id) throws Exception {
 
         var document = documentService.getById(id);
-
-        System.out.println("FILE PATH = " + document.getFilePath());
 
         Path path = Paths.get(document.getFilePath());
 
@@ -121,34 +97,29 @@ public String upload(
                         HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=\"" +
                                 document.getFileName() +
-                                "\""
-                )
+                                "\"")
                 .body(resource);
     }
 
     @GetMapping("/view/{id}")
     public ResponseEntity<Resource> view(
-        @PathVariable Long id) throws Exception {
+            @PathVariable Long id) throws Exception {
 
-            var document = documentService.getById(id);
+        var document = documentService.getById(id);
 
-            Path path = Paths.get(document.getFilePath());
+        Path path = Paths.get(document.getFilePath());
 
-            Resource resource = new UrlResource(path.toUri());
+        Resource resource = new UrlResource(path.toUri());
 
-            String contentType = Files.probeContentType(path);
-
-            return ResponseEntity.ok()
-            .header(
-                    HttpHeaders.CONTENT_DISPOSITION,
-                    "inline; filename=\"" +
-                            document.getFileName() +
-                            "\""
-            )
-            .header(
-                    HttpHeaders.CONTENT_TYPE,
-                    "application/pdf"
-            )
-            .body(resource);
-        }
+        return ResponseEntity.ok()
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" +
+                                document.getFileName() +
+                                "\"")
+                .header(
+                        HttpHeaders.CONTENT_TYPE,
+                        "application/pdf")
+                .body(resource);
+    }
 }

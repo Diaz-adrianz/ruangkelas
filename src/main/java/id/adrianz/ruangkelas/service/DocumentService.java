@@ -27,7 +27,7 @@ public class DocumentService {
     private final DocumentRepository documentRepository;
     private final ClassRepository classRepository;
 
-    @Value("${app.upload.dir}")          // ✅ di dalam class
+    @Value("${app.upload.dir}") // ✅ di dalam class
     private String uploadDir;
 
     // -------------------------------------------------------------------------
@@ -43,8 +43,7 @@ public class DocumentService {
     public Document getById(Long id) {
         return documentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Dokumen dengan ID " + id + " tidak ditemukan."
-                ));
+                        "Dokumen dengan ID " + id + " tidak ditemukan."));
     }
 
     @Transactional(readOnly = true)
@@ -60,8 +59,7 @@ public class DocumentService {
     public Document save(Long classId, String title, MultipartFile file) throws IOException {
         Class clazz = classRepository.findById(classId)
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Class dengan ID " + classId + " tidak ditemukan."
-                ));
+                        "Class dengan ID " + classId + " tidak ditemukan."));
 
         String originalFilename = file.getOriginalFilename();
         String extension = getExtension(originalFilename);
@@ -73,19 +71,16 @@ public class DocumentService {
                 "doc",
                 "docx",
                 "xls",
-                "xlsx"
-        );
+                "xlsx");
 
         if (!allowedTypes.contains(extension)) {
             throw new IllegalArgumentException(
-                    "Format file tidak didukung."
-            );
+                    "Format file tidak didukung.");
         }
 
         String uniqueFileName = UUID.randomUUID() + "_" + originalFilename;
-        String fileType = file.getContentType();
 
-        Path uploadPath = Paths.get(uploadDir);   // ✅ pakai field, bukan static
+        Path uploadPath = Paths.get(uploadDir);
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
@@ -124,20 +119,19 @@ public class DocumentService {
         }
 
         return filename.substring(
-                filename.lastIndexOf(".") + 1
-        ).toLowerCase();
+                filename.lastIndexOf(".") + 1).toLowerCase();
     }
 
     public String formatFileSize(Long size) {
 
-    if (size < 1024) {
-        return size + " B";
-    }
+        if (size < 1024) {
+            return size + " B";
+        }
 
-    if (size < 1024 * 1024) {
-        return String.format("%.1f KB", size / 1024.0);
-    }
+        if (size < 1024 * 1024) {
+            return String.format("%.1f KB", size / 1024.0);
+        }
 
-    return String.format("%.1f MB", size / (1024.0 * 1024.0));
-}
+        return String.format("%.1f MB", size / (1024.0 * 1024.0));
+    }
 }

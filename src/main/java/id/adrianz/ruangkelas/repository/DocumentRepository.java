@@ -3,12 +3,10 @@ package id.adrianz.ruangkelas.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import id.adrianz.ruangkelas.model.Class;
 import id.adrianz.ruangkelas.model.Document;
 
-@Repository
 public interface DocumentRepository extends JpaRepository<Document, Long> {
 
     // Ambil semua dokumen berdasarkan Class object
