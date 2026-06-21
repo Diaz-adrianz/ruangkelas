@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import id.adrianz.ruangkelas.dto.RegisterDto;
 import id.adrianz.ruangkelas.service.UserService;
@@ -51,7 +52,7 @@ public class AuthController {
         try {
             userService.register(request);
             model.addAttribute("registerDto", new RegisterDto());
-            model.addAttribute("success", "Pendaftaran akun berhasil");
+            model.addAttribute("success", "Pendaftaran akun berhasil. Cek email untuk verifikasi");
             return "pages/Register";
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
@@ -59,4 +60,14 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/verify")
+    public String verifyEmail(@RequestParam String token, Model model) {
+        try {
+            userService.verifyEmail(token);
+            model.addAttribute("success", "Akun berhasil diverifikasi. Silakan login.");
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+        }
+        return "pages/Verification";
+    }
 }

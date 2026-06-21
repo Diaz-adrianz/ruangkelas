@@ -1,0 +1,28 @@
+<!doctype html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/Auth}">
+	<head>
+		<title>Verifikasi Akun</title>
+	</head>
+	<body>
+		<div layout:fragment="content" class="card w-full shadow max-w-sm bg-base-100">
+			<div class="card-body gap-4">
+				<div class="text-center">
+					<h1 class="typo-heading-lg">Verifikasi Akun</h1>
+				</div>
+
+				<div th:if="${success}" class="alert alert-vertical sm:alert-horizontal alert-soft alert-success">
+					<i class="ri-shield-check-line text-2xl"></i>
+					<span th:text="${success}"></span>
+					<a href="/auth/login" class="btn btn-sm btn-success ms-auto">Login</a>
+				</div>
+
+				<div th:if="${error}" class="alert alert-vertical sm:alert-horizontal alert-soft alert-error">
+					<i class="ri-error-warning-line text-2xl"></i>
+					<span th:text="${error}"></span>
+					<a href="/auth/register" class="btn btn-sm btn-error ms-auto">Daftar ulang</a>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
+

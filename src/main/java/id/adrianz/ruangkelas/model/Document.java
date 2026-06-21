@@ -1,15 +1,18 @@
+
 package id.adrianz.ruangkelas.model;
 
+import java.beans.Transient;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,45 +21,46 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "users")
+@Table(name = "documents")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class Document {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 50)
-    private String username;
+    @ManyToOne
+    @JoinColumn(name = "class_id", nullable = false)
+    private Class clazz;
 
-    @Column(nullable = false, unique = true, length = 100)
-    private String email;
+    private String title;
 
-    @Column(nullable = false)
-    private String password;
+    private String fileName;
 
-    @Column(nullable = false)
-    private boolean enabled;
+    private String fileType;
 
-    @Column(nullable = false, length = 50)
-    private String name;
+    private String filePath;
 
-    @Column(nullable = true, length = 10)
-    private String nim;
-
-    @Column(nullable = true)
-    private String verificationToken;
-
-    @Column(nullable = true)
-    private LocalDateTime tokenExpiresAt;
+    private Long fileSize;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @Transient
+    public String formatFileSize() {
+        if (this.fileSize < 1024) {
+            return this.fileSize + " B";
+        }
+        if (this.fileSize < 1024 * 1024) {
+            return String.format("%.1f KB", this.fileSize / 1024.0);
+        }
+        return String.format("%.1f MB", this.fileSize / (1024.0 * 1024.0));
+    }
 }
