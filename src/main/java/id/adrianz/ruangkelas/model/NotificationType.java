@@ -5,5 +5,6 @@ public enum NotificationType {
     TASK_REMINDER,
     DEADLINE_REMINDER,
     MEMBER_JOINED,
+    TASK_UPDATED,
     SUBMISSION_UPDATED
 }
