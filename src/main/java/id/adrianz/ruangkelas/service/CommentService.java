@@ -1,5 +1,7 @@
 package id.adrianz.ruangkelas.service;
 
+import id.adrianz.ruangkelas.dto.CommentCreateDto;
+import id.adrianz.ruangkelas.dto.CommentUpdateDto;
 import id.adrianz.ruangkelas.model.Comment;
 import id.adrianz.ruangkelas.model.User;
 import id.adrianz.ruangkelas.repository.CommentRepository;
@@ -17,19 +19,19 @@ public class CommentService {
         return commentRepository.findByTaskId(taskId);
     }
 
-    public Comment createComment(Long taskId, String content, User user) {
+    public Comment createComment(Long taskId, CommentCreateDto dto, User user) {
         Comment comment = Comment.builder()
                 .taskId(taskId)
-                .content(content)
+                .content(dto.getContent())
                 .user(user)
                 .build();
         return commentRepository.save(comment);
     }
 
-    public Comment updateComment(Long commentId, String content) {
+    public Comment updateComment(Long commentId, CommentUpdateDto dto) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new RuntimeException("Comment not found"));
-        comment.setContent(content);
+        comment.setContent(dto.getContent());
         return commentRepository.save(comment);
     }
 
