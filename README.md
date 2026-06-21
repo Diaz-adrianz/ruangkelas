@@ -111,9 +111,54 @@ Generated artifact:
 target/ruangkelas-0.0.1-SNAPSHOT.jar
 ```
 
-Run the application:
+Test the application:
 
 ```bash
 java -jar target/ruangkelas-0.0.1-SNAPSHOT.jar
+```
+
+Create deployment directory
+
+```bash
+sudo mkdir -p /opt/ruangkelas
+sudo cp target/ruangkelas-0.0.1-SNAPSHOT.jar /opt/ruangkelas/app.jar
+```
+
+Create production env file
+
+```bash
+sudo nano /opt/ruangkelas/.env
+```
+
+Register as system service
+
+```bash
+sudo nano /etc/systemd/system/ruangkelas.service
+```
+
+```ini
+[Unit]
+Description=RuangKelas
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/ruangkelas
+EnvironmentFile=/opt/ruangkelas/.env
+
+ExecStart=/usr/bin/java -jar /opt/ruangkelas/app.jar
+
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable and start
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable ruangkelas
+sudo systemctl start ruangkelas
 ```
 

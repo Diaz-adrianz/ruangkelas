@@ -1,0 +1,95 @@
+<!doctype html>
+<html
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/Home}"
+>
+	<head>
+		<title>Buat Tugas</title>
+	</head>
+	<body>
+		<div layout:fragment="content" class="mx-auto max-w-5xl p-4">
+			<div class="breadcrumbs text-sm mb-4">
+				<ul>
+					<li><a href="/">Beranda</a></li>
+					<li><a th:href="@{/class/{classCode}(classCode=${classs.classCode})}" th:text="${classs.name}"></a></li>
+					<li>Buat tugas</li>
+				</ul>
+			</div>
+
+			<!-- ====== ALERTS ======  -->
+			<!-- error -->
+			<div th:if="${error}" class="alert alert-soft alert-error mb-4">
+				<span th:text="${error}"></span>
+			</div>
+
+			<!-- dto errors -->
+			<div th:if="${errors}" class="alert alert-soft alert-warning mb-4">
+				<div>
+					<h3 class="font-bold">Validasi gagal.</h3>
+					<ul class="list-disc ps-4">
+						<li th:each="err : ${errors}" th:text="${err.defaultMessage}"></li>
+					</ul>
+				</div>
+			</div>
+			<!-- ====== ALERTS ======  -->
+
+			<div class="flex items-center justify-between flex-wrap gap-4 mb-4">
+				<h1 class="typo-heading-xl">Buat Tugas Baru</h1>
+			</div>
+
+			<div class="card bg-base-100 border-base-300 border">
+				<div class="card-body">
+					<form
+						th:action="@{/class/{classCode}/tasks/create(classCode=${classs.classCode})}"
+						th:object="${createTaskDto}"
+						method="post"
+						class="flex flex-col"
+					>
+						<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+						<fieldset class="fieldset">
+							<legend class="fieldset-legend">Judul</legend>
+							<input
+								th:field="*{title}"
+								class="input validator w-full"
+								required
+								type="text"
+								placeholder="Contoh: Tugas Pertemuan 3 - OOP Java"
+								minlength="3"
+								maxlength="100"
+							/>
+							<span class="validator-hint">3 - 100 karakter</span>
+						</fieldset>
+
+						<fieldset class="fieldset">
+							<legend class="fieldset-legend">Deskripsi</legend>
+							<textarea
+								th:field="*{description}"
+								class="textarea validator w-full"
+								required
+								type="text"
+								placeholder="Tuliskan instruksi pengerjaan..."
+								minlength="1"
+								maxlength="500"
+							></textarea>
+							<span class="validator-hint">3 - 500 karakter</span>
+						</fieldset>
+
+						<fieldset class="fieldset">
+							<legend class="fieldset-legend">Batas waktu</legend>
+							<input th:field="*{deadline}" class="input validator w-full" required type="datetime-local" />
+							<span class="validator-hint">Wajib diisi</span>
+						</fieldset>
+
+						<div class="flex gap-2 justify-end mt-4">
+							<a th:href="@{/class/{id}(id=${classs.id})}" class="btn btn-ghost">Batal</a>
+							<button type="submit" class="btn btn-primary">Buat Tugas</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
+
