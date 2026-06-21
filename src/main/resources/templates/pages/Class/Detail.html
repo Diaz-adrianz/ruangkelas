@@ -144,7 +144,7 @@
 
         <!-- start: TASKS  -->
         <label class="tab gap-2">
-          <input type="radio" name="tabs" checked />
+          <input type="radio" name="tabs" data-fragment="tasks" checked />
           Tugas
           <span th:if="${#lists.size(tasks) > 0}"
             class="flex items-center justify-center w-5 h-5 rounded-full bg-[#2B2B2B] text-white text-[11px]"
@@ -210,7 +210,7 @@
 
         <!-- start: SCHEDULES  -->
         <label class="tab gap-2">
-          <input type="radio" name="tabs" />
+          <input type="radio" name="tabs" data-fragment="schedules" />
           Jadwal
           <span class="flex items-center justify-center w-5 h-5 rounded-full bg-[#2B2B2B] text-white text-[11px]">
             0
@@ -220,7 +220,7 @@
 
         <!-- start: DOCUMENTS  -->
         <label class="tab gap-2">
-          <input type="radio" name="tabs" />
+          <input type="radio" name="tabs" data-fragment="documents" />
           Materi Ajar
           <span th:if="${#lists.size(documents) > 0}"
             class="flex items-center justify-center w-5 h-5 rounded-full bg-[#2B2B2B] text-white text-[11px]"
@@ -311,7 +311,7 @@
 
         <!-- start: USER CLASSES  -->
         <label class="tab gap-2">
-          <input type="radio" name="tabs" />
+          <input type="radio" name="tabs" data-fragment="members" />
           Anggota
 
           <span th:if="${#lists.size(members) > 0}"
@@ -463,6 +463,29 @@
         <!-- end: USER CLASSES  -->
 
       </div>
+
+      <script>  
+        function syncTabFromFragment() {
+          const fragment = location.hash.replace('#', '');
+          if (!fragment) return;
+  
+          const match = document.querySelector(`input[data-fragment="${fragment}"]`);
+          if (match) match.checked = true;
+        }
+  
+        function bindTabsToFragment() {
+          document.querySelectorAll('input[type="radio"][name="tabs"]').forEach(input => {
+            input.addEventListener('change', () => {
+              const frag = input.dataset.fragment;
+              if (frag) history.replaceState(null, '', `#${frag}`);
+            });
+          });
+        }
+  
+  
+        syncTabFromFragment();
+        bindTabsToFragment();
+      </script>
     </div>
   </body>
 </html>

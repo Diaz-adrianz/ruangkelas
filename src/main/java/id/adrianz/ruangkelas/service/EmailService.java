@@ -1,5 +1,9 @@
 package id.adrianz.ruangkelas.service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -16,6 +20,9 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine; 
+
+    @Value("${app.base-url}")
+    private String baseUrl;
 
     public void sendSimpleMessage(String to, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
@@ -39,5 +46,27 @@ public class EmailService {
         } catch (MessagingException e) {
             throw new RuntimeException("Gagal mengirim email: " + e.getMessage());
         }
+    }
+
+    // USE CASES
+    public void sendVerificationEmail(String to, String token, LocalDateTime expiresAt) {
+        String link = baseUrl + "/auth/verify?token=" + token;
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm");
+
+        Context ctx = new Context();
+        ctx.setVariable("link", link);
+        ctx.setVariable("expiry", expiresAt.format(fmt));
+
+        sendTemplateMessage(to, "Verifikasi Akun", "email/verification", ctx);
+    }
+
+    public void sendResetPasswordEmail(String to, String otp, LocalDateTime expiresAt) {
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm");
+
+        Context ctx = new Context();
+        ctx.setVariable("otp", otp);
+        ctx.setVariable("expiry", expiresAt.format(fmt));
+
+        sendTemplateMessage(to, "Kode OTP Reset Password", "email/resetpassword", ctx);
     }
 }

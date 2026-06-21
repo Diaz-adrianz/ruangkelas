@@ -48,6 +48,18 @@ public class User {
     @Column(nullable = true, length = 10)
     private String nim;
 
+    @Column(nullable = true)
+    private String verificationToken;
+
+    @Column(nullable = true)
+    private LocalDateTime tokenExpiresAt;
+
+    @Column(nullable = true)
+    private String resetOtp;
+
+    @Column(nullable = true)
+    private LocalDateTime resetOtpExpiresAt;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 

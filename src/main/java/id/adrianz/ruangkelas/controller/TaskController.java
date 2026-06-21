@@ -72,7 +72,7 @@ public class TaskController {
         }
 
         redirectAttributes.addFlashAttribute("success", "Tugas berhasil ditambahkan");
-        return "redirect:/class/" + classCode;
+        return "redirect:/class/" + classCode + "#tasks";
     }
 
     @GetMapping("/{taskId}/edit")
@@ -147,7 +147,7 @@ public class TaskController {
         }
 
         redirectAttributes.addFlashAttribute("success", "Tugas berhasil dihapus");
-        return "redirect:/class/" + classCode;
+        return "redirect:/class/" + classCode + "#tasks";
     }
 
     @GetMapping("/{taskId}")

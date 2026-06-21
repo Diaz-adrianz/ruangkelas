@@ -242,7 +242,7 @@ public class ClassController {
                           RedirectAttributes redirectAttributes) {
         classService.approve(userClassId);
         redirectAttributes.addFlashAttribute("success", "Permintaan bergabung berhasil diterima");
-        return "redirect:/class/" + classCode + "#anggota";
+        return "redirect:/class/" + classCode + "#members";
     }
 
     @PostMapping("/member/{userClassId}/reject")
@@ -251,7 +251,7 @@ public class ClassController {
                         RedirectAttributes redirectAttributes) {
         classService.reject(userClassId);
         redirectAttributes.addFlashAttribute("success", "Permintaan bergabung berhasil ditolak");
-        return "redirect:/class/" + classCode + "#anggota";
+        return "redirect:/class/" + classCode + "#members";
     }
 
     // ================= KICK =================
@@ -262,7 +262,7 @@ public class ClassController {
                         RedirectAttributes redirectAttributes) {
         classService.kick(userClassId);
         redirectAttributes.addFlashAttribute("success", "Anggota berhasil dikeluarkan");
-        return "redirect:/class/" + classCode + "#anggota";
+        return "redirect:/class/" + classCode + "#members";
     }
 
     // ================= PROMOTE / DEMOTE =================
@@ -273,7 +273,7 @@ public class ClassController {
                             RedirectAttributes redirectAttributes) {
         classService.promote(userClassId);
         redirectAttributes.addFlashAttribute("success", "Admin berhasil ditambahkan");
-        return "redirect:/class/" + classCode + "#anggota";
+        return "redirect:/class/" + classCode + "#members";
     }
 
     @PostMapping("/member/{userClassId}/demote")
@@ -282,7 +282,7 @@ public class ClassController {
                             RedirectAttributes redirectAttributes) {
         classService.demote(userClassId);
         redirectAttributes.addFlashAttribute("success", "Admin berhasil dihapus");
-        return "redirect:/class/" + classCode + "#anggota";
+        return "redirect:/class/" + classCode + "#members";
     }
 
     // ================= CREATE (Relations) =================
