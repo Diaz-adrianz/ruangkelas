@@ -1,6 +1,7 @@
 
 package id.adrianz.ruangkelas.model;
 
+import java.beans.Transient;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -52,4 +53,14 @@ public class Document {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    @Transient
+    public String formatFileSize() {
+        if (this.fileSize < 1024) {
+            return this.fileSize + " B";
+        }
+        if (this.fileSize < 1024 * 1024) {
+            return String.format("%.1f KB", this.fileSize / 1024.0);
+        }
+        return String.format("%.1f MB", this.fileSize / (1024.0 * 1024.0));
+    }
 }

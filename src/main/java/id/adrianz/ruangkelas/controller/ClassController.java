@@ -66,11 +66,6 @@ public class ClassController {
             documentService.getDocumentsByClass(classs.getId())
         );
 
-        model.addAttribute(
-            "documentService",
-            documentService
-        );
-
         return "pages/Class/Detail";
     }
 

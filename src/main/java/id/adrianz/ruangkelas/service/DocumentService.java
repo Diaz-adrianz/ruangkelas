@@ -121,17 +121,4 @@ public class DocumentService {
         return filename.substring(
                 filename.lastIndexOf(".") + 1).toLowerCase();
     }
-
-    public String formatFileSize(Long size) {
-
-        if (size < 1024) {
-            return size + " B";
-        }
-
-        if (size < 1024 * 1024) {
-            return String.format("%.1f KB", size / 1024.0);
-        }
-
-        return String.format("%.1f MB", size / (1024.0 * 1024.0));
-    }
 }
