@@ -60,4 +60,14 @@ public class EmailService {
 
         sendTemplateMessage(to, "Verifikasi Akun", "email/verification", ctx);
     }
+
+    public void sendResetPasswordEmail(String to, String otp, LocalDateTime expiresAt) {
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm");
+
+        Context ctx = new Context();
+        ctx.setVariable("otp", otp);
+        ctx.setVariable("expiry", expiresAt.format(fmt));
+
+        sendTemplateMessage(to, "Kode OTP Reset Password", "email/resetpassword", ctx);
+    }
 }

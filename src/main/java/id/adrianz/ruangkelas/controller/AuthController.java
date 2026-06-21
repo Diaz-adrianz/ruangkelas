@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import id.adrianz.ruangkelas.dto.ForgotPasswordDto;
 import id.adrianz.ruangkelas.dto.RegisterDto;
 import id.adrianz.ruangkelas.service.UserService;
 import jakarta.validation.Valid;
@@ -69,5 +70,29 @@ public class AuthController {
             model.addAttribute("error", e.getMessage());
         }
         return "pages/Verification";
+    }
+
+    @GetMapping("/forgot-password")
+    public String forgotPassword(Model model) {
+        model.addAttribute("forgotPasswordDto", new ForgotPasswordDto());
+        return "pages/ForgotPassword";
+    }
+
+    @PostMapping("/forgot-password")
+    public String forgotPasswordSubmit(@Valid @ModelAttribute("forgotPasswordDto") ForgotPasswordDto request,
+            BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            model.addAttribute("errors", result.getFieldErrors());
+            return "pages/ForgotPassword";
+        }
+
+        try {
+            userService.forgotPassword(request.getEmail());
+            model.addAttribute("success", "Kode OTP dikirim ke email");
+            return "pages/ForgotPassword";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            return "pages/ForgotPassword";
+        }
     }
 }

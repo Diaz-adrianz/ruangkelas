@@ -1,5 +1,6 @@
 package id.adrianz.ruangkelas.service;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -82,5 +83,23 @@ public class UserService implements UserDetailsService {
         user.setVerificationToken(null);
         user.setTokenExpiresAt(null);
         userRepository.save(user);
+    }
+
+    public void forgotPassword(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Email tidak ditemukan"));
+
+        if (!user.isEnabled()) {
+            throw new IllegalArgumentException("Akun belum diverifikasi");
+        }
+
+        String otp = String.format("%06d", new SecureRandom().nextInt(999999));
+        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(15);
+
+        user.setResetOtp(otp);
+        user.setResetOtpExpiresAt(expiresAt);
+        userRepository.save(user);
+
+        emailService.sendResetPasswordEmail(user.getEmail(), otp, expiresAt);
     }
 }

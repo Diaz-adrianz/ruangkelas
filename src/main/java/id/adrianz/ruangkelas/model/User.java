@@ -54,6 +54,12 @@ public class User {
     @Column(nullable = true)
     private LocalDateTime tokenExpiresAt;
 
+    @Column(nullable = true)
+    private String resetOtp;
+
+    @Column(nullable = true)
+    private LocalDateTime resetOtpExpiresAt;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
