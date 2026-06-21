@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import id.adrianz.ruangkelas.dto.CreateClassDto;
+import id.adrianz.ruangkelas.dto.CreateDocumentDto;
 import id.adrianz.ruangkelas.dto.JoinClassDto;
 import id.adrianz.ruangkelas.dto.UpdateClassDto;
 import id.adrianz.ruangkelas.model.Class;
@@ -278,5 +279,14 @@ public class ClassController {
         classService.demote(userClassId);
         redirectAttributes.addFlashAttribute("success", "Admin berhasil dihapus");
         return "redirect:/class/" + classCode + "#anggota";
+    }
+
+    // ================= CREATE (Relations) =================
+    @GetMapping("/{classCode}/document/upload")
+    public String showCreateForm(@PathVariable String classCode, Model model) {
+        Class classs = classService.getByCode(classCode);
+        model.addAttribute("classs", classs);
+        model.addAttribute("createDocumentDto", new CreateDocumentDto());
+        return "pages/Document/Create";
     }
 }

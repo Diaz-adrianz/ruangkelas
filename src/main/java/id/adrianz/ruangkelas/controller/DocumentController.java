@@ -9,16 +9,21 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import id.adrianz.ruangkelas.dto.CreateDocumentDto;
+import id.adrianz.ruangkelas.model.Class;
 import id.adrianz.ruangkelas.service.ClassService;
 import id.adrianz.ruangkelas.service.DocumentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -35,25 +40,31 @@ public class DocumentController {
 
     @PostMapping("/upload")
     public String upload(
-            @RequestParam Long classId,
-            @RequestParam String title,
-            @RequestParam MultipartFile file,
-            RedirectAttributes redirectAttributes) {
+                @Valid @ModelAttribute("createDocumentDto") CreateDocumentDto request,
+                BindingResult result,
+                Model model,
+                RedirectAttributes redirectAttributes) {
+
+        Class classs = classService.getById(request.getClassId());
+
+        if (result.hasErrors()) {
+                model.addAttribute("classs", classs);
+                model.addAttribute("errors", result.getFieldErrors());
+                return "pages/Document/Create";
+        }
 
         try {
-            documentService.save(classId, title, file);
+            documentService.save(request.getClassId(), request.getTitle(), request.getFile());
             redirectAttributes.addFlashAttribute(
                     "success",
                     "Dokumen berhasil diupload");
         } catch (IOException | IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute(
-                    "error",
-                    e.getMessage());
-        }
+            model.addAttribute("classs", classs);
+            model.addAttribute("error", e.getMessage());
+            return "pages/Document/Create";
+        } 
 
-        String classCode = classService.getById(classId).getClassCode();
-
-        return "redirect:/class/" + classCode;
+        return "redirect:/class/" + classs.getClassCode();
     }
 
     // =====================
