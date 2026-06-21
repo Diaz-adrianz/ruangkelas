@@ -47,27 +47,7 @@ public class TaskNotificationScheduler {
 
             for (UserClass member : members) {
                 User user = member.getUser();
-                
-                // HANYA MENGIRIM EMAIL (Push Notification milik temanmu tetap aman)
-                notificationService.createAndSendEmailNotification(
-                    Math.toIntExact(user.getId()),
-                    user.getEmail(),
-                    subject + " - " + task.getTitle(),
-                    body,
-                    type,
-                    Math.toIntExact(task.getId()),
-                    "TASK"
-                );
             }
         }
     }
-
-
-    // Tambahkan di dalam TaskNotificationScheduler.java
-@GetMapping("/test-reminder") // Pastikan controller memanggil ini
-public String triggerManualCheck() {
-    checkUpcomingDeadlines();
-    return "Scheduler email sudah dipicu!";
-}
-
 }

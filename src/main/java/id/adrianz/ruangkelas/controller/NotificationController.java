@@ -3,6 +3,7 @@ package id.adrianz.ruangkelas.controller;
 import id.adrianz.ruangkelas.model.Notification;
 import id.adrianz.ruangkelas.model.User;
 import id.adrianz.ruangkelas.repository.UserRepository;
+import id.adrianz.ruangkelas.scheduler.TaskNotificationScheduler;
 import id.adrianz.ruangkelas.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ public class NotificationController {
 
     private final NotificationService notificationService;
     private final UserRepository userRepository;
-
+    
     @GetMapping
     public ResponseEntity<List<Notification>> getAllUserNotifications(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
