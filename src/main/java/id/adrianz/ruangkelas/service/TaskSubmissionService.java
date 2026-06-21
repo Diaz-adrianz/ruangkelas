@@ -1,5 +1,6 @@
 package id.adrianz.ruangkelas.service;
 
+import id.adrianz.ruangkelas.model.Task;
 import id.adrianz.ruangkelas.model.TaskSubmission;
 import id.adrianz.ruangkelas.repository.TaskSubmissionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,14 @@ public class TaskSubmissionService {
     @Autowired
     private TaskSubmissionRepository submissionRepository;
 
-    public TaskSubmission submitTask(TaskSubmission submission){
+    @Autowired 
+    private TaskService taskService;
+
+    public TaskSubmission submitTask(TaskSubmission submission, Long taskId){
+        Task task = taskService.getTaskById(taskId);
+
+        submission.setTask(task);
+
         return submissionRepository.save(submission);
     }
 

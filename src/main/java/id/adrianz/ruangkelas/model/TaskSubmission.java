@@ -2,9 +2,13 @@ package id.adrianz.ruangkelas.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity 
 @Table(name = "task_submissions")
+@Getter 
+@Setter
 public class TaskSubmission {
 
     @Id

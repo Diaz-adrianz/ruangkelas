@@ -10,7 +10,7 @@ import java.util.List;
 @RequestMapping("/api/submissions")
 public class TaskSubmissionController {
 
-    @Autowired 
+    @Autowired
     private TaskSubmissionService submissionService;
 
     @PostMapping
