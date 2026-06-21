@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import id.adrianz.ruangkelas.dto.CreateClassDto;
+import id.adrianz.ruangkelas.dto.CreateDocumentDto;
 import id.adrianz.ruangkelas.dto.JoinClassDto;
 import id.adrianz.ruangkelas.dto.UpdateClassDto;
 import id.adrianz.ruangkelas.model.Class;
@@ -22,6 +23,7 @@ import id.adrianz.ruangkelas.model.Task;
 import id.adrianz.ruangkelas.model.UserClass;
 import id.adrianz.ruangkelas.model.UserPrincipal;
 import id.adrianz.ruangkelas.service.ClassService;
+import id.adrianz.ruangkelas.service.DocumentService;
 import id.adrianz.ruangkelas.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 public class ClassController {
 
     private final ClassService classService;
+    private final DocumentService documentService;
     private final TaskService taskService;
 
     // ================= INDEX =================
@@ -62,8 +65,13 @@ public class ClassController {
         model.addAttribute("isAdmin", isAdmin);
         model.addAttribute("currentUserId", principal.getUser().getId());
 
+        model.addAttribute(
+            "documents",
+            documentService.getDocumentsByClass(classs.getId())
+        );
         List<Task> tasks = taskService.getTasksByClassCode(classCode);
         model.addAttribute("tasks", tasks);
+
 
         return "pages/Class/Detail";
     }
@@ -275,5 +283,14 @@ public class ClassController {
         classService.demote(userClassId);
         redirectAttributes.addFlashAttribute("success", "Admin berhasil dihapus");
         return "redirect:/class/" + classCode + "#anggota";
+    }
+
+    // ================= CREATE (Relations) =================
+    @GetMapping("/{classCode}/document/upload")
+    public String showCreateForm(@PathVariable String classCode, Model model) {
+        Class classs = classService.getByCode(classCode);
+        model.addAttribute("classs", classs);
+        model.addAttribute("createDocumentDto", new CreateDocumentDto());
+        return "pages/Document/Create";
     }
 }
