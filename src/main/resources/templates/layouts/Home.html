@@ -1,171 +1,163 @@
 <!doctype html>
 <html
-	xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-	data-theme="light"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+    data-theme="light"
 >
-	<head>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title layout:title-pattern="$CONTENT_TITLE | RuangKelas">RuangKelas</title>
-		<link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title layout:title-pattern="$CONTENT_TITLE | RuangKelas">RuangKelas</title>
+        <link rel="stylesheet" th:href="@{/css/styles.css}" />
 
-		<!-- fonts  -->
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link
-			href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
-			rel="stylesheet"
-		/>
-		<link href="https://cdn.jsdelivr.net/npm/remixicon@4.9.0/fonts/remixicon.css" rel="stylesheet" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+            rel="stylesheet"
+        />
+        <link href="https://cdn.jsdelivr.net/npm/remixicon@4.9.0/fonts/remixicon.css" rel="stylesheet" />
 
-		<meta name="_csrf" th:content="${_csrf.token}" />
-		<meta name="_csrf_header" th:content="${_csrf.headerName}" />
-	</head>
-	<body class="bg-base-200 min-h-screen">
-		<nav class="navbar border-b bg-base-100 border-base-300">
-			<div class="w-full mx-auto max-w-5xl justify-between flex items-center">
-				<img th:src="@{/images/LogoText.svg}" alt="Logo" class="w-40" />
+        <meta name="_csrf" th:content="${_csrf.token}" />
+        <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    </head>
+    <body class="bg-base-200 min-h-screen">
+        <nav class="navbar border-b bg-base-100 border-base-300">
+            <div class="w-full mx-auto max-w-5xl justify-between flex items-center">
+                <img th:src="@{/images/LogoText.svg}" alt="Logo" class="w-40" />
 
-				<div sec:authorize="isAuthenticated()" class="dropdown dropdown-end">
-					<div tabindex="0" role="button" class="btn btn-ghost btn-circle">
-						<div class="avatar">
-							<div class="w-10 rounded-full overflow-hidden">
+                <div sec:authorize="isAuthenticated()" class="dropdown dropdown-end" id="user-dropdown">
+                    <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+                        <div class="avatar avatar-placeholder">
+                            <div class="bg-neutral text-neutral-content w-10 rounded-full">
+                                <span sec:authentication="principal.initials"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div tabindex="0" class="dropdown-content rounded-box border mt-2 border-base-300 bg-base-100 w-52 z-10">
+                        <div class="px-4 py-2 border-b border-base-300 grid -space-y-px">
+                            <p sec:authentication="principal.name" class="text-lg font-bold"></p>
+                            <span th:text="'@' + ${#authentication.principal.username}" class="text-sm text-base-content/60"></span>
+                        </div>
+                        <ul class="menu w-full">
+                            <li><a href="/profile">Profil</a></li>
+                            <li class="text-error">
+                                <form method="post" th:action="@{/auth/logout}">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                    <button type="submit">Keluar</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <main layout:fragment="content"></main>
 
-								<img
-									th:if="${#authentication.principal.user.profilePicture != null}"
-									th:src="${#authentication.principal.user.profilePicture}"
-									alt="Profile Picture"
-									class="w-full h-full object-cover"
-								/>
+        <script th:inline="javascript">
+            const firebaseConfig = {
+                apiKey: 'AIzaSyDE1E4vN-3FFPn0OCyUuvE1fZizjsofYwk',
+                authDomain: 'didlin.firebaseapp.com',
+                projectId: 'didlin',
+                storageBucket: 'didlin.firebasestorage.app',
+                messagingSenderId: '599992082188',
+                appId: '1:599992082188:web:9924580056179ab634f329'
+            };
+            const vapidKey = 'BOzvP1IDYnvaIYh6e7kB8F4GIAqTLwD5mqc0mTBsKKFBe1tHQaBF3OVmuP_4sEOknOMlH8d7ua8UKCZUtd1YNms';
+        </script>
 
-								<div
-									th:unless="${#authentication.principal.user.profilePicture != null}"
-									class="bg-neutral text-neutral-content w-10 h-10 rounded-full flex items-center justify-center"
-								>
-									<span sec:authentication="principal.initials"></span>
-								</div>
+        <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+        import {
+            getMessaging,
+            getToken,
+            onMessage,
+        } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';
 
-							</div>
-						</div>
-					</div>
-					<div tabindex="0" class="dropdown-content rounded-box border mt-2 border-base-300 bg-base-100 w-52 z-10">
-						<div class="px-4 py-2 border-b border-base-300 grid -space-y-px">
-							<p sec:authentication="principal.name" class="text-lg font-bold"></p>
-							<span th:text="'@' + ${#authentication.principal.username}" class="text-sm text-base-content/60"></span>
-						</div>
-						<ul class="menu w-full">
-							<li><a href="/profile">Profil</a></li>
-							<li class="text-error">
-								<form method="post" th:action="@{/auth/logout}">
-									<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-									<button type="submit">Keluar</button>
-								</form>
-							</li>
-						</ul>
-					</div>
-				</div>
-			</div>
-		</nav>
-		<main layout:fragment="content"></main>
+        const app = initializeApp(firebaseConfig);
+        const messaging = getMessaging(app);
 
-		<script th:inline="javascript">
-			const firebaseConfig = {
-				apiKey: /*[[${firebaseConfig.apiKey}]]*/ '',
-				authDomain: /*[[${firebaseConfig.authDomain}]]*/ '',
-				projectId: /*[[${firebaseConfig.projectId}]]*/ '',
-				storageBucket: /*[[${firebaseConfig.storageBucket}]]*/ '',
-				messagingSenderId: /*[[${firebaseConfig.messagingSenderId}]]*/ '',
-				appId: /*[[${firebaseConfig.appId}]]*/ '',
-			};
-			const vapidKey = /*[[${firebaseConfig.vapidKey}]]*/ '';
-		</script>
+        async function setupPushNotification() {
+            if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
 
-		<script type="module">
-			import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-			import {
-				getMessaging,
-				getToken,
-				onMessage,
-			} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission !== 'granted') return;
 
-			const app = initializeApp(firebaseConfig);
-			const messaging = getMessaging(app);
+                let registration = await navigator.serviceWorker.getRegistration('/');
+                if (!registration) {
+                    registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+                        scope: '/',
+                    });
+                }
 
-			async function setupPushNotification() {
-				// Cek support browser
-				if (!('serviceWorker' in navigator) || !('Notification' in window)) {
-					return;
-				}
+                await navigator.serviceWorker.ready;
 
-				try {
-					// Minta izin notifikasi
-					const permission = await Notification.requestPermission();
-					if (permission !== 'granted') {
-						return;
-					}
+                const token = await getToken(messaging, {
+                    vapidKey: vapidKey,
+                    serviceWorkerRegistration: registration,
+                });
 
-					// Register service worker
-					let registration = await navigator.serviceWorker.getRegistration('/');
-					if (!registration) {
-						registration = await navigator.serviceWorker.register('/api/notification/firebase-messaging-sw.js', {
-							scope: '/',
-						});
-					}
+                if (token) await saveToken(token);
 
-					await navigator.serviceWorker.ready;
+                onMessage(messaging, (payload) => {
+                    console.log('Pesan diterima saat tab aktif (foreground):', payload);
+                    
+                    const title = payload.notification?.title || payload.data?.title || 'Notifikasi Ruangkelas';
+                    const options = {
+                        body: payload.notification?.body || payload.data?.body || '',
+                        icon: '/icons/icon-192.png',
+                    };
+                    
+                    // Tampilkan notifikasi pop-up dari sistem operasi
+                    const notification = new Notification(title, options);
+                    
+                    // Handler klik untuk notifikasi saat foreground
+                    notification.onclick = function(event) {
+                        event.preventDefault();
+                        notification.close();
+                        
+                        const refId = payload.data?.referenceId;
+                        const refType = payload.data?.referenceType;
+                        
+                        let redirectPath = '/';
+                        if (refType && refId) {
+                            redirectPath = `/notifications/redirect?type=${refType}&id=${refId}`;
+                        }
+                        
+                        window.location.href = redirectPath;
+                    };
+                });
 
-					// Ambil FCM token
-					const token = await getToken(messaging, {
-						vapidKey: vapidKey,
-						serviceWorkerRegistration: registration,
-					});
+            } catch (e) {
+                console.error("Gagal setup FCM:", e);
+            }
+        }
 
-					if (token) {
-						await saveToken(token);
-					}
-				} catch {
-					// silent
-				}
-			}
+        async function saveToken(token) {
+            try {
+                const csrf = document.querySelector('meta[name="_csrf"]')?.content;
+                const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+                if (!csrf || !csrfHeader) return;
 
-			// Kirim token ke backend Spring Boot
-			async function saveToken(token) {
-				try {
-					const csrf = document.querySelector('meta[name="_csrf"]').content;
-					const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+                // URL DIPERBAIKI: Menyesuaikan dengan NotificationController yang memakai "/api/notifications"
+                await fetch('/api/notifications/register-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrf,
+                    },
+                    body: JSON.stringify({ token }),
+                });
+            } catch (e) {
+                console.error("Gagal simpan token:", e);
+            }
+        }
 
-					const response = await fetch('/api/notification/register-token', {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-							[csrfHeader]: csrf,
-						},
-						body: JSON.stringify({ token }),
-					});
-				} catch {
-					// silent
-				}
-			}
-
-			// Handle notifikasi saat app sedang aktif (foreground)
-			onMessage(messaging, (payload) => {
-				const title = payload.notification?.title || 'Notifikasi Baru';
-				const body = payload.notification?.body || '';
-
-				if (Notification.permission === 'granted') {
-					navigator.serviceWorker.ready.then((registration) => {
-						registration.showNotification(title, {
-							body,
-							icon: '/images/Logo.svg',
-						});
-					});
-				}
-			});
-
-			// Jalankan
-			setupPushNotification();
-		</script>
-	</body>
+        const isUserLoggedIn = document.getElementById('user-dropdown') !== null;
+        if (isUserLoggedIn) {
+            setupPushNotification();
+        }
+    </script>
+    </body>
 </html>
-

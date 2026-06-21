@@ -71,7 +71,6 @@ public class EmailService {
         sendTemplateMessage(to, "Kode OTP Reset Password", "email/resetpassword", ctx);
     }
 
-    // Fitur revisi kirim HTML manual milikmu
     public void sendHtmlMessage(String to, String subject, String htmlBody) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
