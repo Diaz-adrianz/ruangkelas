@@ -69,4 +69,18 @@ public class UserService implements UserDetailsService {
     public User save(User user) {
         return userRepository.save(user);
     }
+
+    public void verifyEmail(String token) {
+        User user = userRepository.findByVerificationToken(token)
+                .orElseThrow(() -> new IllegalArgumentException("Token tidak valid"));
+
+        if (user.getTokenExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Token sudah kadaluarsa");
+        }
+
+        user.setEnabled(true);
+        user.setVerificationToken(null);
+        user.setTokenExpiresAt(null);
+        userRepository.save(user);
+    }
 }
