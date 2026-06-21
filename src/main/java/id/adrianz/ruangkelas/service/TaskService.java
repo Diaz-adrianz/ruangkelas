@@ -24,30 +24,30 @@ public class TaskService {
     }
 
     public List<Task> getTasksByClassCode(String classCode) {
-    return taskRepository.findByClasseClassCodeOrderByDeadlineAsc(classCode);
-}
+        return taskRepository.findByClasseClassCodeOrderByDeadlineAsc(classCode);
+    }
 
     public Task getTaskById(Long id) {
         return taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task dengan ID " + id + " tidak ditemukan"));
     }
 
-    
+
     public Task createTask(Task task) {
         Task savedTask = taskRepository.save(task);
 
         try {
             List<UserClass> members = userClassRepository.findByClasseId(savedTask.getClasse().getId());
-            
+
             for (UserClass member : members) {
                 User user = member.getUser();
                 notificationService.createAndSendEmailNotification(
-                    Math.toIntExact(user.getId()),
+                    user.getId(),
                     user.getEmail(),
                     "Tugas Baru: " + savedTask.getTitle(),
                     "Ada tugas baru '" + savedTask.getTitle() + "' di kelas Anda. Segera cek sistem!",
                     NotificationType.TASK_CREATED, // Pastikan ini ada di Enum
-                    Math.toIntExact(savedTask.getId()),
+                    savedTask.getId(),
                     "TASK"
                 );
             }
@@ -58,8 +58,8 @@ public class TaskService {
         return savedTask;
     }
 
-   
-  public Task updateTask(Long id, Task updatedTask) {
+
+    public Task updateTask(Long id, Task updatedTask) {
         Task existingTask = getTaskById(id);
 
         existingTask.setTitle(updatedTask.getTitle());
@@ -70,16 +70,16 @@ public class TaskService {
 
         try {
             List<UserClass> members = userClassRepository.findByClasseId(savedTask.getClasse().getId());
-            
+
             for (UserClass member : members) {
                 User user = member.getUser();
                 notificationService.createAndSendEmailNotification(
-                    Math.toIntExact(user.getId()),
+                    user.getId(),
                     user.getEmail(),
                     "Update Tugas: " + savedTask.getTitle(),
                     "Informasi tugas '" + savedTask.getTitle() + "' telah diperbarui.",
                     NotificationType.TASK_UPDATED, // Pastikan ini sesuai dengan Enum
-                    Math.toIntExact(savedTask.getId()),
+                    savedTask.getId(),
                     "TASK"
                 );
             }
@@ -93,6 +93,5 @@ public class TaskService {
     public void deleteTask(Long id) {
         taskRepository.deleteById(id);
     }
-    
 
 }

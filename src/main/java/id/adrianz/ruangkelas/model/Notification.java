@@ -12,13 +12,13 @@ public abstract class Notification {
     private Integer id;
 
     @Column(name = "user_id")
-    private Integer userId;
+    private Long userId;
 
     @Enumerated(EnumType.STRING)
     private NotificationType type;
 
     @Column(name = "reference_id")
-    private Integer referenceId;
+    private Long referenceId;
 
     @Column(name = "reference_type")
     private String referenceType;
@@ -47,12 +47,12 @@ public abstract class Notification {
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
-    public Integer getUserId() { return userId; }
-    public void setUserId(Integer userId) { this.userId = userId; }
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
     public NotificationType getType() { return type; }
     public void setType(NotificationType type) { this.type = type; }
-    public Integer getReferenceId() { return referenceId; }
-    public void setReferenceId(Integer referenceId) { this.referenceId = referenceId; }
+    public Long getReferenceId() { return referenceId; }
+    public void setReferenceId(Long referenceId) { this.referenceId = referenceId; }
     public String getReferenceType() { return referenceType; }
     public void setReferenceType(String referenceType) { this.referenceType = referenceType; }
     public String getMessage() { return message; }
