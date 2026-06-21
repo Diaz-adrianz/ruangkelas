@@ -155,6 +155,8 @@ public class ClassService {
         return adminCount > 1;
     }
 
+    // #28: pesan error dirapikan -> cek "sendirian di kelas" duluan baru "admin terakhir",
+    // supaya pesan yang muncul lebih tepat sasaran (gak ketuker)
     public void leaveClass(Long classId, Long userId) {
         UserClass userClass = userClassRepository.findByUserIdAndClasseId(userId, classId)
                 .orElseThrow(() -> new RuntimeException("Kamu bukan anggota kelas ini"));
@@ -163,12 +165,12 @@ public class ClassService {
             int totalMembers = userClassRepository.findByClasseIdAndStatus(classId, UserClass.Status.ACCEPTED).size();
             int adminCount = userClassRepository.countAdminByClasseId(classId);
 
-            if (adminCount <= 1 && totalMembers > 1) {
-                throw new RuntimeException("Kamu admin satu-satunya. Promote anggota lain jadi admin dulu sebelum keluar");
+            if (totalMembers <= 1) {
+                throw new RuntimeException("Kamu satu-satunya anggota di kelas ini. Hapus kelas jika ingin keluar");
             }
 
-            if (totalMembers <= 1) {
-                throw new RuntimeException("Kamu satu-satunya anggota kelas ini. Hapus kelas jika ingin keluar");
+            if (adminCount <= 1) {
+                throw new RuntimeException("Kamu admin satu-satunya di kelas ini. Jadikan anggota lain admin dulu sebelum keluar");
             }
         }
 
