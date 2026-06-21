@@ -75,7 +75,7 @@ public class TaskController {
 
         // PERBAIKAN: Memastikan rute redirect bersifat absolut dari root server
         redirectAttributes.addFlashAttribute("success", "Tugas berhasil ditambahkan");
-        return "redirect:/class/" + classCode;
+        return "redirect:/class/" + classCode + "#tasks";
     }
 
     // 3. Tampilan Form Edit Task
@@ -154,7 +154,7 @@ public class TaskController {
 
         // PERBAIKAN: Memastikan rute redirect bersifat absolut dari root server
         redirectAttributes.addFlashAttribute("success", "Tugas berhasil dihapus");
-        return "redirect:/class/" + classCode;
+        return "redirect:/class/" + classCode + "#tasks";
     }
 
     @GetMapping("/{taskId}")
