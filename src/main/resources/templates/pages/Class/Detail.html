@@ -187,20 +187,14 @@
           Materi Ajar
 
           <span
+            th:if="${#lists.size(documents) > 0}"
             class="flex items-center justify-center w-5 h-5 rounded-full bg-[#2B2B2B] text-white text-[11px]"
+            th:text="${#lists.size(documents)}"
           >
-            0
           </span>
         </label>
 
         <div class="tab-content pt-4">
-          <!-- ================= MEMBER INFO ================= -->
-          <th:block th:unless="${isAdmin}">
-            <div class="alert alert-info mb-4">
-              <span> Anda hanya dapat mengunduh materi yang tersedia. </span>
-            </div>
-          </th:block>
-
           <!-- ================= ADMIN UPLOAD ================= -->
           <th:block th:if="${isAdmin}">
             <div class="card bg-base-100 border border-base-300 mb-6">
@@ -282,87 +276,66 @@
 
           <!-- ================= DAFTAR MATERI ================= -->
 
-          <div class="card bg-base-100 border border-base-300">
-            <div class="card-body">
-              <h2 class="text-xl font-semibold mb-4">
-                Daftar Materi (<span th:text="${#lists.size(documents)}"></span
-                >)
-              </h2>
-              <div class="overflow-x-auto">
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th>No</th>
-                      <th>Judul Materi</th>
-                      <th>Tipe File</th>
-                      <th>Ukuran</th>
-                      <th>Tanggal Upload</th>
-                      <th>Aksi</th>
-                    </tr>
-                  </thead>
+          <div class="flex flex-col gap-2">
+            <div th:each="document : ${documents}" class="card bg-base-100 border border-base-300">
+              <div class="card-body flex-row items-center justify-between p-4">
+                <div>
+                  <p class="typo-body-md" th:text="${document.title}"></p>
+                  <span 
+                    class="typo-small text-base-content/60" 
+                    th:text="|${document.fileType} - ${documentService.formatFileSize(document.fileSize)} - ${#temporals.format(document.createdAt, 'dd MMM yyyy HH:mm a')}|">
+                  </span>                         
+                </div>
+                <div class="dropdown dropdown-end">
+                  <div
+                    tabindex="0"
+                    role="button"
+                    class="btn btn-ghost btn-circle btn-sm"
+                  >
+                    <i class="ri-more-2-line text-sm"></i>
+                  </div>
+                  <ul
+                    tabindex="0"
+                    class="dropdown-content menu bg-base-100 rounded-box border border-base-300 w-44 mt-2 z-10"
+                  >
+                    <li>
+                      <a th:href="@{/document/view/{id}(id=${document.id})}" target="_blank">
+                        Lihat
+                      </a>
+                    </li>
+                    <li>
+                      <a th:href="@{/document/download/{id}(id=${document.id})}">
+                        Download
+                      </a>
+                    </li>
+                    <th:block th:if="${isAdmin}">
+                      <li>
+                        <form
+                          th:action="@{/document/delete/{id}(id=${document.id})}"
+                          method="post"
+                          onsubmit="
+                            return confirm(
+                              'Yakin ingin menghapus dokumen ini?',
+                            );
+                          "
+                        >
+                          <input
+                            type="hidden"
+                            name="classId"
+                            th:value="${classs.id}"
+                          />
 
-                  <tbody>
-                    <tr th:each="document, stat : ${documents}">
-                      <td th:text="${stat.count}"></td>
-
-                      <td th:text="${document.title}"></td>
-
-                      <td th:text="${document.fileType}"></td>
-
-                      <td
-                        th:text="${documentService.formatFileSize(document.fileSize)}"
-                      ></td>
-
-                      <td
-                        th:text="${#temporals.format(document.createdAt, 'dd MMM yyyy')}"
-                      ></td>
-
-                      <td>
-                        <div class="flex gap-2">
-                          <a
-                            th:href="@{/document/view/{id}(id=${document.id})}"
-                            target="_blank"
-                            class="btn btn-sm btn-outline"
+                          <button
+                            type="submit"
+                            class="text-error"
                           >
-                            Lihat
-                          </a>
-
-                          <a
-                            th:href="@{/document/download/{id}(id=${document.id})}"
-                            class="btn btn-sm btn-outline btn-primary"
-                          >
-                            Download
-                          </a>
-
-                          <th:block th:if="${isAdmin}">
-                            <form
-                              th:action="@{/document/delete/{id}(id=${document.id})}"
-                              method="post"
-                              onsubmit="
-                                return confirm(
-                                  'Yakin ingin menghapus dokumen ini?',
-                                );
-                              "
-                            >
-                              <input
-                                type="hidden"
-                                name="classId"
-                                th:value="${classs.id}"
-                              />
-
-                              <button
-                                type="submit"
-                                class="btn btn-sm btn-outline btn-error"
-                              >
-                                Hapus
-                              </button>
-                            </form>
-                          </th:block>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                            Hapus
+                          </button>
+                        </form>
+                      </li>
+                    </th:block>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
