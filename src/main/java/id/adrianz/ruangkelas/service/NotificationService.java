@@ -1,10 +1,12 @@
 package id.adrianz.ruangkelas.service;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
-import com.google.firebase.messaging.BatchResponse;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
@@ -28,6 +30,9 @@ public class NotificationService {
     private final DeviceTokenRepository deviceTokenRepository;
     private final NotificationRepository notificationRepository;
     private final EmailService emailService;
+
+    @Value("${app.base-url:http://localhost:8080}")
+    private String baseUrl;
 
     public void sendToUser(User user, String title, String body) {
         List<DeviceToken> tokens = deviceTokenRepository.findByUser(user);
@@ -56,11 +61,9 @@ public class NotificationService {
                 .build();
 
         try {
-            BatchResponse response = FirebaseMessaging.getInstance().sendEachForMulticast(message);
-            log.info("Notifikasi multicast terkirim. Sukses: {}, Gagal: {}", 
-                    response.getSuccessCount(), response.getFailureCount());
+            FirebaseMessaging.getInstance().sendEachForMulticast(message);
         } catch (FirebaseMessagingException e) {
-            log.error("Gagal kirim notifikasi multicast: {}", e.getMessage());
+            log.error(e.getMessage());
         }
     }
 
@@ -74,19 +77,18 @@ public class NotificationService {
                 .build();
 
         try {
-            String response = FirebaseMessaging.getInstance().send(message);
-            log.info("Notifikasi terkirim: {}", response);
+            FirebaseMessaging.getInstance().send(message);
         } catch (FirebaseMessagingException e) {
-            log.error("Gagal kirim notifikasi ke token {}: {}", token, e.getMessage());
+            log.error(e.getMessage());
         }
     }
 
-    public void createAndSendEmailNotification(Integer userId, String emailTarget, String subject, String message, NotificationType type, Integer referenceId, String referenceType) {
+    public void createAndSendEmailNotification(Integer userId, String emailTarget, String subject, String messageContent, NotificationType type, Integer referenceId, String referenceType) {
         EmailNotification notification = new EmailNotification();
         notification.setUserId(userId);
         notification.setEmail(emailTarget);
         notification.setSubject(subject);
-        notification.setMessage(message);
+        notification.setMessage(messageContent);
         notification.setType(type);
         notification.setReferenceId(referenceId);
         notification.setReferenceType(referenceType);
@@ -94,7 +96,22 @@ public class NotificationService {
 
         notificationRepository.save(notification);
 
-        emailService.sendSimpleMessage(emailTarget, subject, message);
+        String redirectUrl = baseUrl + "/notifications/redirect?type=" + referenceType + "&id=" + referenceId;
+        String htmlTemplate = loadHtmlTemplate(subject, messageContent, redirectUrl);
+
+        emailService.sendHtmlMessage(emailTarget, subject, htmlTemplate);
+    }
+
+    private String loadHtmlTemplate(String title, String content, String redirectUrl) {
+        try {
+            ClassPathResource resource = new ClassPathResource("templates/email/email-template.html");
+            String html = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            return html.replace("{{TITLE}}", title)
+                       .replace("{{CONTENT}}", content)
+                       .replace("{{REDIRECT_URL}}", redirectUrl);
+        } catch (Exception e) {
+            return content; 
+        }
     }
 
     public List<Notification> getAllNotificationsByUserId(Long userId) {

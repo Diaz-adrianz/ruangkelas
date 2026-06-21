@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import id.adrianz.ruangkelas.model.Task;
 import id.adrianz.ruangkelas.model.User;
@@ -42,24 +43,31 @@ public class TaskNotificationScheduler {
 
         for (Task task : tasks) {
             List<UserClass> members = userClassRepository.findByClasseId(task.getClasse().getId());
-
-            String pushBody = "Tugas '" + task.getTitle() + "' akan segera berakhir pada: " + task.getDeadline();
+            String body = "Halo, tugas '" + task.getTitle() + "' akan berakhir pada " + task.getDeadline().toString() + ". Segera selesaikan!";
 
             for (UserClass member : members) {
                 User user = member.getUser();
-
+                
+                // HANYA MENGIRIM EMAIL (Push Notification milik temanmu tetap aman)
                 notificationService.createAndSendEmailNotification(
                     Math.toIntExact(user.getId()),
                     user.getEmail(),
                     subject + " - " + task.getTitle(),
-                    pushBody,
+                    body,
                     type,
                     Math.toIntExact(task.getId()),
                     "TASK"
                 );
-
-                notificationService.sendToUser(user, subject, pushBody);
             }
         }
     }
+
+
+    // Tambahkan di dalam TaskNotificationScheduler.java
+@GetMapping("/test-reminder") // Pastikan controller memanggil ini
+public String triggerManualCheck() {
+    checkUpcomingDeadlines();
+    return "Scheduler email sudah dipicu!";
+}
+
 }

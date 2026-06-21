@@ -70,4 +70,18 @@ public class EmailService {
 
         sendTemplateMessage(to, "Kode OTP Reset Password", "email/resetpassword", ctx);
     }
+
+    // Fitur revisi kirim HTML manual milikmu
+    public void sendHtmlMessage(String to, String subject, String htmlBody) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(htmlBody, true); 
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
