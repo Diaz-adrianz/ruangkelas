@@ -102,4 +102,18 @@ public class UserService implements UserDetailsService {
 
         emailService.sendResetPasswordEmail(user.getEmail(), otp, expiresAt);
     }
+
+    public void resetPassword(String otp, String newPassword) {
+        User user = userRepository.findByResetOtp(otp)
+                .orElseThrow(() -> new IllegalArgumentException("Kode OTP tidak valid"));
+
+        if (user.getResetOtpExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Kode OTP sudah kadaluarsa");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setResetOtp(null);
+        user.setResetOtpExpiresAt(null);
+        userRepository.save(user);
+    }
 }
