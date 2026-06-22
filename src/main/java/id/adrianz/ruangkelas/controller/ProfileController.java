@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import id.adrianz.ruangkelas.dto.UpdateProfileDto;
 import id.adrianz.ruangkelas.model.User;
@@ -60,7 +61,8 @@ public class ProfileController {
             BindingResult result,
             Model model,
             @RequestParam(required = false) MultipartFile photo,
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            RedirectAttributes redirectAttributes) {
 
         if (result.hasErrors()) {
             model.addAttribute("errors", result.getFieldErrors());
@@ -80,8 +82,7 @@ public class ProfileController {
 
                 Files.createDirectories(Paths.get(uploadDir));
 
-                String fileName =
-                        UUID.randomUUID() + "_" + photo.getOriginalFilename();
+                String fileName = UUID.randomUUID() + "_" + photo.getOriginalFilename();
 
                 Path path = Paths.get(uploadDir, fileName);
 
@@ -96,13 +97,14 @@ public class ProfileController {
 
             userService.save(user);
 
+            redirectAttributes.addFlashAttribute("success", "Profil berhasil di edit");
             return "redirect:/profile";
 
         } catch (IOException e) {
 
             model.addAttribute(
                     "error",
-                    "Gagal mengupload foto profil");
+                    "Gagal mengedit profil");
 
             return "pages/EditProfile";
 
@@ -116,7 +118,9 @@ public class ProfileController {
 
     @PostMapping("/profile/delete-photo")
     public String deletePhoto(
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            Model model,
+            RedirectAttributes redirectAttributes) {
 
         User user = userPrincipal.getUser();
 
@@ -136,8 +140,10 @@ public class ProfileController {
 
             userService.save(user);
 
+            redirectAttributes.addFlashAttribute("success", "Foto profil berhasil dihapus");
         } catch (IOException e) {
-            e.printStackTrace();
+            model.addAttribute("error", e.getMessage());
+            return "pages/EditProfile";
         }
 
         return "redirect:/profile";

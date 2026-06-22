@@ -18,6 +18,16 @@
 				</ul>
 			</div>
 
+			<!-- ALERT -->
+			<div th:if="${success}" class="alert alert-soft alert-success mb-4">
+				<span th:text="${success}"></span>
+			</div>
+
+			<div th:if="${error}" class="alert alert-soft alert-error mb-4">
+				<span th:text="${error}"></span>
+			</div>
+
+
 			<div class="flex items-center justify-between mb-6">
 
 				<h1 class="typo-heading-xl">
