@@ -56,127 +56,125 @@
 
         <script th:inline="javascript">
             const firebaseConfig = {
-                apiKey: /*[[${@firebaseProperties.apiKey}]]*/ '',
-                authDomain: /*[[${@firebaseProperties.authDomain}]]*/ '',
-                projectId: /*[[${@firebaseProperties.projectId}]]*/ '',
-                storageBucket: /*[[${@firebaseProperties.storageBucket}]]*/ '',
-                messagingSenderId: /*[[${@firebaseProperties.messagingSenderId}]]*/ '',
-                appId: /*[[${@firebaseProperties.appId}]]*/ ''
+                apiKey: /*[[${@firebaseConfigProperties.apiKey}]]*/ '',
+                authDomain: /*[[${@firebaseConfigProperties.authDomain}]]*/ '',
+                projectId: /*[[${@firebaseConfigProperties.projectId}]]*/ '',
+                storageBucket: /*[[${@firebaseConfigProperties.storageBucket}]]*/ '',
+                messagingSenderId: /*[[${@firebaseConfigProperties.messagingSenderId}]]*/ '',
+                appId: /*[[${@firebaseConfigProperties.appId}]]*/ ''
             };
-            const vapidKey = /*[[${@firebaseProperties.vapidKey}]]*/ '';
+            const vapidKey = /*[[${@firebaseConfigProperties.vapidKey}]]*/ '';
         </script>
 
-       <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-        import {
-            getMessaging,
-            getToken,
-            onMessage,
-        } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';
+        <script type="module">
+            import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+            import {
+                getMessaging,
+                getToken,
+                onMessage,
+            } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';
 
-        const app = initializeApp(firebaseConfig);
-        const messaging = getMessaging(app);
+            const app = initializeApp(firebaseConfig);
+            const messaging = getMessaging(app);
 
-        async function setupPushNotification() {
-            if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
+            async function setupPushNotification() {
+                if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
 
-            try {
-                const permission = await Notification.requestPermission();
-                if (permission !== 'granted') {
-                    console.warn("Izin notifikasi ditolak oleh user.");
-                    return;
-                }
+                try {
+                    const permission = await Notification.requestPermission();
+                    if (permission !== 'granted') {
+                        console.warn("Izin notifikasi ditolak oleh user.");
+                        return;
+                    }
 
-                // FIX 1: URL disesuaikan dengan endpoint di Controller kamu
-                const swUrl = '/api/notification/firebase-messaging-sw.js';
-                
-                let registration = await navigator.serviceWorker.getRegistration('/');
-                if (!registration || registration.active?.scriptURL.indexOf(swUrl) === -1) {
-                    registration = await navigator.serviceWorker.register(swUrl, {
-                        scope: '/',
+                    const swUrl = '/api/notification/firebase-messaging-sw.js';
+
+                    let registration = await navigator.serviceWorker.getRegistration('/');
+                    if (!registration || registration.active?.scriptURL.indexOf(swUrl) === -1) {
+                        registration = await navigator.serviceWorker.register(swUrl, {
+                            scope: '/',
+                        });
+                    }
+
+                    await navigator.serviceWorker.ready;
+
+                    const token = await getToken(messaging, {
+                        vapidKey: vapidKey,
+                        serviceWorkerRegistration: registration,
                     });
+
+                    if (token) {
+                        console.log("Token didapat:", token);
+                        await saveToken(token);
+                    } else {
+                        console.warn("Gagal mendapatkan token dari Firebase.");
+                    }
+
+                    onMessage(messaging, (payload) => {
+                        console.log('Pesan diterima saat tab aktif (foreground):', payload);
+
+                        const title = payload.notification?.title || payload.data?.title || 'Notifikasi RuangKelas';
+                        const options = {
+                            body: payload.notification?.body || payload.data?.body || '',
+                            icon: '/images/Logo.svg',
+                        };
+
+                        const notification = new Notification(title, options);
+
+                        notification.onclick = function(event) {
+                            event.preventDefault();
+                            notification.close();
+
+                            const refId = payload.data?.referenceId;
+                            const refType = payload.data?.referenceType;
+
+                            let redirectPath = '/';
+                            if (refType && refId) {
+                                redirectPath = `/notifications/redirect?type=${refType}&id=${refId}`;
+                            }
+
+                            window.location.href = redirectPath;
+                        };
+                    });
+
+                } catch (e) {
+                    console.error("Gagal setup FCM:", e);
                 }
-
-                await navigator.serviceWorker.ready;
-
-                // FIX 2: Firebase v10 menerima string VAPID secara langsung
-                const token = await getToken(messaging, {
-                    vapidKey: vapidKey, 
-                    serviceWorkerRegistration: registration,
-                });
-
-                if (token) {
-                    console.log("Token didapat:", token);
-                    await saveToken(token);
-                } else {
-                    console.warn("Gagal mendapatkan token dari Firebase.");
-                }
-
-                onMessage(messaging, (payload) => {
-                    console.log('Pesan diterima saat tab aktif (foreground):', payload);
-                    
-                    const title = payload.notification?.title || payload.data?.title || 'Notifikasi RuangKelas';
-                    const options = {
-                        body: payload.notification?.body || payload.data?.body || '',
-                        icon: '/images/Logo.svg',
-                    };
-                    
-                    const notification = new Notification(title, options);
-                    
-                    notification.onclick = function(event) {
-                        event.preventDefault();
-                        notification.close();
-                        
-                        const refId = payload.data?.referenceId;
-                        const refType = payload.data?.referenceType;
-                        
-                        let redirectPath = '/';
-                        if (refType && refId) {
-                            redirectPath = `/notifications/redirect?type=${refType}&id=${refId}`;
-                        }
-                        
-                        window.location.href = redirectPath;
-                    };
-                });
-
-            } catch (e) {
-                console.error("Gagal setup FCM:", e);
             }
-        }
 
-        async function saveToken(token) {
-            try {
-                const csrf = document.querySelector('meta[name="_csrf"]')?.content;
-                const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
-                
-                if (!csrf || !csrfHeader) {
-                    console.error("CSRF token tidak ditemukan di meta tags!");
-                    return;
+            async function saveToken(token) {
+                try {
+                    const csrf = document.querySelector('meta[name="_csrf"]')?.content;
+                    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+
+                    if (!csrf || !csrfHeader) {
+                        console.error("CSRF token tidak ditemukan di meta tags!");
+                        return;
+                    }
+
+                    const response = await fetch('/api/notification/register-token', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            [csrfHeader]: csrf,
+                        },
+                        body: JSON.stringify({ token }),
+                    });
+
+                    if (response.ok) {
+                        console.log("Token FCM berhasil disimpan ke DB.");
+                    } else {
+                        console.error("Gagal menyimpan token ke DB:", await response.text());
+                    }
+                } catch (e) {
+                    console.error("Error saat fetch API simpan token:", e);
                 }
-
-                const response = await fetch('/api/notification/register-token', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        [csrfHeader]: csrf,
-                    },
-                    body: JSON.stringify({ token }),
-                });
-
-                if(response.ok) {
-                    console.log("Token FCM berhasil disimpan ke DB.");
-                } else {
-                    console.error("Gagal menyimpan token ke DB:", await response.text());
-                }
-            } catch (e) {
-                console.error("Error saat fetch API simpan token:", e);
             }
-        }
 
-        const isUserLoggedIn = document.getElementById('user-dropdown') !== null;
-        if (isUserLoggedIn) {
-            setupPushNotification();
-        }
-      </script>
+            const isUserLoggedIn = document.getElementById('user-dropdown') !== null;
+            if (isUserLoggedIn) {
+                setupPushNotification();
+            }
+        </script>
     </body>
 </html>
