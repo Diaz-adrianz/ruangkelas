@@ -113,4 +113,33 @@ public class ProfileController {
             return "pages/EditProfile";
         }
     }
+
+    @PostMapping("/profile/delete-photo")
+    public String deletePhoto(
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        User user = userPrincipal.getUser();
+
+        try {
+
+            if (user.getProfilePicture() != null) {
+
+                String filePath = user.getProfilePicture()
+                        .replace("/uploads/", "uploads/");
+
+                Path path = Paths.get(filePath);
+
+                Files.deleteIfExists(path);
+            }
+
+            user.setProfilePicture(null);
+
+            userService.save(user);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return "redirect:/profile";
+    }
 }
