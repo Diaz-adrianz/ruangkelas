@@ -230,4 +230,20 @@ public class NotificationService {
     public void markAllNotificationsAsRead(Long userId) {
         notificationRepository.markAllAsReadByUserId(userId);
     }
+
+    public void markAsRead(Integer id) {
+        Notification notification = notificationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Notifikasi tidak ditemukan"));
+        notification.setIsRead(true);
+        notificationRepository.save(notification);  
+    }
+
+    public void deleteNotification(Integer id) {
+        notificationRepository.deleteById(id);
+    }
+
+    public Notification getNotificationById(Integer id) {
+        return notificationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Notifikasi tidak ditemukan"));
+    }
 }

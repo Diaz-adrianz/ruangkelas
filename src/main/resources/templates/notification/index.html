@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Notifikasi Saya</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; margin: 0; }
+        .container { max-width: 800px; margin: 0 auto; background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .header { background-color: #009ca4; color: #ffffff; padding: 15px; border-radius: 8px 8px 0 0; text-align: center; margin-bottom: 20px; }
+        .notif-card { border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .notif-unread { background-color: #e0f7fa; border-color: #009ca4; }
+        .notif-content h4 { margin: 0 0 5px 0; color: #333; }
+        .notif-content p { margin: 0; color: #666; font-size: 14px; }
+        .notif-actions { display: flex; gap: 10px; }
+        .btn { padding: 8px 12px; text-decoration: none; border-radius: 4px; font-size: 14px; cursor: pointer; border: none; font-weight: bold; }
+        .btn-read { background-color: #009ca4; color: white; }
+        .btn-delete { background-color: #e74c3c; color: white; }
+        .btn-link { background-color: #f39c12; color: white; }
+        .notif-empty { text-align: center; color: #888; padding: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Notifikasi Saya</h2>
+        </div>
+        
+        <div th:if="${notifications.empty}" class="notif-empty">
+            <p>Belum ada notifikasi saat ini.</p>
+        </div>
+
+        <div th:each="notif : ${notifications}" th:classappend="${!notif.isRead} ? 'notif-card notif-unread' : 'notif-card'">
+            <div class="notif-content">
+                <h4 th:text="${notif.subject}"></h4>
+                <p th:text="${notif.message}"></p>
+                <small th:text="${#temporals.format(notif.createdAt, 'dd-MM-yyyy HH:mm')}"></small>
+            </div>
+            
+            <div class="notif-actions">
+                <a th:href="@{/notification/redirect/{id}(id=${notif.id})}" class="btn btn-link">Lihat Detail</a>
+                
+                <form th:if="${!notif.isRead}" th:action="@{/notification/{id}/read(id=${notif.id})}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-read">Tandai Dibaca</button>
+                </form>
+                
+                <form th:action="@{/notification/{id}/delete(id=${notif.id})}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-delete">Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <a href="/" class="btn" style="background-color: #009ca4; color: #ffffff; text-decoration: none; padding: 8px 15px; border-radius: 5px; font-weight: bold;">
+            &larr; Home
+        </a>
+        
+        
+        
+        <div style="width: 70px;"></div>
+    </div>
+    
+    </div>
+</body>
+</html>

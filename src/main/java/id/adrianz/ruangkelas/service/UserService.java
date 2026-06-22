@@ -116,4 +116,9 @@ public class UserService implements UserDetailsService {
         user.setResetOtpExpiresAt(null);
         userRepository.save(user);
     }
+
+    public User findByUsernameOrEmail(String identifier) {
+        return userRepository.findByUsernameOrEmail(identifier, identifier)
+                .orElseThrow(() -> new IllegalArgumentException("User dengan identitas " + identifier + " tidak ditemukan"));
+    }
 }
