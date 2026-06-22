@@ -11,4 +11,7 @@ public class PushNotification extends Notification {
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
+    public String getSubject() {
+        return this.title; 
+    }
 }

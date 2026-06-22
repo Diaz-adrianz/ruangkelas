@@ -41,6 +41,7 @@
                         </div>
                         <ul class="menu w-full">
                             <li><a href="/profile">Profil</a></li>
+                            <li><a th:href="@{/notification}">Notifikasi</a></li>
                             <li class="text-error">
                                 <form method="post" th:action="@{/auth/logout}">
                                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
