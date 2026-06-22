@@ -38,7 +38,7 @@
 
 					<a
 						href="/profile/edit"
-						class="btn btn-primary btn-sm btn-soft"
+						class="btn btn-primary btn-sm btn-outline"
 					>
 						<i class="ri-pencil-line text-sm"></i>
 						Edit Profil
@@ -58,80 +58,92 @@
 
 						<button
 							type="submit"
-							class="btn btn-error btn-sm"
+							class="btn btn-error btn-outline btn-sm"
 							onclick="return confirm('Hapus foto profil?')"
 						>
 							Hapus Foto
 						</button>
-
 					</form>
-
 				</div>
-
 			</div>
 
-			<!-- FOTO PROFIL -->
-			<div
-				th:if="${user.profilePicture != null}"
-				class="mb-6"
-			>
+			
+			<div class="flex flex-col gap-4 md:flex-row md:gap-16">
+				<div class="avatar">
+					<div class="size-52 md:size-32 rounded-full overflow-hidden">
+						<img
+							th:if="${user.profilePicture != null}"
+							th:src="${user.profilePicture}"
+							alt="Profile Picture"
+							class="w-full h-full object-cover"
+						/>
 
-				<img
-					th:src="${user.profilePicture}"
-					alt="Profile Picture"
-					class="w-32 h-32 rounded-full object-cover border"
-				/>
+						<div
+							th:unless="${user.profilePicture != null}"
+							class="bg-neutral text-neutral-content text-4xl size-full rounded-full flex items-center justify-center"
+						>
+							<span sec:authentication="principal.initials"></span>
+						</div>
+					</div>
+				</div>
 
+				<div
+					th:if="${user.profilePicture != null}"
+					class="mb-6"
+				>
+					<img
+						th:src="${user.profilePicture}"
+						alt="Profile Picture"
+						class="w-32 h-32 rounded-full object-cover border"
+					/>
+				</div>
+
+				<div class="flex flex-col gap-2 grow">
+					<div class="flex">
+						<p class="typo-body-md w-1/3 max-w-40 opacity-60">
+							Username
+						</p>
+	
+						<p
+							class="typo-body-md grow"
+							th:text="'@' + ${user.username}"
+						></p>
+					</div>
+	
+					<div class="flex">
+						<p class="typo-body-md w-1/3 max-w-40 opacity-60">
+							Email
+						</p>
+	
+						<p
+							class="typo-body-md grow"
+							th:text="${user.email}"
+						></p>
+					</div>
+	
+					<div class="flex">
+						<p class="typo-body-md w-1/3 max-w-40 opacity-60">
+							Nama
+						</p>
+	
+						<p
+							class="typo-body-md grow"
+							th:text="${user.name}"
+						></p>
+					</div>
+	
+					<div class="flex">
+						<p class="typo-body-md w-1/3 max-w-40 opacity-60">
+							NIM
+						</p>
+	
+						<p
+							class="typo-body-md grow"
+							th:text="${user.nim}"
+						></p>
+					</div>
+				</div>
 			</div>
-
-			<div class="flex flex-col gap-2">
-
-				<div class="flex">
-					<p class="typo-body-md w-1/3 max-w-40 opacity-60">
-						Username
-					</p>
-
-					<p
-						class="typo-body-md grow"
-						th:text="'@' + ${user.username}"
-					></p>
-				</div>
-
-				<div class="flex">
-					<p class="typo-body-md w-1/3 max-w-40 opacity-60">
-						Email
-					</p>
-
-					<p
-						class="typo-body-md grow"
-						th:text="${user.email}"
-					></p>
-				</div>
-
-				<div class="flex">
-					<p class="typo-body-md w-1/3 max-w-40 opacity-60">
-						Nama
-					</p>
-
-					<p
-						class="typo-body-md grow"
-						th:text="${user.name}"
-					></p>
-				</div>
-
-				<div class="flex">
-					<p class="typo-body-md w-1/3 max-w-40 opacity-60">
-						NIM
-					</p>
-
-					<p
-						class="typo-body-md grow"
-						th:text="${user.nim}"
-					></p>
-				</div>
-
-			</div>
-
 		</div>
 	</body>
 </html>
