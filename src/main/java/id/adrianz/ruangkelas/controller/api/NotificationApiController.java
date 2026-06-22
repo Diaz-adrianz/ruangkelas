@@ -17,10 +17,11 @@ import id.adrianz.ruangkelas.model.DeviceToken;
 import id.adrianz.ruangkelas.model.User;
 import id.adrianz.ruangkelas.repository.DeviceTokenRepository;
 import id.adrianz.ruangkelas.repository.UserRepository;
-import id.adrianz.ruangkelas.scheduler.TaskNotificationScheduler;
 import id.adrianz.ruangkelas.service.NotificationService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/notification")
 @RequiredArgsConstructor
@@ -31,7 +32,6 @@ public class NotificationApiController {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
     
-
     @GetMapping("/firebase-messaging-sw.js")
     public ResponseEntity<String> firebaseSwJs() {
         String js = """
@@ -66,6 +66,7 @@ public class NotificationApiController {
                 firebaseConfig.getAppId()
         );
 
+        // Header Service-Worker-Allowed sangat penting agar scope '/' diizinkan meski file ada di /api/notification/
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/javascript"))
                 .header("Service-Worker-Allowed", "/")
@@ -83,14 +84,26 @@ public class NotificationApiController {
             return ResponseEntity.badRequest().body("Token tidak boleh kosong");
         }
 
-        if (!deviceTokenRepository.existsByToken(token)) {
-            User user = userRepository.findByUsername(userDetails.getUsername())
-                    .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+        User user = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
 
+        // Cek apakah token sudah ada di database
+        // Asumsi kamu punya method findByToken di DeviceTokenRepository
+        // Jika tidak punya, buat method: Optional<DeviceToken> findByToken(String token);
+        DeviceToken existingToken = deviceTokenRepository.findByToken(token).orElse(null);
+
+        if (existingToken == null) {
+            // Jika token benar-benar baru
             DeviceToken deviceToken = new DeviceToken();
             deviceToken.setToken(token);
             deviceToken.setUser(user);
             deviceTokenRepository.save(deviceToken);
+            log.info("Token baru berhasil didaftarkan untuk user: {}", user.getUsername());
+        } else if (!existingToken.getUser().getId().equals(user.getId())) {
+            // Jika token sudah ada tapi dimiliki user lain (misal pindah akun di device yang sama)
+            existingToken.setUser(user);
+            deviceTokenRepository.save(existingToken);
+            log.info("Kepemilikan token diupdate untuk user: {}", user.getUsername());
         }
 
         return ResponseEntity.ok(Map.of("message", "Token berhasil disimpan"));
@@ -105,5 +118,4 @@ public class NotificationApiController {
         notificationService.sendToToken(token, title, message);
         return ResponseEntity.ok(Map.of("message", "Notifikasi terkirim"));
     }
-
 }

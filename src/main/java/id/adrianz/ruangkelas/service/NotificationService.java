@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.google.firebase.messaging.BatchResponse;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
@@ -13,6 +15,9 @@ import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.MessagingErrorCode;
 import com.google.firebase.messaging.MulticastMessage;
 import com.google.firebase.messaging.SendResponse;
+import com.google.firebase.messaging.WebpushConfig;
+import com.google.firebase.messaging.WebpushFcmOptions;
+
 import id.adrianz.ruangkelas.model.DeviceToken;
 import id.adrianz.ruangkelas.model.EmailNotification;
 import id.adrianz.ruangkelas.model.Notification;
@@ -38,8 +43,8 @@ public class NotificationService {
     private String baseUrl;
 
     public void createAndSendPushNotification(User user, String title, String body,
-                                                NotificationType type,
-                                                Long referenceId, String referenceType) {
+                                              NotificationType type,
+                                              Long referenceId, String referenceType) {
         PushNotification notification = new PushNotification();
         notification.setUserId(user.getId());
         notification.setTitle(title);
@@ -51,22 +56,15 @@ public class NotificationService {
 
         notificationRepository.save(notification);
 
-        // referenceId & referenceType sekarang ikut dikirim sebagai data payload FCM,
-        // biar service worker bisa baca pas notifikasi diklik.
         sendToUser(user, title, body, referenceId, referenceType);
     }
 
     public boolean alreadyNotifiedToday(Long userId, Long referenceId, String referenceType, NotificationType type) {
-        // SEMENTARA RETURN SAKLEK FALSE BIAR GAK DI-SKIP PAS TESTING
-        return false; 
-
-        /* KODE LAMA DI-COMMENT DULU SEMENTARA
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
         LocalDateTime endOfDay = LocalDate.now().atTime(23, 59, 59);
 
         return notificationRepository.existsByUserIdAndReferenceIdAndReferenceTypeAndTypeAndCreatedAtBetween(
                 userId, referenceId, referenceType, type, startOfDay, endOfDay);
-        */
     }
 
     private void sendToUser(User user, String title, String body, Long referenceId, String referenceType) {
@@ -86,10 +84,20 @@ public class NotificationService {
     }
 
     private void sendMulticastNotification(List<String> tokens, String title, String body,
-                                            Long referenceId, String referenceType) {
+                                           Long referenceId, String referenceType) {
+        
+        // Membentuk URL redirect berdasarkan tipe dan ID
+        String clickUrl = (referenceId != null && referenceType != null) 
+                ? baseUrl + "/notifications/redirect?type=" + referenceType + "&id=" + referenceId 
+                : baseUrl + "/";
+
         MulticastMessage.Builder builder = MulticastMessage.builder()
                 .setNotification(com.google.firebase.messaging.Notification.builder()
                         .setTitle(title).setBody(body).build())
+                // Menambahkan konfigurasi link agar notifikasi bisa diklik (khusus Web Push)
+                .setWebpushConfig(WebpushConfig.builder()
+                        .setFcmOptions(WebpushFcmOptions.builder().setLink(clickUrl).build())
+                        .build())
                 .addAllTokens(tokens);
 
         putReferenceData(builder, title, body, referenceId, referenceType);
@@ -113,16 +121,24 @@ public class NotificationService {
         }
     }
 
-    // Overload lama tetap dipertahankan biar pemanggil existing (kalau ada) gak rusak.
-    // Tapi TIDAK akan bawa referenceId/referenceType — pakai versi di bawah kalau butuh redirect.
     public void sendToToken(String token, String title, String body) {
         sendToToken(token, title, body, null, null);
     }
 
     public void sendToToken(String token, String title, String body, Long referenceId, String referenceType) {
+        
+        // Membentuk URL redirect berdasarkan tipe dan ID
+        String clickUrl = (referenceId != null && referenceType != null) 
+                ? baseUrl + "/notifications/redirect?type=" + referenceType + "&id=" + referenceId 
+                : baseUrl + "/";
+
         Message.Builder builder = Message.builder()
                 .setNotification(com.google.firebase.messaging.Notification.builder()
                         .setTitle(title).setBody(body).build())
+                // Menambahkan konfigurasi link agar notifikasi bisa diklik (khusus Web Push)
+                .setWebpushConfig(WebpushConfig.builder()
+                        .setFcmOptions(WebpushFcmOptions.builder().setLink(clickUrl).build())
+                        .build())
                 .setToken(token);
 
         putReferenceData(builder, title, body, referenceId, referenceType);
@@ -137,62 +153,74 @@ public class NotificationService {
         }
     }
 
-    // Helper biar gak duplikat logic putData di Message.Builder & MulticastMessage.Builder.
-    // FCM data payload WAJIB semua value-nya String, makanya referenceId di-toString().
     private void putReferenceData(Message.Builder builder, String title, String body,
-                                   Long referenceId, String referenceType) {
+                                  Long referenceId, String referenceType) {
         builder.putData("title", title);
         builder.putData("body", body);
-        if (referenceType != null) {
-            builder.putData("referenceType", referenceType);
-        }
-        if (referenceId != null) {
-            builder.putData("referenceId", referenceId.toString());
-        }
+        if (referenceType != null) builder.putData("referenceType", referenceType);
+        if (referenceId != null) builder.putData("referenceId", referenceId.toString());
     }
 
     private void putReferenceData(MulticastMessage.Builder builder, String title, String body,
-                                   Long referenceId, String referenceType) {
+                                  Long referenceId, String referenceType) {
         builder.putData("title", title);
         builder.putData("body", body);
-        if (referenceType != null) {
-            builder.putData("referenceType", referenceType);
-        }
-        if (referenceId != null) {
-            builder.putData("referenceId", referenceId.toString());
-        }
+        if (referenceType != null) builder.putData("referenceType", referenceType);
+        if (referenceId != null) builder.putData("referenceId", referenceId.toString());
     }
 
-    private void handleFcmError(String token, FirebaseMessagingException e) {
+    @Transactional // Memastikan query delete custom berjalan dengan aman
+    protected void handleFcmError(String token, FirebaseMessagingException e) {
         if (e == null) return;
 
-        if (e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) {
-            log.warn(">>> Token tidak valid, menghapus dari DB: {}", token);
+        // FITUR UTAMA: Mempertahankan pengecekan standar FCM
+        // FITUR TAMBAHAN: Antisipasi jika getMessagingErrorCode() bernilai null akibat ZipException pada HTTP 404
+        if (e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED || 
+            (e.getMessage() != null && e.getMessage().contains("404"))) {
+            
+            log.warn(">>> Token tidak valid atau unregistered (404), menghapus dari DB: {}", token);
             deviceTokenRepository.deleteByToken(token);
         } else {
             log.error(">>> Gagal kirim FCM ke token {} ({}): {}", token, e.getMessagingErrorCode(), e.getMessage());
         }
     }
 
-    public void createAndSendEmailNotification(Long userId, String emailTarget, String subject, String messageContent, NotificationType type, Long referenceId, String referenceType) {
-        EmailNotification notification = new EmailNotification();
-        notification.setUserId(userId);
-        notification.setEmail(emailTarget);
-        notification.setSubject(subject);
-        notification.setMessage(messageContent);
-        notification.setType(type);
-        notification.setReferenceId(referenceId);
-        notification.setReferenceType(referenceType);
-        notification.setIsRead(false);
-
-        notificationRepository.save(notification);
-
+    // PERBAIKAN: Mengubah Long userId menjadi User user agar sinkron dengan fitur Push Notification di bawahnya
+    public void createAndSendEmailNotification(User user, String emailTarget, String subject,
+                                               String messageContent, NotificationType type,
+                                               Long referenceId, String referenceType) {
+        
+        // 1. Proses Save & Kirim Email Notification
+        EmailNotification emailNotification = new EmailNotification();
+        emailNotification.setUserId(user.getId());
+        emailNotification.setEmail(emailTarget);
+        emailNotification.setSubject(subject);
+        emailNotification.setMessage(messageContent);
+        emailNotification.setType(type);
+        emailNotification.setReferenceId(referenceId);
+        emailNotification.setReferenceType(referenceType);
+        emailNotification.setIsRead(false);
+        notificationRepository.save(emailNotification);  
+        
         Context context = new Context();
         context.setVariable("title", subject);
         context.setVariable("content", messageContent);
-        context.setVariable("redirectUrl", baseUrl + "/notifications/redirect?type=" + referenceType + "&id=" + referenceId);
 
         emailService.sendTemplateMessage(emailTarget, subject, "email/email-template", context);
+
+        // 2. Proses Save & Kirim Push Notification (Fitur dipertahankan & diperbaiki variabelnya)
+        PushNotification pushNotification = new PushNotification();
+        pushNotification.setUserId(user.getId());
+        pushNotification.setTitle(subject); // Menyesuaikan dari parameter subject
+        pushNotification.setMessage(messageContent); // Menyesuaikan dari parameter messageContent
+        pushNotification.setType(type);
+        pushNotification.setReferenceId(referenceId);
+        pushNotification.setReferenceType(referenceType);
+        pushNotification.setIsRead(false);
+        
+        notificationRepository.save(pushNotification);
+
+        sendToUser(user, subject, messageContent, referenceId, referenceType);
     }
 
     public List<Notification> getAllNotificationsByUserId(Long userId) {
