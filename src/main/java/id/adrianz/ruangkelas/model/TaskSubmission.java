@@ -1,13 +1,13 @@
 package id.adrianz.ruangkelas.model;
 
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
-@Entity 
+@Entity
 @Table(name = "task_submissions")
-@Getter 
+@Getter
 @Setter
 public class TaskSubmission {
 
@@ -15,20 +15,25 @@ public class TaskSubmission {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
+
     @ManyToOne
     @JoinColumn(name = "task_id", nullable = false)
     private Task task;
 
-    @Column(nullable = false)
-    private String studentName;
+    @Enumerated(EnumType.STRING)
+    private SubmissionStatus status = SubmissionStatus.PENDING;
 
-    @Column(nullable = false)
-    private String fileUrl;
+    @Column(columnDefinition = "TEXT")
+    private String note;
 
+    @Column(name = "submitted_at")
     private LocalDateTime submittedAt;
 
-    @PrePersist
-    protected void onCreate(){
-        submittedAt = LocalDateTime.now();
-     }
+    @Column(name = "created_at")
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt = LocalDateTime.now();
 }
