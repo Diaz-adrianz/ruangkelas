@@ -1,10 +1,6 @@
-// firebase-messaging-sw.js
-// Service worker buat handle FCM push notification pas tab/browser di background.
+importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
-importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-compat.js');
-
-// !! GANTI dengan config Firebase yang SAMA dengan yang dipakai di JS utama (tempat getToken() dipanggil) !!
 firebase.initializeApp({
   apiKey: "AIzaSyDE1E4vN-3FFPn0OCyUuvE1fZizjsofYwk",
   authDomain: "didlin.firebaseapp.com",
@@ -16,52 +12,59 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Dipanggil otomatis kalau ada push masuk SAAT tab/app lagi di background atau tertutup
 messaging.onBackgroundMessage((payload) => {
-  console.log('[firebase-messaging-sw.js] Pesan diterima di background:', payload);
-
+  console.log('[firebase-messaging-sw.js] Pesan masuk di background:', payload);
+  
   const title = payload.notification?.title || payload.data?.title || 'Notifikasi Ruangkelas';
   const options = {
     body: payload.notification?.body || payload.data?.body || '',
-    icon: '/icons/icon-192.png', // sesuaikan path icon kalau ada, atau hapus baris ini
-    data: payload.data || {} // Data payload (termasuk referenceId & referenceType) otomatis masuk ke sini
+    icon: '/icons/icon-192.png',
+    data: payload
   };
 
   self.registration.showNotification(title, options);
 });
 
-// HANDLER KETIKA NOTIFIKASI DIKLIK
 self.addEventListener('notificationclick', (event) => {
-  event.notification.close(); // Tutup pop-up notifikasi terlebih dahulu
+  event.notification.close();
+  
+  let targetUrl = '/';
+  const payload = event.notification.data || {};
 
-  // Ambil data payload
-  const data = event.notification.data || {};
-  const referenceId = data.referenceId;
-  const referenceType = data.referenceType;
+  console.log('[notificationclick] full payload:', JSON.stringify(payload));
 
-  // Default redirect ke halaman utama jika tidak ada tipe referensi
-  let redirectPath = '/';
+  const dataBlock = payload.data 
+    || payload.FCM_MSG?.data 
+    || payload.FCM_MSG?.notification?.data
+    || {};
 
-  if (referenceType && referenceId) {
-      redirectPath = `/notifications/redirect?type=${referenceType}&id=${referenceId}`;
+  console.log('[notificationclick] dataBlock:', JSON.stringify(dataBlock));
+
+  if (payload.fcmOptions?.link) {
+      targetUrl = payload.fcmOptions.link;
+  } else if (payload.FCM_MSG?.fcmOptions?.link) {
+      targetUrl = payload.FCM_MSG.fcmOptions.link;
+  } else if (dataBlock.referenceType && dataBlock.referenceId) {
+      targetUrl = `/notifications/redirect?type=${dataBlock.referenceType}&id=${dataBlock.referenceId}`;
   }
 
-  // client.url dari clients.matchAll() selalu absolute URL, jadi redirectPath
-  // (yang relative) harus dijadiin absolute dulu sebelum dibandingin —
-  // kalau enggak, perbandingan client.url === redirectPath gak akan pernah match.
-  const targetUrl = new URL(redirectPath, self.location.origin).href;
+  console.log('[notificationclick] targetUrl:', targetUrl);
 
-  // Arahkan tab browser yang sudah ada, atau buka tab baru jika belum ada yang aktif
+  const finalUrl = new URL(targetUrl, self.location.origin).href;
+
   event.waitUntil(
-      clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
+      clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
           for (let i = 0; i < clientList.length; i++) {
               let client = clientList[i];
-              if (client.url === targetUrl && 'focus' in client) {
-                  return client.focus();
+              if (client.url.startsWith(self.location.origin) && 'focus' in client) {
+                  client.focus();
+                  if ('navigate' in client) {
+                      return client.navigate(finalUrl);
+                  }
               }
           }
           if (clients.openWindow) {
-              return clients.openWindow(targetUrl);
+              return clients.openWindow(finalUrl);
           }
       })
   );

@@ -2,6 +2,7 @@ package id.adrianz.ruangkelas.scheduler;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 import jakarta.annotation.PostConstruct;
@@ -45,33 +46,36 @@ public class TaskNotificationScheduler {
     }
 
     private void processDeadline(LocalDate targetDate, String title, NotificationType type) {
-    LocalDateTime startOfDay = targetDate.atStartOfDay();
-    LocalDateTime endOfDay = targetDate.atTime(23, 59, 59);
+        LocalDateTime startOfDay = targetDate.atStartOfDay();
+        LocalDateTime endOfDay = targetDate.atTime(LocalTime.MAX);
 
-    List<Task> tasks = taskRepository.findByDeadlineBetween(startOfDay, endOfDay);
-    log.info(">>> Tasks ditemukan untuk tanggal {}: {}", targetDate, tasks.size());
+        List<Task> tasks = taskRepository.findByDeadlineBetween(startOfDay, endOfDay);
+        log.info(">>> Tasks ditemukan untuk tanggal {}: {}", targetDate, tasks.size());
 
-    for (Task task : tasks) {
-        List<UserClass> members = userClassRepository.findByClasseId(task.getClasse().getId());
-        String body = "Halo, tugas '" + task.getTitle() + "' akan berakhir pada " + task.getDeadline().toString() + ". Segera selesaikan!";
+        for (Task task : tasks) {
+            List<UserClass> members = userClassRepository.findByClasseId(task.getClasse().getId());
+            String body = "Halo, tugas '" + task.getTitle() + "' akan berakhir pada "
+                    + task.getDeadline().toString() + ". Segera selesaikan!";
 
-        for (UserClass member : members) {
-            User user = member.getUser();
+            for (UserClass member : members) {
+                User user = member.getUser();
 
-            if (notificationService.alreadyNotifiedToday(user.getId(), task.getId(), "TASK", type)) {
-                log.info(">>> User {} sudah dinotif hari ini untuk task {}, skip", user.getId(), task.getId());
-                continue;
+                if (notificationService.alreadyNotifiedToday(user.getId(), task.getId(), "TASK", type)) {
+                    log.info(">>> User {} sudah dinotif hari ini untuk task {}, skip", user.getId(), task.getId());
+                    continue;
+                }
+
+                log.info(">>> Memproses pengiriman notifikasi untuk User ID: {}", user.getId());
+
+                notificationService.createAndSendPushNotification(
+                        user,
+                        title,
+                        body,
+                        type,
+                        task.getId(),
+                        "TASK"
+                );
             }
-
-            notificationService.createAndSendPushNotification(
-                    user,
-                    title,
-                    body,
-                    type,
-                    task.getId(),
-                    "TASK"
-            );
         }
     }
-}
 }

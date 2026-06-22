@@ -56,17 +56,17 @@
 
         <script th:inline="javascript">
             const firebaseConfig = {
-                apiKey: 'AIzaSyDE1E4vN-3FFPn0OCyUuvE1fZizjsofYwk',
-                authDomain: 'didlin.firebaseapp.com',
-                projectId: 'didlin',
-                storageBucket: 'didlin.firebasestorage.app',
-                messagingSenderId: '599992082188',
-                appId: '1:599992082188:web:9924580056179ab634f329'
+                apiKey: /*[[${@firebaseProperties.apiKey}]]*/ '',
+                authDomain: /*[[${@firebaseProperties.authDomain}]]*/ '',
+                projectId: /*[[${@firebaseProperties.projectId}]]*/ '',
+                storageBucket: /*[[${@firebaseProperties.storageBucket}]]*/ '',
+                messagingSenderId: /*[[${@firebaseProperties.messagingSenderId}]]*/ '',
+                appId: /*[[${@firebaseProperties.appId}]]*/ ''
             };
-            const vapidKey = 'BOzvP1IDYnvaIYh6e7kB8F4GIAqTLwD5mqc0mTBsKKFBe1tHQaBF3OVmuP_4sEOknOMlH8d7ua8UKCZUtd1YNms';
+            const vapidKey = /*[[${@firebaseProperties.vapidKey}]]*/ '';
         </script>
 
-        <script type="module">
+       <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
         import {
             getMessaging,
@@ -82,37 +82,47 @@
 
             try {
                 const permission = await Notification.requestPermission();
-                if (permission !== 'granted') return;
+                if (permission !== 'granted') {
+                    console.warn("Izin notifikasi ditolak oleh user.");
+                    return;
+                }
 
+                // FIX 1: URL disesuaikan dengan endpoint di Controller kamu
+                const swUrl = '/api/notification/firebase-messaging-sw.js';
+                
                 let registration = await navigator.serviceWorker.getRegistration('/');
-                if (!registration) {
-                    registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+                if (!registration || registration.active?.scriptURL.indexOf(swUrl) === -1) {
+                    registration = await navigator.serviceWorker.register(swUrl, {
                         scope: '/',
                     });
                 }
 
                 await navigator.serviceWorker.ready;
 
+                // FIX 2: Firebase v10 menerima string VAPID secara langsung
                 const token = await getToken(messaging, {
-                    vapidKey: vapidKey,
+                    vapidKey: vapidKey, 
                     serviceWorkerRegistration: registration,
                 });
 
-                if (token) await saveToken(token);
+                if (token) {
+                    console.log("Token didapat:", token);
+                    await saveToken(token);
+                } else {
+                    console.warn("Gagal mendapatkan token dari Firebase.");
+                }
 
                 onMessage(messaging, (payload) => {
                     console.log('Pesan diterima saat tab aktif (foreground):', payload);
                     
-                    const title = payload.notification?.title || payload.data?.title || 'Notifikasi Ruangkelas';
+                    const title = payload.notification?.title || payload.data?.title || 'Notifikasi RuangKelas';
                     const options = {
                         body: payload.notification?.body || payload.data?.body || '',
-                        icon: '/icons/icon-192.png',
+                        icon: '/images/Logo.svg',
                     };
                     
-                    // Tampilkan notifikasi pop-up dari sistem operasi
                     const notification = new Notification(title, options);
                     
-                    // Handler klik untuk notifikasi saat foreground
                     notification.onclick = function(event) {
                         event.preventDefault();
                         notification.close();
@@ -138,10 +148,13 @@
             try {
                 const csrf = document.querySelector('meta[name="_csrf"]')?.content;
                 const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
-                if (!csrf || !csrfHeader) return;
+                
+                if (!csrf || !csrfHeader) {
+                    console.error("CSRF token tidak ditemukan di meta tags!");
+                    return;
+                }
 
-                // URL DIPERBAIKI: Menyesuaikan dengan NotificationController yang memakai "/api/notifications"
-                await fetch('/api/notifications/register-token', {
+                const response = await fetch('/api/notification/register-token', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -149,8 +162,14 @@
                     },
                     body: JSON.stringify({ token }),
                 });
+
+                if(response.ok) {
+                    console.log("Token FCM berhasil disimpan ke DB.");
+                } else {
+                    console.error("Gagal menyimpan token ke DB:", await response.text());
+                }
             } catch (e) {
-                console.error("Gagal simpan token:", e);
+                console.error("Error saat fetch API simpan token:", e);
             }
         }
 
@@ -158,6 +177,6 @@
         if (isUserLoggedIn) {
             setupPushNotification();
         }
-    </script>
+      </script>
     </body>
 </html>
