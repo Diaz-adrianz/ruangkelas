@@ -82,6 +82,12 @@ public class ProfileController {
 
                 Files.createDirectories(Paths.get(uploadDir));
 
+                String oldPicture = user.getProfilePicture();
+                if (oldPicture != null && !oldPicture.isEmpty()) {
+                    Path oldPath = Paths.get(oldPicture.replaceFirst("^/", ""));
+                    Files.deleteIfExists(oldPath);
+                }
+
                 String fileName = UUID.randomUUID() + "_" + photo.getOriginalFilename();
 
                 Path path = Paths.get(uploadDir, fileName);
