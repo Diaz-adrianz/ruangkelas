@@ -330,10 +330,27 @@
               th:text="'Permintaan bergabung (' + ${#lists.size(pendingRequests)} + ')'"></p>
 
             <div class="flex flex-wrap gap-2">
-              <div th:each="req : ${pendingRequests}"
-                class="card bg-base-100 rounded-xl flex-1 min-w-60 overflow-hidden">
+              <div 
+                th:each="req : ${pendingRequests}" 
+                class="card bg-base-100 rounded-xl flex-1 min-w-60 overflow-hidden"
+              >
+                <div class="card-body flex-row items-center justify-between p-4 gap-2">
+                  <div class="size-8 rounded-full overflow-hidden">
+                    <img
+                      th:if="${req.user.profilePicture != null}"
+                      th:src="${req.user.profilePicture}"
+                      alt="Profile Picture"
+                      class="w-full h-full object-cover"
+                    />
 
-                <div class="card-body flex-row items-center justify-between p-4">
+                    <div
+                      th:unless="${req.user.profilePicture != null}"
+                      class="bg-neutral text-neutral-content text-sm size-full rounded-full flex items-center justify-center"
+                    >
+                      <span th:text="${req.user.getInitials()}"></span>
+                    </div>
+                  </div>
+
                   <p class="typo-body-md grow" th:text="${req.user.name}"></p>
 
                   <form th:action="@{/class/member/{id}/approve(id=${req.id})}" method="post">
@@ -358,8 +375,24 @@
               th:each="member : ${members}"
               class="card bg-base-100 border border-base-300"
             >
-              <div class="card-body flex-row items-center justify-between p-4">
-                <div>
+              <div class="card-body flex-row items-center p-4 gap-2">
+                <div class="size-12 rounded-full overflow-hidden">
+                  <img
+                    th:if="${member.user.profilePicture != null}"
+                    th:src="${member.user.profilePicture}"
+                    alt="Profile Picture"
+                    class="w-full h-full object-cover"
+                  />
+
+                  <div
+                    th:unless="${member.user.profilePicture != null}"
+                    class="bg-neutral text-neutral-content size-full rounded-full flex items-center justify-center"
+                  >
+                    <span th:text="${member.user.getInitials()}"></span>
+                  </div>
+                </div>
+
+                <div class="grow">
                   <p class="typo-body-md">
                     <span th:text="${member.user.name}"></span>
                     <span
