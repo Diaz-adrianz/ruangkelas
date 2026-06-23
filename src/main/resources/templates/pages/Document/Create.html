@@ -1,0 +1,83 @@
+<!doctype html>
+<html
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/Home}"
+>
+	<head>
+		<title>Buat Tugas</title>
+	</head>
+	<body>
+		<div layout:fragment="content" class="mx-auto max-w-5xl p-4">
+			<div class="breadcrumbs text-sm mb-4">
+				<ul>
+					<li><a href="/">Beranda</a></li>
+					<li><a th:href="@{/class/{classCode}(classCode=${classs.classCode})}" th:text="${classs.name}"></a></li>
+					<li>Tambah materi</li>
+				</ul>
+			</div>
+
+			<!-- ====== ALERTS ======  -->
+			<!-- error -->
+			<div th:if="${error}" class="alert alert-soft alert-error mb-4">
+				<span th:text="${error}"></span>
+			</div>
+
+			<!-- dto errors -->
+			<div th:if="${errors}" class="alert alert-soft alert-warning mb-4">
+				<div>
+					<h3 class="font-bold">Validasi gagal.</h3>
+					<ul class="list-disc ps-4">
+						<li th:each="err : ${errors}" th:text="${err.defaultMessage}"></li>
+					</ul>
+				</div>
+			</div>
+			<!-- ====== ALERTS ======  -->
+
+			<div class="flex items-center justify-between flex-wrap gap-4 mb-4">
+				<h1 class="typo-heading-xl">Tambah Materi Baru</h1>
+			</div>
+
+			<div class="card bg-base-100 border-base-300 border">
+				<div class="card-body">
+					<form
+						th:action="@{/document/upload}"
+						th:object="${createDocumentDto}"
+						method="post"
+						enctype="multipart/form-data"
+						class="flex flex-col"
+					>
+						<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+						<input type="hidden" name="classId" th:value="${classs.id}" />
+
+						<fieldset class="fieldset">
+							<legend class="fieldset-legend">Judul</legend>
+							<input
+								th:field="*{title}"
+								class="input validator w-full"
+								required
+								type="text"
+								placeholder="Contoh: Modul pertemuan 1"
+								minlength="3"
+								maxlength="100"
+							/>
+							<span class="validator-hint">3 - 100 karakter</span>
+						</fieldset>
+
+						<fieldset class="fieldset">
+							<legend class="fieldset-legend">File</legend>
+							<input th:field="*{file}" class="file-input validator w-full" required type="file" />
+							<span class="validator-hint">Wajib diisi</span>
+						</fieldset>
+
+						<div class="flex gap-2 justify-end mt-4">
+							<a th:href="@{/class/{classCode}(classCode=${classs.classCode})}" class="btn btn-ghost">Batal</a>
+							<button type="submit" class="btn btn-primary">Simpan</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
+

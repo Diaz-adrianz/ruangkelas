@@ -29,9 +29,23 @@
 
 				<div sec:authorize="isAuthenticated()" class="dropdown dropdown-end">
 					<div tabindex="0" role="button" class="btn btn-ghost btn-circle">
-						<div class="avatar avatar-placeholder">
-							<div class="bg-neutral text-neutral-content w-10 rounded-full">
-								<span sec:authentication="principal.initials"></span>
+						<div class="avatar">
+							<div class="w-10 rounded-full overflow-hidden">
+
+								<img
+									th:if="${#authentication.principal.user.profilePicture != null}"
+									th:src="${#authentication.principal.user.profilePicture}"
+									alt="Profile Picture"
+									class="w-full h-full object-cover"
+								/>
+
+								<div
+									th:unless="${#authentication.principal.user.profilePicture != null}"
+									class="bg-neutral text-neutral-content w-10 h-10 rounded-full flex items-center justify-center"
+								>
+									<span sec:authentication="principal.initials"></span>
+								</div>
+
 							</div>
 						</div>
 					</div>

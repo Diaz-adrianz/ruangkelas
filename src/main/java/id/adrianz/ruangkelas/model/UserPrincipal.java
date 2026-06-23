@@ -38,6 +38,10 @@ public class UserPrincipal implements UserDetails {
         return user.getEmail();
     }
 
+    public String getProfilePicture() {
+        return user.getProfilePicture();
+    }
+
     @Override
     public String getUsername() {
         return user.getUsername();
