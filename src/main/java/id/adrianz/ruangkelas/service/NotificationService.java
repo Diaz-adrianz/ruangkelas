@@ -206,7 +206,7 @@ public class NotificationService {
         context.setVariable("title", subject);
         context.setVariable("content", messageContent);
 
-        emailService.sendTemplateMessage(emailTarget, subject, "email/email-template", context);
+        emailService.sendTemplateMessage(emailTarget, subject, "email/Notification", context);
 
         // 2. Proses Save & Kirim Push Notification (Fitur dipertahankan & diperbaiki variabelnya)
         PushNotification pushNotification = new PushNotification();
