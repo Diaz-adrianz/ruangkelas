@@ -18,7 +18,7 @@ public class FirebaseConfig {
     public void init() throws IOException {
         if (FirebaseApp.getApps().isEmpty()) {
             InputStream serviceAccount =
-                getClass().getClassLoader().getResourceAsStream("serviceAccountKey.json");
+                getClass().getClassLoader().getResourceAsStream("secrets/firebase-service-account.json");
 
             if (serviceAccount == null) {
                 log.warn("⚠️ Firebase service account not found, skipping initialization.");
