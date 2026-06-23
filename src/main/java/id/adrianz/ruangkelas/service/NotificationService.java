@@ -200,11 +200,12 @@ public class NotificationService {
         emailNotification.setReferenceId(referenceId);
         emailNotification.setReferenceType(referenceType);
         emailNotification.setIsRead(false);
-        notificationRepository.save(emailNotification);  
+        Notification notif = notificationRepository.save(emailNotification);  
         
         Context context = new Context();
         context.setVariable("title", subject);
         context.setVariable("content", messageContent);
+        context.setVariable("redirectUrl", baseUrl + "/notification/redirect/" + notif.getId());
 
         emailService.sendTemplateMessage(emailTarget, subject, "email/Notification", context);
     }
