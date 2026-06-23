@@ -30,14 +30,24 @@ public class NotificationPageController {
     }
 
     @PostMapping("/{id}/read")
-    public String markAsRead(@PathVariable Integer id) {
-        notificationService.markAsRead(id);
+    public String markAsRead(@PathVariable Integer id, Model model) {
+        try {
+            notificationService.markAsRead(id);
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            return "pages/Notification/Index";
+        }
         return "redirect:/notification";
     }
 
     @PostMapping("/{id}/delete")
-    public String deleteNotification(@PathVariable Integer id) {
-        notificationService.deleteNotification(id);
+    public String deleteNotification(@PathVariable Integer id, Model model) {
+        try {
+            notificationService.deleteNotification(id);
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            return "pages/Notification/Index";
+        }
         return "redirect:/notification";
     }
 
