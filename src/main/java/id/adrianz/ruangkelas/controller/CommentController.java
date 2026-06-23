@@ -20,14 +20,25 @@ public class CommentController {
     private final CommentService commentService;
 
     @GetMapping
-    public String getComments(@PathVariable String classCode, @PathVariable Long taskId, Model model) {
-        model.addAttribute("comments", commentService.getCommentsByTaskId(taskId));
+    public String getComments(@PathVariable String classCode, 
+                              @PathVariable Long taskId, 
+                              @AuthenticationPrincipal User user, 
+                              Model model) {
+        model.addAttribute("comments", commentService.getComments(taskId, user));
         model.addAttribute("taskId", taskId);
         model.addAttribute("classCode", classCode); 
-        
-        model.addAttribute("commentCreateDto", new CommentCreateDto());
         model.addAttribute("commentUpdateDto", new CommentUpdateDto());
         return "task/comment-list";
+    }
+
+    @GetMapping("/new")
+    public String showCreateForm(@PathVariable String classCode, 
+                                 @PathVariable Long taskId, 
+                                 Model model) {
+        model.addAttribute("taskId", taskId);
+        model.addAttribute("classCode", classCode);
+        model.addAttribute("commentCreateDto", new CommentCreateDto());
+        return "task/comment-create"; 
     }
 
     @PostMapping
@@ -38,11 +49,9 @@ public class CommentController {
                                 @AuthenticationPrincipal User user,
                                 Model model) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("comments", commentService.getCommentsByTaskId(taskId));
             model.addAttribute("taskId", taskId);
             model.addAttribute("classCode", classCode);
-            model.addAttribute("commentUpdateDto", new CommentUpdateDto());
-            return "task/comment-list";
+            return "task/comment-create";
         }
         
         commentService.createComment(taskId, dto, user);
@@ -58,10 +67,9 @@ public class CommentController {
                                 @AuthenticationPrincipal User user,
                                 Model model) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("comments", commentService.getCommentsByTaskId(taskId));
+            model.addAttribute("comments", commentService.getComments(taskId, user));
             model.addAttribute("taskId", taskId);
             model.addAttribute("classCode", classCode);
-            model.addAttribute("commentCreateDto", new CommentCreateDto());
             return "task/comment-list";
         }
 
