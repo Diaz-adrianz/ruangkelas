@@ -2,6 +2,7 @@
 uploads/
 src/main/resources/static/css/styles.css
 src/main/resources/secrets/**
+src/main/resources/serviceAccountKey.json
 
 # Environment Variables
 .env
