@@ -137,12 +137,11 @@
                             event.preventDefault();
                             notification.close();
 
-                            const refId = payload.data?.referenceId;
-                            const refType = payload.data?.referenceType;
+                            const id = payload.data?.id;
 
                             let redirectPath = '/';
-                            if (refType && refId) {
-                                redirectPath = `/notifications/redirect?type=${refType}&id=${refId}`;
+                            if (id) {
+                                redirectPath = `/notification/redirect/${id}`;
                             }
 
                             window.location.href = redirectPath;
