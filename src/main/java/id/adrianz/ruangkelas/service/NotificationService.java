@@ -207,20 +207,6 @@ public class NotificationService {
         context.setVariable("content", messageContent);
 
         emailService.sendTemplateMessage(emailTarget, subject, "email/Notification", context);
-
-        // 2. Proses Save & Kirim Push Notification (Fitur dipertahankan & diperbaiki variabelnya)
-        PushNotification pushNotification = new PushNotification();
-        pushNotification.setUserId(user.getId());
-        pushNotification.setTitle(subject); // Menyesuaikan dari parameter subject
-        pushNotification.setMessage(messageContent); // Menyesuaikan dari parameter messageContent
-        pushNotification.setType(type);
-        pushNotification.setReferenceId(referenceId);
-        pushNotification.setReferenceType(referenceType);
-        pushNotification.setIsRead(false);
-        
-        notificationRepository.save(pushNotification);
-
-        sendToUser(user, subject, messageContent, referenceId, referenceType);
     }
 
     public List<Notification> getAllNotificationsByUserId(Long userId) {
