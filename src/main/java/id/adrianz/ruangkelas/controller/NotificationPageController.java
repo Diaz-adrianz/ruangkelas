@@ -23,12 +23,11 @@ public class NotificationPageController {
 
     @GetMapping
     public String getNotificationsPage(Principal principal, Model model) {
-       User user = userService.findByUsernameOrEmail(principal.getName());
+        User user = userService.findByUsernameOrEmail(principal.getName());
         List<Notification> notifications = notificationService.getAllNotificationsByUserId(user.getId());
         model.addAttribute("notifications", notifications);
-        return "notification/index";
+        return "pages/Notification/Index";
     }
-    
 
     @PostMapping("/{id}/read")
     public String markAsRead(@PathVariable Integer id) {
@@ -43,28 +42,28 @@ public class NotificationPageController {
     }
 
     @GetMapping("/redirect/{id}")
-public String redirectNotification(@PathVariable Integer id) {
-    Notification notif = notificationService.getNotificationById(id);
-    
-    if (!notif.getIsRead()) {
-        notificationService.markAsRead(id);
-    }
-    
-    String refType = notif.getReferenceType();
-    Number refId = notif.getReferenceId(); 
-    
-    if ("TASK".equals(refType)) {
-        try {
-            
-            id.adrianz.ruangkelas.model.Task task = taskService.getTaskById(refId.longValue());
-            String classCode = task.getClasse().getClassCode();
-        
-            return "redirect:/class/" + classCode + "/tasks/" + refId;
-        } catch (Exception e) {
-            return "redirect:/notification";
+    public String redirectNotification(@PathVariable Integer id) {
+        Notification notif = notificationService.getNotificationById(id);
+
+        if (!notif.getIsRead()) {
+            notificationService.markAsRead(id);
         }
-    } 
-    
-    return "redirect:/notification";
-}
+
+        String refType = notif.getReferenceType();
+        Number refId = notif.getReferenceId();
+
+        if ("TASK".equals(refType)) {
+            try {
+
+                id.adrianz.ruangkelas.model.Task task = taskService.getTaskById(refId.longValue());
+                String classCode = task.getClasse().getClassCode();
+
+                return "redirect:/class/" + classCode + "/tasks/" + refId;
+            } catch (Exception e) {
+                return "redirect:/notification";
+            }
+        }
+
+        return "redirect:/notification";
+    }
 }
