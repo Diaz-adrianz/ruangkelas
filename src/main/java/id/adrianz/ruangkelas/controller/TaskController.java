@@ -18,7 +18,7 @@ import id.adrianz.ruangkelas.model.Task;
 import id.adrianz.ruangkelas.model.UserPrincipal;
 import id.adrianz.ruangkelas.service.ClassService;
 import id.adrianz.ruangkelas.service.TaskService;
-import id.adrianz.ruangkelas.service.CommentService; 
+import id.adrianz.ruangkelas.service.CommentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -29,7 +29,7 @@ public class TaskController {
 
     private final TaskService taskService;
     private final ClassService classService;
-    private final CommentService commentService; 
+    private final CommentService commentService;
 
     @GetMapping("/create")
     public String showCreateForm(@PathVariable String classCode, Model model) {
@@ -65,7 +65,7 @@ public class TaskController {
                     .deadline(request.getDeadline())
                     .createdBy(principal.getUser())
                     .build();
-    
+
             taskService.createTask(task);
         } catch (Exception e) {
             model.addAttribute("classs", classs);
@@ -94,14 +94,13 @@ public class TaskController {
     }
 
     @PostMapping("/{taskId}/edit")
-    public String updateTask(@PathVariable String classCode, 
+    public String updateTask(@PathVariable String classCode,
             @PathVariable Long taskId,
-            @Valid @ModelAttribute("updateTaskDto") UpdateTaskDto request, 
+            @Valid @ModelAttribute("updateTaskDto") UpdateTaskDto request,
             BindingResult result,
             Model model,
             RedirectAttributes redirectAttributes,
-            @AuthenticationPrincipal UserPrincipal principal
-        ) {
+            @AuthenticationPrincipal UserPrincipal principal) {
         Class classs = classService.getByCode(classCode);
         Task task = taskService.getTaskById(taskId);
 
@@ -114,13 +113,13 @@ public class TaskController {
 
         try {
             classService.ensureAdmin(classs.getId(), principal.getUser().getId());
-    
+
             Task updatedTaskData = new Task();
             updatedTaskData.setTitle(request.getTitle());
             updatedTaskData.setDescription(request.getDescription());
             updatedTaskData.setDeadline(request.getDeadline());
-    
-            taskService.updateTask(taskId, updatedTaskData); 
+
+            taskService.updateTask(taskId, updatedTaskData);
         } catch (Exception e) {
             model.addAttribute("classs", classs);
             model.addAttribute("task", task);
@@ -133,11 +132,11 @@ public class TaskController {
     }
 
     @PostMapping("/{taskId}/delete")
-    public String deleteTask(@PathVariable String classCode, 
-                            @PathVariable Long taskId, 
-                            RedirectAttributes redirectAttributes,
-                            Model model,
-                            @AuthenticationPrincipal UserPrincipal principal) {
+    public String deleteTask(@PathVariable String classCode,
+            @PathVariable Long taskId,
+            RedirectAttributes redirectAttributes,
+            Model model,
+            @AuthenticationPrincipal UserPrincipal principal) {
         try {
             Class classs = classService.getByCode(classCode);
 
@@ -153,10 +152,10 @@ public class TaskController {
     }
 
     @GetMapping("/{taskId}")
-    public String getMethodName(@PathVariable String classCode, 
-                                @PathVariable Long taskId, 
-                                Model model, 
-                                @AuthenticationPrincipal UserPrincipal principal) {
+    public String getMethodName(@PathVariable String classCode,
+            @PathVariable Long taskId,
+            Model model,
+            @AuthenticationPrincipal UserPrincipal principal) {
         Class classs = classService.getByCode(classCode);
         boolean isAdmin = classService.isAdmin(classs.getId(), principal.getUser().getId());
         model.addAttribute("classs", classs);

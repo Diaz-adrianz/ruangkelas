@@ -10,7 +10,6 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class EmailService {
 
     private final JavaMailSender mailSender;
-    private final TemplateEngine templateEngine;
+    private final TemplateEngine templateEngine; 
 
     @Value("${app.base-url}")
     private String baseUrl;
@@ -33,8 +32,8 @@ public class EmailService {
         mailSender.send(message);
     }
 
-    // templatePath should located under resources/templates/email/
     public void sendTemplateMessage(String to, String subject, String templatePath, Context context) {
+        // Menggunakan engine untuk memproses HTML
         String html = templateEngine.process(templatePath, context);
         MimeMessage message = mailSender.createMimeMessage();
 
@@ -42,10 +41,10 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setTo(to);
             helper.setSubject(subject);
-            helper.setText(html, true);
+            helper.setText(html, true); // true = format HTML
             mailSender.send(message);
         } catch (MessagingException e) {
-            throw new RuntimeException("Gagal mengirim email: " + subject, e);
+            throw new RuntimeException("Gagal mengirim email: " + e.getMessage());
         }
     }
 
