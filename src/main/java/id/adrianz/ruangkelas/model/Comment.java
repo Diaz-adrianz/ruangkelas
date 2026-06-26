@@ -20,6 +20,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import id.adrianz.ruangkelas.model.User;
+
 @Entity
 @Table(name = "comments")
 @Getter
@@ -40,8 +42,13 @@ public class Comment {
     @JoinColumn(name = "user_class_id", nullable = false)
     private UserClass userClass;
 
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id", nullable = false)
     private Task task;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")

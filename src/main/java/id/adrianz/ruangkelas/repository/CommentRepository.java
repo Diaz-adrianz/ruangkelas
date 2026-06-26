@@ -13,11 +13,14 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     @Query("""
         SELECT DISTINCT c FROM Comment c 
-        LEFT JOIN c.replies r 
         WHERE c.task.id = :taskId 
         AND c.parent IS NULL 
-        AND (c.userClass.user.id = :userId 
-             OR r.userClass.role = id.adrianz.ruangkelas.model.UserClass.Role.ADMIN)
+        AND (c.user.id = :userId 
+             OR EXISTS (
+                 SELECT r FROM Comment r 
+                 WHERE r.parent = c 
+                 AND r.userClass.role = id.adrianz.ruangkelas.model.UserClass.Role.ADMIN
+             ))
     """)
     List<Comment> findCommentsForStudent(@Param("taskId") Long taskId, @Param("userId") Long userId);
 }

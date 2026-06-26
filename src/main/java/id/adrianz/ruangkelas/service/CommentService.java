@@ -22,7 +22,6 @@ public class CommentService {
     private final TaskRepository taskRepository;
     private final UserClassRepository userClassRepository;
 
-    // 1. Ambil komentar pake filter Role
     public List<Comment> getComments(Long taskId, User user) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
@@ -48,6 +47,7 @@ public class CommentService {
         Comment comment = Comment.builder()
                 .task(task)
                 .userClass(userClass)
+                .user(user)
                 .content(dto.getContent())
                 .build();
 
