@@ -91,8 +91,14 @@ public class CommentController {
     public String deleteComment(@PathVariable String classCode,
                                 @PathVariable Long taskId,
                                 @PathVariable Long commentId,
+                                RedirectAttributes redirectAttributes,
                                 @AuthenticationPrincipal UserPrincipal principal) {
-        commentService.deleteComment(commentId, principal.getUser());
+        try {
+            commentService.deleteComment(commentId, principal.getUser());
+            redirectAttributes.addFlashAttribute("success", "Komentar berhasil dihapus");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
         return "redirect:/class/" + classCode + "/tasks/" + taskId + "#comments";
     }
 }
