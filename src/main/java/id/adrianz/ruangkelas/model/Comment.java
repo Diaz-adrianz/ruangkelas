@@ -15,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -56,6 +57,7 @@ public class Comment {
     private Comment parent;
 
     @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
+    @OrderBy("createdAt DESC")
     private List<Comment> replies;
 
     @CreationTimestamp
