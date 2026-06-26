@@ -18,7 +18,7 @@ public class CommentController {
 
     private final CommentService commentService;
 
-    @GetMapping("/new")
+    @GetMapping("/create")
     public String showCreateForm(@PathVariable String classCode, 
                                  @PathVariable Long taskId, 
                                  Model model) {
@@ -42,7 +42,7 @@ public class CommentController {
         }
         
         commentService.createComment(taskId, dto, principal.getUser());
-        return "redirect:/class/" + classCode + "/tasks/" + taskId;
+        return "redirect:/class/" + classCode + "/tasks/" + taskId + "#comments";
     }
 
     @PostMapping("/{commentId}/reply")
@@ -68,6 +68,6 @@ public class CommentController {
                                 @PathVariable Long commentId,
                                 @AuthenticationPrincipal UserPrincipal principal) {
         commentService.deleteComment(commentId, principal.getUser());
-        return "redirect:/class/" + classCode + "/tasks/" + taskId;
+        return "redirect:/class/" + classCode + "/tasks/" + taskId + "#comments";
     }
 }
