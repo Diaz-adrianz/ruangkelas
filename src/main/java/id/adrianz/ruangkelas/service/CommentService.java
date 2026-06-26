@@ -22,10 +22,15 @@ public class CommentService {
     private final TaskRepository taskRepository;
     private final UserClassRepository userClassRepository;
 
+    public Comment getCommentById(Long id) {
+        return commentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Comment dengan ID " + id + " tidak ditemukan"));
+    }
+
     public List<Comment> getComments(Long taskId, User user) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
-        
+
         UserClass userClass = userClassRepository.findByUserIdAndClasseId(user.getId(), task.getClasse().getId())
                 .orElseThrow(() -> new RuntimeException("Not registered in this class"));
 
@@ -54,10 +59,10 @@ public class CommentService {
         if (dto.getParentId() != null) {
             Comment parent = commentRepository.findById(dto.getParentId())
                     .orElseThrow(() -> new RuntimeException("Parent comment not found"));
-            
+
             boolean isAdmin = userClass.getRole() == UserClass.Role.ADMIN;
             boolean isOwnComment = parent.getUserClass().getUser().getId().equals(user.getId());
-            
+
             if (!isAdmin && !isOwnComment) {
                 throw new RuntimeException("Only Admin can reply to other user's comments");
             }
@@ -85,7 +90,8 @@ public class CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new RuntimeException("Comment not found"));
 
-        UserClass currentUserClass = userClassRepository.findByUserIdAndClasseId(user.getId(), comment.getTask().getClasse().getId())
+        UserClass currentUserClass = userClassRepository
+                .findByUserIdAndClasseId(user.getId(), comment.getTask().getClasse().getId())
                 .orElseThrow(() -> new RuntimeException("Not registered in this class"));
 
         boolean isOwner = comment.getUserClass().getUser().getId().equals(user.getId());
