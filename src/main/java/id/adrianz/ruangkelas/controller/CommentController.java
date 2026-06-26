@@ -2,7 +2,11 @@ package id.adrianz.ruangkelas.controller;
 
 import id.adrianz.ruangkelas.dto.CommentCreateDto;
 import id.adrianz.ruangkelas.model.UserPrincipal;
+import id.adrianz.ruangkelas.model.Class;
+import id.adrianz.ruangkelas.model.Task;
+import id.adrianz.ruangkelas.service.ClassService;
 import id.adrianz.ruangkelas.service.CommentService;
+import id.adrianz.ruangkelas.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -10,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/class/{classCode}/tasks/{taskId}/comments")
@@ -17,15 +22,20 @@ import org.springframework.web.bind.annotation.*;
 public class CommentController {
 
     private final CommentService commentService;
+    private final ClassService classService;
+    private final TaskService taskService;
 
     @GetMapping("/create")
     public String showCreateForm(@PathVariable String classCode, 
                                  @PathVariable Long taskId, 
                                  Model model) {
-        model.addAttribute("taskId", taskId);
-        model.addAttribute("classCode", classCode);
+        Class classs = classService.getByCode(classCode);
+        Task task = taskService.getTaskById(taskId);
+
+        model.addAttribute("classs", classs);
+        model.addAttribute("task", task);
         model.addAttribute("commentCreateDto", new CommentCreateDto());
-        return "pages/Task/CommentCreate";
+        return "pages/Comment/Create";
     }
 
     @PostMapping
@@ -34,14 +44,29 @@ public class CommentController {
                                 @Valid @ModelAttribute("commentCreateDto") CommentCreateDto dto,
                                 BindingResult bindingResult,
                                 @AuthenticationPrincipal UserPrincipal principal,
+                                RedirectAttributes redirectAttributes,
                                 Model model) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("taskId", taskId);
-            model.addAttribute("classCode", classCode);
-            return "pages/Task/CommentCreate";
+            Class classs = classService.getByCode(classCode);
+            Task task = taskService.getTaskById(taskId);
+
+            model.addAttribute("classs", classs);
+            model.addAttribute("task", task);
+            return "pages/Comment/Create";
         }
-        
-        commentService.createComment(taskId, dto, principal.getUser());
+
+        try {
+            commentService.createComment(taskId, dto, principal.getUser());    
+        } catch (RuntimeException e) {
+            Class classs = classService.getByCode(classCode);
+            Task task = taskService.getTaskById(taskId);
+
+            model.addAttribute("classs", classs);
+            model.addAttribute("task", task);
+            return "pages/Comment/Create";
+        }
+
+        redirectAttributes.addFlashAttribute("success", "Komentar berhasil ditambahkan");
         return "redirect:/class/" + classCode + "/tasks/" + taskId + "#comments";
     }
 
