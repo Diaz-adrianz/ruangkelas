@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     
-    @Query("SELECT c FROM Comment c WHERE c.task.id = :taskId AND c.parent IS NULL")
+    @Query("SELECT c FROM Comment c WHERE c.task.id = :taskId AND c.parent IS NULL ORDER BY c.createdAt DESC")
     List<Comment> findAllMainComments(@Param("taskId") Long taskId);
 
     @Query("""
@@ -21,6 +21,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
                  WHERE r.parent = c 
                  AND r.userClass.role = id.adrianz.ruangkelas.model.UserClass.Role.ADMIN
              ))
+        ORDER BY c.createdAt DESC
     """)
     List<Comment> findCommentsForStudent(@Param("taskId") Long taskId, @Param("userId") Long userId);
 }
