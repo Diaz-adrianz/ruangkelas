@@ -1,5 +1,9 @@
 package id.adrianz.ruangkelas.service;
 
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,6 +22,7 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -27,26 +32,93 @@ public class UserService implements UserDetailsService {
         return new UserPrincipal(user);
     }
 
-        public User register(RegisterDto request) {
+    public User register(RegisterDto request) {
         if (userRepository.existsByUsername(request.getEmail())) {
             throw new IllegalArgumentException("Username sudah terdaftar");
         }
 
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("Email sudah terdaftar");
-        }
+        userRepository.findByEmail(request.getEmail()).ifPresent(existing -> {
+            boolean unverified = !existing.isEnabled();
+            boolean expired = existing.getTokenExpiresAt() != null
+                    && existing.getTokenExpiresAt().isBefore(LocalDateTime.now());
 
-        return userRepository.save(User.builder()
+            if (!unverified || !expired) {
+                throw new IllegalArgumentException("Email sudah terdaftar");
+            }
+
+            userRepository.delete(existing);
+        });
+
+        String token = UUID.randomUUID().toString();
+        LocalDateTime expiresAt = LocalDateTime.now().plusHours(24);
+
+        User user = userRepository.save(User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .enabled(true)
+                .enabled(false)
                 .name(request.getName())
                 .nim(request.getNim())
+                .verificationToken(token)
+                .tokenExpiresAt(expiresAt)
                 .build());
+
+        emailService.sendVerificationEmail(user.getEmail(), token, expiresAt);
+        return user;
     }
 
     public User save(User user) {
         return userRepository.save(user);
+    }
+
+    public void verifyEmail(String token) {
+        User user = userRepository.findByVerificationToken(token)
+                .orElseThrow(() -> new IllegalArgumentException("Token tidak valid"));
+
+        if (user.getTokenExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Token sudah kadaluarsa");
+        }
+
+        user.setEnabled(true);
+        user.setVerificationToken(null);
+        user.setTokenExpiresAt(null);
+        userRepository.save(user);
+    }
+
+    public void forgotPassword(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Email tidak ditemukan"));
+
+        if (!user.isEnabled()) {
+            throw new IllegalArgumentException("Akun belum diverifikasi");
+        }
+
+        String otp = String.format("%06d", new SecureRandom().nextInt(999999));
+        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(15);
+
+        user.setResetOtp(otp);
+        user.setResetOtpExpiresAt(expiresAt);
+        userRepository.save(user);
+
+        emailService.sendResetPasswordEmail(user.getEmail(), otp, expiresAt);
+    }
+
+    public void resetPassword(String otp, String newPassword) {
+        User user = userRepository.findByResetOtp(otp)
+                .orElseThrow(() -> new IllegalArgumentException("Kode OTP tidak valid"));
+
+        if (user.getResetOtpExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Kode OTP sudah kadaluarsa");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setResetOtp(null);
+        user.setResetOtpExpiresAt(null);
+        userRepository.save(user);
+    }
+
+    public User findByUsernameOrEmail(String identifier) {
+        return userRepository.findByUsernameOrEmail(identifier, identifier)
+                .orElseThrow(() -> new IllegalArgumentException("User dengan identitas " + identifier + " tidak ditemukan"));
     }
 }

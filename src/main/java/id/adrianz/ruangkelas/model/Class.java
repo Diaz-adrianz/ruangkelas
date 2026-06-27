@@ -3,6 +3,8 @@ package id.adrianz.ruangkelas.model;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
@@ -15,6 +17,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,7 +25,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "classes")
+@Table(name = "classes", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"course_id", "name", "year", "semester"}),
+    @UniqueConstraint(columnNames = {"class_code"})
+})
 @Getter
 @Setter
 @Builder
@@ -40,6 +46,7 @@ public class Class {
 
     @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
     private Course course;
 
     @Column(nullable = false, length = 100)
@@ -51,6 +58,13 @@ public class Class {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Semester semester;
+
+    // Kode unik untuk gabung kelas, mis. "X7K9QA"
+    @Column(name = "class_code", nullable = false, length = 8, unique = true)
+    private String classCode;
+
+    @Column(nullable = true, length = 100)
+    private String lecturerName;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

@@ -28,12 +28,18 @@ public class SecurityConfig {
             throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers(
+                    "/auth/**",
+                    "/css/**",
+                    "/js/**",
+                    "/images/**",
+                    "/api/jadwal/**",
+                    "/api/notification/firebase-messaging-sw.js"
+                ).permitAll()
                 .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                 .loginPage("/auth/login")
-                .defaultSuccessUrl("/", true)
                 .failureHandler((request, response, exception) -> {
                     String message;
                     if (exception instanceof BadCredentialsException) {

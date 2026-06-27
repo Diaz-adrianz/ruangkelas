@@ -1,0 +1,639 @@
+<!doctype html>
+<html
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/Home}"
+>
+<head>
+    <title th:text="${classs.name} + ' - Jadwal'">Jadwal</title>
+    <style>
+        /* ─────────────────── layout ─────────────────── */
+        .schedule-page {
+            max-width: 1020px;
+            margin: 0 auto;
+            padding: 16px 24px 40px;
+        }
+
+        /* ─────────────────── breadcrumb ─────────────────── */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #687079;
+            margin-bottom: 4px;
+            flex-wrap: wrap;
+        }
+        .breadcrumb a { color: #687079; text-decoration: none; }
+        .breadcrumb a:hover { color: #009ca4; }
+        .breadcrumb-sep { color: #b4bac0; }
+
+        /* ─────────────────── page title ─────────────────── */
+        .schedule-title {
+            font-size: 28px;
+            font-weight: 800;
+            margin: 12px 0 20px;
+            color: #050505;
+            line-height: 1.2;
+        }
+
+        /* ─────────────────── class meta ─────────────────── */
+        .class-meta {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 32px;
+            color: #4f5459;
+        }
+
+        .class-meta-row {
+            display: grid;
+            grid-template-columns: 142px minmax(0, 1fr);
+            align-items: center;
+            gap: 14px;
+            font-size: 14px;
+        }
+
+        .class-meta-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #687079;
+        }
+
+        .class-meta-value {
+            color: #050505;
+            font-weight: 500;
+        }
+
+        /* ─────────────────── tabs ─────────────────── */
+        .schedule-tabs {
+            display: flex;
+            align-items: center;
+            gap: 34px;
+            margin-bottom: 14px;
+            padding-left: 24px;
+            color: #4f5459;
+            font-size: 13px;
+            font-weight: 500;
+            border-bottom: 1px solid #e8eaed;
+        }
+
+        .schedule-tab {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            height: 38px;
+            text-decoration: none;
+            color: #687079;
+        }
+
+        .schedule-tab.active { color: #009ca4; }
+
+        .schedule-tab.active::after {
+            content: "";
+            position: absolute;
+            left: 0; right: 0; bottom: -1px;
+            height: 2px;
+            background: #009ca4;
+            border-radius: 2px 2px 0 0;
+        }
+
+        .tab-count {
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            border-radius: 999px;
+            background: #6b7075;
+            color: #fff;
+            font-size: 10px;
+            line-height: 18px;
+            text-align: center;
+        }
+
+        .schedule-tab.active .tab-count { background: #009ca4; }
+
+        /* ─────────────────── toolbar ─────────────────── */
+        .calendar-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin: 16px 0 12px;
+        }
+
+        .month-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .month-title {
+            min-width: 128px;
+            font-size: 18px;
+            font-weight: 800;
+            color: #050505;
+        }
+
+        .icon-button {
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #c6ccd2;
+            border-radius: 8px;
+            background: #fff;
+            color: #687079;
+            cursor: pointer;
+        }
+
+        .icon-button:hover { background: #f5f7f9; }
+
+        .add-button {
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 8px;
+            border: 0;
+            padding: 0 16px;
+            background: #009ca4;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .add-button:hover { background: #007f87; }
+
+        /* ─────────────────── calendar ─────────────────── */
+        .calendar-shell {
+            overflow: hidden;
+            border-radius: 12px 12px 0 0;
+            border: 1px solid #d0d5da;
+            background: #f8fafc;
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            height: 36px;
+            align-items: center;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 800;
+            color: #050505;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            border-top: 1px solid #70757a;
+            border-left: 1px solid #70757a;
+            background: #fff;
+        }
+
+        .calendar-cell {
+            min-height: 116px;
+            border-right: 1px solid #70757a;
+            border-bottom: 1px solid #70757a;
+            padding: 12px 10px;
+            background: #fbfcfd;
+        }
+
+        .calendar-cell.is-muted { background: #f5f7f9; }
+
+        .day-number {
+            font-size: 14px;
+            font-weight: 500;
+            color: #050505;
+            margin-bottom: 8px;
+        }
+
+        .calendar-cell.is-muted .day-number { color: #a8afb6; }
+
+        .calendar-cell.is-today .day-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #009ca4;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+
+        /* ─────────────────── event chip ─────────────────── */
+        .schedule-event {
+            width: 100%;
+            border: 0;
+            border-radius: 8px;
+            background: #009ca4;
+            color: #fff;
+            padding: 7px 8px;
+            text-align: left;
+            font-size: 11px;
+            line-height: 1.3;
+            cursor: pointer;
+            margin-bottom: 4px;
+            display: block;
+            transition: background 0.12s;
+        }
+
+        .schedule-event:hover { background: #007f87; }
+
+        .schedule-event .ev-time {
+            display: block;
+            font-size: 10px;
+            opacity: 0.85;
+        }
+
+        .schedule-event .ev-place {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            margin-top: 1px;
+        }
+
+        /* ─────────────────── Detail modal ─────────────────── */
+        .detail-modal::backdrop { background: rgba(0,0,0,0.45); }
+
+        .detail-modal {
+            border: 0;
+            border-radius: 16px;
+            padding: 0;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 8px 48px rgba(0,0,0,0.18);
+            overflow: hidden;
+        }
+
+        .detail-header {
+            background: #009ca4;
+            padding: 22px 24px 18px;
+            color: #fff;
+        }
+
+        .detail-header .detail-dayname {
+            font-size: 13px;
+            opacity: 0.85;
+            margin: 0 0 4px;
+        }
+
+        .detail-header .detail-date {
+            font-size: 24px;
+            font-weight: 800;
+            margin: 0;
+        }
+
+        .detail-content {
+            padding: 20px 24px 8px;
+        }
+
+        .detail-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f2f4;
+            font-size: 14px;
+        }
+
+        .detail-row:last-child { border-bottom: 0; }
+
+        .detail-row i {
+            width: 20px;
+            color: #009ca4;
+            font-size: 18px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .detail-row-label {
+            font-size: 11px;
+            color: #909599;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-weight: 700;
+        }
+
+        .detail-row-value {
+            font-weight: 600;
+            color: #050505;
+            margin-top: 2px;
+        }
+
+        .detail-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 24px;
+            border-top: 1px solid #f0f2f4;
+        }
+
+        .btn-detail-delete {
+            height: 38px;
+            padding: 0 16px;
+            border-radius: 8px;
+            border: 1px solid #fca5a5;
+            background: #fff;
+            color: #dc2626;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .btn-detail-delete:hover {
+            background: rgba(220,38,38,0.06);
+        }
+
+        .btn-detail-right {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-detail-close {
+            height: 38px;
+            padding: 0 16px;
+            border-radius: 8px;
+            border: 1px solid #c6ccd2;
+            background: #fff;
+            color: #454c54;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-detail-edit {
+            height: 38px;
+            padding: 0 18px;
+            border-radius: 8px;
+            border: 0;
+            background: #009ca4;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .btn-detail-edit:hover { background: #007f87; color: #fff; }
+
+        /* ─────────────────── responsive ─────────────────── */
+        @media (max-width: 720px) {
+            .schedule-page { padding: 14px 12px 32px; }
+            .schedule-title { font-size: 22px; }
+            .class-meta-row { grid-template-columns: 1fr; gap: 3px; }
+            .schedule-tabs { gap: 18px; padding-left: 0; overflow-x: auto; }
+            .calendar-toolbar { flex-direction: column; align-items: flex-start; }
+            .add-button { width: 100%; justify-content: center; }
+            .calendar-cell { min-height: 82px; padding: 8px 6px; }
+            .schedule-event .ev-place { font-size: 11px; }
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content" class="schedule-page">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <a th:href="@{/}">Beranda</a>
+        <span class="breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <a th:href="@{/class/{code}(code=${classs.classCode})}" th:text="${classs.name}">Kelas</a>
+        <span class="breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <span>Jadwal</span>
+    </nav>
+
+    <!-- Title -->
+    <h1 class="schedule-title"
+        th:text="${classs.name} + ' – ' + (${classs.course != null ? classs.course.name : 'Mata kuliah tidak tersedia'})">
+        Kelas A – Pemrograman Berorientasi Objek
+    </h1>
+
+    <!-- Class meta -->
+    <div class="class-meta">
+        <div class="class-meta-row">
+            <div class="class-meta-label"><i class="ri-hashtag"></i><span>Kode kelas</span></div>
+            <div class="class-meta-value" th:text="${classs.classCode}">xmw-dca</div>
+        </div>
+        <div class="class-meta-row">
+            <div class="class-meta-label"><i class="ri-book-marked-line"></i><span>Mata Kuliah</span></div>
+            <div class="class-meta-value"
+                 th:text="${classs.course != null ? classs.course.name : '-'}">Pemrograman Berorientasi Objek</div>
+        </div>
+        <div class="class-meta-row">
+            <div class="class-meta-label"><i class="ri-calendar-2-line"></i><span>Tahun Ajaran</span></div>
+            <div class="class-meta-value" th:text="${classs.year}">2025/2026</div>
+        </div>
+        <div class="class-meta-row">
+            <div class="class-meta-label"><i class="ri-list-ordered-2"></i><span>Semester</span></div>
+            <div class="class-meta-value"
+                 th:text="${classs.semester == T(id.adrianz.ruangkelas.model.Class.Semester).ODD ? 'Ganjil' : 'Genap'}">Ganjil</div>
+        </div>
+        <div class="class-meta-row">
+            <div class="class-meta-label"><i class="ri-graduation-cap-line"></i><span>Dosen</span></div>
+            <div class="class-meta-value"
+                 th:text="${classs.lecturerName != null and !classs.lecturerName.isEmpty()} ? ${classs.lecturerName} : '-'">Pa Deden</div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="schedule-tabs">
+        <a class="schedule-tab" th:href="@{/class/{code}(code=${classs.classCode})}">
+            Tugas <span class="tab-count">0</span>
+        </a>
+        <span class="schedule-tab active">
+            Jadwal <span class="tab-count" th:text="${schedules != null ? #lists.size(schedules) : 0}">0</span>
+        </span>
+        <a class="schedule-tab" th:href="@{/class/{code}(code=${classs.classCode})}">
+            Materi Ajar <span class="tab-count">0</span>
+        </a>
+        <a class="schedule-tab" th:href="@{/class/{code}(code=${classs.classCode})}">
+            Anggota <span class="tab-count">0</span>
+        </a>
+    </div>
+
+    <!-- Calendar toolbar -->
+    <div class="calendar-toolbar">
+        <div class="month-controls">
+            <button type="button" class="icon-button" id="prevMonth" aria-label="Bulan sebelumnya">
+                <i class="ri-arrow-left-s-line"></i>
+            </button>
+            <div class="month-title" id="monthTitle">Juni 2026</div>
+            <button type="button" class="icon-button" id="nextMonth" aria-label="Bulan berikutnya">
+                <i class="ri-arrow-right-s-line"></i>
+            </button>
+        </div>
+        <a class="add-button"
+           th:href="@{/admin/jadwal/create/{code}(code=${classs.classCode})}">
+            <i class="ri-add-line"></i>
+            Tambah Jadwal
+        </a>
+    </div>
+
+    <!-- Calendar -->
+    <div class="calendar-shell">
+        <div class="calendar-weekdays">
+            <div>Senin</div><div>Selasa</div><div>Rabu</div>
+            <div>Kamis</div><div>Jumat</div><div>Sabtu</div><div>Minggu</div>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+
+    <!-- ───────────────── Detail Schedule Modal ───────────────── -->
+    <dialog id="detailScheduleModal" class="detail-modal">
+        <div class="detail-header">
+            <p class="detail-dayname" id="detailDayName">Selasa</p>
+            <p class="detail-date" id="detailDate">2 Juni 2026</p>
+        </div>
+        <div class="detail-content">
+            <div class="detail-row">
+                <i class="ri-time-line"></i>
+                <div>
+                    <div class="detail-row-label">Waktu</div>
+                    <div class="detail-row-value" id="detailTime">08.00</div>
+                </div>
+            </div>
+            <div class="detail-row">
+                <i class="ri-map-pin-line"></i>
+                <div>
+                    <div class="detail-row-label">Lokasi</div>
+                    <div class="detail-row-value" id="detailPlace">Ruang 4.0</div>
+                </div>
+            </div>
+        </div>
+        <div class="detail-actions">
+            <!-- Delete -->
+            <a id="deleteScheduleBtn" href="#" class="btn-detail-delete"
+               onclick="return confirm('Yakin ingin menghapus jadwal ini?')">
+                <i class="ri-delete-bin-line"></i> Hapus
+            </a>
+            <div class="btn-detail-right">
+                <button type="button" class="btn-detail-close"
+                        onclick="document.getElementById('detailScheduleModal').close()">Tutup</button>
+                <a id="editScheduleBtn" href="#" class="btn-detail-edit">
+                    <i class="ri-pencil-line"></i> Edit
+                </a>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- ───────────────── Script ───────────────── -->
+    <script th:inline="javascript">
+        const classId = /*[[${classs.id}]]*/ 0;
+
+        const MONTH_NAMES = [
+            "Januari","Februari","Maret","April","Mei","Juni",
+            "Juli","Agustus","September","Oktober","November","Desember"
+        ];
+        const DAY_NAMES = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+
+        const calendarGrid = document.getElementById("calendarGrid");
+        const monthTitle   = document.getElementById("monthTitle");
+        let visibleDate = new Date();
+        let schedules   = [];
+
+        function toDateKey(d) {
+            return d.getFullYear() + "-"
+                 + String(d.getMonth()+1).padStart(2,"0") + "-"
+                 + String(d.getDate()).padStart(2,"0");
+        }
+
+        function fmtTime(d) {
+            return String(d.getHours()).padStart(2,"0") + "."
+                 + String(d.getMinutes()).padStart(2,"0");
+        }
+
+        function fmtDateFull(d) {
+            return `${d.getDate()} ${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
+        }
+
+        function renderCalendar() {
+            const year  = visibleDate.getFullYear();
+            const month = visibleDate.getMonth();
+            const firstDay   = new Date(year, month, 1);
+            const startOffset = (firstDay.getDay() + 6) % 7;   // Mon-based
+            const gridStart  = new Date(year, month, 1 - startOffset);
+            const today      = new Date();
+            const todayKey   = toDateKey(today);
+
+            monthTitle.textContent = `${MONTH_NAMES[month]} ${year}`;
+            calendarGrid.innerHTML = "";
+
+            for (let i = 0; i < 42; i++) {
+                const day = new Date(gridStart);
+                day.setDate(gridStart.getDate() + i);
+
+                const isCurrent = day.getMonth() === month;
+                const isToday   = toDateKey(day) === todayKey;
+
+                const cell = document.createElement("div");
+                cell.className = "calendar-cell" + (isCurrent ? "" : " is-muted")
+                               + (isToday ? " is-today" : "");
+
+                // Day number
+                const dayNum = document.createElement("div");
+                dayNum.className = "day-number";
+                dayNum.textContent = day.getDate();
+                cell.appendChild(dayNum);
+
+                // Events for this day
+                schedules
+                    .filter(s => s.key === toDateKey(day))
+                    .forEach(s => {
+                        const btn = document.createElement("button");
+                        btn.type = "button";
+                        btn.className = "schedule-event";
+                        btn.innerHTML =
+                            `<span class="ev-time">${s.endDate ? fmtTime(s.date) + " - " + fmtTime(s.endDate) : fmtTime(s.date)}</span>
+                             <span class="ev-place">${s.place}</span>`;
+                        btn.addEventListener("click", () => showDetail(s));
+                        cell.appendChild(btn);
+                    });
+
+                calendarGrid.appendChild(cell);
+            }
+        }
+
+        function showDetail(s) {
+            window.location.href = `/admin/jadwal/${s.id}`;
+        }
+
+        async function loadSchedules() {
+            const res  = await fetch(`/api/jadwal/data?classId=${classId}`);
+            const data = await res.json();
+            schedules = data
+                .filter(item => item.start)
+                .map(item => {
+                    const date = new Date(item.start);
+                    const endDate = item.end ? new Date(item.end) : null;
+                    return { id: item.id, date, endDate, key: toDateKey(date), place: item.place || "Ruangan" };
+                });
+            renderCalendar();
+        }
+
+        document.getElementById("prevMonth").addEventListener("click", () => {
+            visibleDate = new Date(visibleDate.getFullYear(), visibleDate.getMonth()-1, 1);
+            renderCalendar();
+        });
+
+        document.getElementById("nextMonth").addEventListener("click", () => {
+            visibleDate = new Date(visibleDate.getFullYear(), visibleDate.getMonth()+1, 1);
+            renderCalendar();
+        });
+
+        loadSchedules().catch(() => renderCalendar());
+    </script>
+</div>
+</body>
+</html>

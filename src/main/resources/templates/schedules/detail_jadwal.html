@@ -1,0 +1,370 @@
+<!doctype html>
+<html
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/Home}"
+>
+<head>
+    <title th:text="'Detail Jadwal - ' + ${schedule.kelas.name}">Detail Jadwal</title>
+    <style>
+        .detail-page {
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 20px 24px 48px;
+        }
+
+        /* ── breadcrumb ── */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #687079;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+        }
+        .breadcrumb a { color: #687079; text-decoration: none; }
+        .breadcrumb a:hover { color: #009ca4; }
+        .breadcrumb-sep { color: #b4bac0; }
+        .breadcrumb span { color: #050505; font-weight: 500; }
+
+        /* ── page heading ── */
+        .detail-heading {
+            font-size: 26px;
+            font-weight: 800;
+            color: #050505;
+            margin: 14px 0 28px;
+            line-height: 1.2;
+        }
+
+        /* ── card ── */
+        .detail-card {
+            background: #fff;
+            border: 1px solid #e2e6ea;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        /* ── card header (teal banner) ── */
+        .detail-card-header {
+            background: #009ca4;
+            padding: 24px 32px 20px;
+            color: #fff;
+        }
+
+        .detail-card-header .day-label {
+            font-size: 13px;
+            opacity: 0.85;
+            margin: 0 0 4px;
+            font-weight: 500;
+        }
+
+        .detail-card-header .date-label {
+            font-size: 28px;
+            font-weight: 800;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        /* ── card body ── */
+        .detail-card-body {
+            padding: 8px 32px 4px;
+        }
+
+        .detail-row {
+            display: grid;
+            grid-template-columns: 160px minmax(0, 1fr);
+            align-items: center;
+            gap: 14px;
+            padding: 16px 0;
+            border-bottom: 1px solid #f0f2f4;
+            font-size: 14px;
+        }
+
+        .detail-row:last-child { border-bottom: 0; }
+
+        .detail-row-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #687079;
+            font-size: 14px;
+        }
+
+        .detail-row-label i {
+            font-size: 17px;
+            color: #009ca4;
+            width: 20px;
+            flex-shrink: 0;
+        }
+
+        .detail-row-value {
+            color: #050505;
+            font-weight: 600;
+        }
+
+        .detail-row-value a {
+            color: #009ca4;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .detail-row-value a:hover {
+            text-decoration: underline;
+        }
+
+        /* ── actions ── */
+        .detail-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 20px 32px;
+            border-top: 1px solid #f0f2f4;
+        }
+
+        .btn-delete {
+            height: 40px;
+            padding: 0 18px;
+            border-radius: 8px;
+            border: 1px solid #fca5a5;
+            background: #fff;
+            color: #dc2626;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            text-decoration: none;
+        }
+        .btn-delete:hover { background: rgba(220,38,38,0.06); }
+
+        .btn-group-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-back {
+            height: 40px;
+            padding: 0 20px;
+            border-radius: 8px;
+            border: 1px solid #c6ccd2;
+            background: #fff;
+            color: #454c54;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+        .btn-back:hover { background: #f5f7f9; }
+
+        .btn-edit {
+            height: 40px;
+            padding: 0 22px;
+            border-radius: 8px;
+            border: 0;
+            background: #009ca4;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        .btn-edit:hover { background: #007f87; color: #fff; }
+
+        /* ── delete confirm dialog ── */
+        .confirm-dialog::backdrop { background: rgba(0,0,0,0.45); }
+        .confirm-dialog {
+            border: 0;
+            border-radius: 14px;
+            padding: 28px 28px 24px;
+            max-width: 380px;
+            width: 100%;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+        }
+        .confirm-dialog h3 {
+            font-size: 18px;
+            font-weight: 800;
+            color: #050505;
+            margin: 0 0 8px;
+        }
+        .confirm-dialog p {
+            font-size: 14px;
+            color: #687079;
+            margin: 0 0 24px;
+        }
+        .confirm-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .btn-outline {
+            height: 38px;
+            padding: 0 18px;
+            border-radius: 8px;
+            border: 1px solid #c6ccd2;
+            background: #fff;
+            color: #454c54;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-danger {
+            height: 38px;
+            padding: 0 18px;
+            border-radius: 8px;
+            border: 0;
+            background: #dc2626;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-danger:hover { background: #b91c1c; color: #fff; }
+
+        @media (max-width: 600px) {
+            .detail-page { padding: 14px 12px 36px; }
+            .detail-card-header { padding: 18px 20px 16px; }
+            .detail-card-header .date-label { font-size: 22px; }
+            .detail-card-body { padding: 4px 20px 0; }
+            .detail-row { grid-template-columns: 1fr; gap: 4px; }
+            .detail-actions { flex-direction: column-reverse; align-items: stretch; padding: 16px 20px; }
+            .btn-group-right { justify-content: flex-end; }
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content" class="detail-page">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <a th:href="@{/}">Beranda</a>
+        <span class="breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <a th:href="@{/class/{code}(code=${schedule.kelas.classCode})}"
+           th:text="${schedule.kelas.name}">Kelas A</a>
+        <span class="breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <a th:href="@{/class/{code}/jadwal(code=${schedule.kelas.classCode})}">Jadwal</a>
+        <span class="breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <span th:text="${#temporals.format(schedule.effectiveDateTime, 'dd MMM yyyy')}">2 Juni 2026</span>
+    </nav>
+
+    <h1 class="detail-heading"
+        th:text="${#temporals.format(schedule.effectiveDateTime, 'EEEE, d MMMM yyyy')}">
+        Selasa, 2 Juni 2026
+    </h1>
+
+    <div class="detail-card">
+
+        <!-- Teal header banner -->
+        <div class="detail-card-header">
+            <p class="day-label"
+               th:text="${#temporals.format(schedule.effectiveDateTime, 'EEEE')}">Selasa</p>
+            <p class="date-label"
+               th:text="${#temporals.format(schedule.effectiveDateTime, 'd MMMM yyyy')}">2 Juni 2026</p>
+        </div>
+
+        <!-- Detail rows -->
+        <div class="detail-card-body">
+
+            <!-- Kelas -->
+            <div class="detail-row">
+                <div class="detail-row-label">
+                    <i class="ri-hashtag"></i>
+                    <span>Kelas</span>
+                </div>
+                <div class="detail-row-value">
+                    <a th:href="@{/class/{code}(code=${schedule.kelas.classCode})}"
+                       th:text="${schedule.kelas.name}">Kelas A</a>
+                </div>
+            </div>
+
+            <!-- Mata Kuliah -->
+            <div class="detail-row">
+                <div class="detail-row-label">
+                    <i class="ri-book-open-line"></i>
+                    <span>Mata Kuliah</span>
+                </div>
+                <div class="detail-row-value"
+                     th:text="${schedule.kelas.course != null ? schedule.kelas.course.name : '-'}">
+                    Pemrograman Berorientasi Objek
+                </div>
+            </div>
+
+            <!-- Jam -->
+            <div class="detail-row">
+                <div class="detail-row-label">
+                    <i class="ri-time-line"></i>
+                    <span>Jam</span>
+                </div>
+                <div class="detail-row-value">
+                    <span th:text="${#temporals.format(schedule.effectiveDateTime, 'HH.mm')}">08.00</span>
+                    <span th:if="${schedule.endDateTime != null}"
+                          th:text="${' – ' + #temporals.format(schedule.endDateTime, 'HH.mm')}"> – 09.00</span>
+                </div>
+            </div>
+
+            <!-- Lokasi -->
+            <div class="detail-row">
+                <div class="detail-row-label">
+                    <i class="ri-map-pin-line"></i>
+                    <span>Lokasi</span>
+                </div>
+                <div class="detail-row-value"
+                     th:text="${schedule.effectivePlace}">Ruang 4.0</div>
+            </div>
+
+        </div>
+
+        <!-- Action buttons -->
+        <div class="detail-actions">
+            <!-- Delete -->
+            <button type="button" class="btn-delete"
+                    onclick="document.getElementById('deleteDialog').showModal()">
+                <i class="ri-delete-bin-line"></i>
+                Hapus
+            </button>
+
+            <div class="btn-group-right">
+                <a class="btn-back"
+                   th:href="@{/class/{code}/jadwal(code=${schedule.kelas.classCode})}">
+                    Kembali
+                </a>
+                <a class="btn-edit"
+                   th:href="@{/admin/jadwal/edit/{id}(id=${schedule.id})}">
+                    <i class="ri-pencil-line"></i>
+                    Edit
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete confirmation dialog -->
+    <dialog id="deleteDialog" class="confirm-dialog">
+        <h3>Hapus Jadwal?</h3>
+        <p>Jadwal yang dihapus tidak dapat dikembalikan. Yakin ingin melanjutkan?</p>
+        <div class="confirm-actions">
+            <button type="button" class="btn-outline"
+                    onclick="document.getElementById('deleteDialog').close()">
+                Batal
+            </button>
+            <a class="btn-danger"
+               th:href="@{/admin/jadwal/delete/{id}(id=${schedule.id})}">
+                <i class="ri-delete-bin-line"></i>
+                Hapus
+            </a>
+        </div>
+    </dialog>
+
+</div>
+</body>
+</html>

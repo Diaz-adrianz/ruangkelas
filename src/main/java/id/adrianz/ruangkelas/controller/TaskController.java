@@ -1,53 +1,174 @@
 package id.adrianz.ruangkelas.controller;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import id.adrianz.ruangkelas.model.SubTask;
+import id.adrianz.ruangkelas.dto.CreateTaskDto;
+import id.adrianz.ruangkelas.dto.UpdateTaskDto;
+import id.adrianz.ruangkelas.model.Class;
 import id.adrianz.ruangkelas.model.Task;
+import id.adrianz.ruangkelas.model.UserPrincipal;
+import id.adrianz.ruangkelas.service.ClassService;
 import id.adrianz.ruangkelas.service.TaskService;
+import id.adrianz.ruangkelas.service.CommentService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
-@RestController
-@RequestMapping("/api/tasks")
-@CrossOrigin(origins = "*") // Mengizinkan akses dari frontend manapun
+@Controller
+@RequestMapping("/class/{classCode}/tasks")
+@RequiredArgsConstructor
 public class TaskController {
 
-    @Autowired
-    private TaskService taskService;
+    private final TaskService taskService;
+    private final ClassService classService;
+    private final CommentService commentService;
 
-    // Endpoint untuk mendapatkan semua task (GET http://localhost:8080/api/tasks)
-    @GetMapping
-    public List<Task> getAllTasks() {
-        return taskService.getAllTasks();
+    @GetMapping("/create")
+    public String showCreateForm(@PathVariable String classCode, Model model) {
+        Class classs = classService.getByCode(classCode);
+        model.addAttribute("classs", classs);
+        model.addAttribute("createTaskDto", new CreateTaskDto());
+        return "pages/Task/Create";
     }
 
-    // Endpoint untuk membuat task baru (POST http://localhost:8080/api/tasks)
-    @PostMapping
-    public Task createTask(@RequestBody Task task) {
-        return taskService.createTask(task);
+    @PostMapping("/create")
+    public String createTask(@PathVariable String classCode,
+            @Valid @ModelAttribute("createTaskDto") CreateTaskDto request,
+            BindingResult result,
+            Model model,
+            RedirectAttributes redirectAttributes,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        Class classs = classService.getByCode(classCode);
+
+        if (result.hasErrors()) {
+            model.addAttribute("classs", classs);
+            model.addAttribute("errors", result.getFieldErrors());
+            return "pages/Task/create";
+        }
+
+        try {
+            classService.ensureAdmin(classs.getId(), principal.getUser().getId());
+
+            Task task = Task.builder()
+                    .classe(classs)
+                    .title(request.getTitle())
+                    .description(request.getDescription())
+                    .status("PENDING")
+                    .deadline(request.getDeadline())
+                    .createdBy(principal.getUser())
+                    .build();
+
+            taskService.createTask(task);
+        } catch (Exception e) {
+            model.addAttribute("classs", classs);
+            model.addAttribute("error", e.getMessage());
+            return "pages/Task/create";
+        }
+
+        redirectAttributes.addFlashAttribute("success", "Tugas berhasil ditambahkan");
+        return "redirect:/class/" + classCode + "#tasks";
     }
 
-    // Endpoint untuk menghapus task (DELETE http://localhost:8080/api/tasks/{id})
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteTask(@PathVariable Long id) {
-        taskService.deleteTask(id);
-        return ResponseEntity.ok().body("Task berhasil dihapus");
+    @GetMapping("/{taskId}/edit")
+    public String showEditForm(@PathVariable String classCode, @PathVariable Long taskId, Model model) {
+        Class classs = classService.getByCode(classCode);
+        Task task = taskService.getTaskById(taskId);
+
+        UpdateTaskDto updateTaskDto = new UpdateTaskDto();
+        updateTaskDto.setTitle(task.getTitle());
+        updateTaskDto.setDescription(task.getDescription());
+        updateTaskDto.setDeadline(task.getDeadline());
+
+        model.addAttribute("classs", classs);
+        model.addAttribute("task", task);
+        model.addAttribute("updateTaskDto", updateTaskDto);
+        return "pages/Task/Edit";
     }
 
-    // Endpoint untuk menambah subtask ke dalam task tertentu (POST http://localhost:8080/api/tasks/{taskId}/subtasks)
-    @PostMapping("/{taskId}/subtasks")
-    public ResponseEntity<SubTask> addSubTask(@PathVariable Long taskId, @RequestBody SubTask subTask) {
-        SubTask savedSubTask = taskService.addSubTask(taskId, subTask);
-        return ResponseEntity.ok(savedSubTask);
+    @PostMapping("/{taskId}/edit")
+    public String updateTask(@PathVariable String classCode,
+            @PathVariable Long taskId,
+            @Valid @ModelAttribute("updateTaskDto") UpdateTaskDto request,
+            BindingResult result,
+            Model model,
+            RedirectAttributes redirectAttributes,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        Class classs = classService.getByCode(classCode);
+        Task task = taskService.getTaskById(taskId);
+
+        if (result.hasErrors()) {
+            model.addAttribute("classs", classs);
+            model.addAttribute("task", task);
+            model.addAttribute("errors", result.getFieldErrors());
+            return "pages/Task/Edit";
+        }
+
+        try {
+            classService.ensureAdmin(classs.getId(), principal.getUser().getId());
+
+            Task updatedTaskData = new Task();
+            updatedTaskData.setTitle(request.getTitle());
+            updatedTaskData.setDescription(request.getDescription());
+            updatedTaskData.setDeadline(request.getDeadline());
+
+            taskService.updateTask(taskId, updatedTaskData);
+        } catch (Exception e) {
+            model.addAttribute("classs", classs);
+            model.addAttribute("task", task);
+            model.addAttribute("error", e.getMessage());
+            return "pages/Task/Edit";
+        }
+
+        redirectAttributes.addFlashAttribute("success", "Tugas berhasil diedit");
+        return "redirect:/class/" + classCode + "/tasks/" + taskId;
+    }
+
+    @PostMapping("/{taskId}/delete")
+    public String deleteTask(@PathVariable String classCode,
+            @PathVariable Long taskId,
+            RedirectAttributes redirectAttributes,
+            Model model,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        try {
+            Class classs = classService.getByCode(classCode);
+
+            classService.ensureAdmin(classs.getId(), principal.getUser().getId());
+            taskService.deleteTask(taskId);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/class/" + classCode + "/tasks/" + taskId;
+        }
+
+        redirectAttributes.addFlashAttribute("success", "Tugas berhasil dihapus");
+        return "redirect:/class/" + classCode + "#tasks";
+    }
+
+    @GetMapping("/{taskId}")
+    public String getMethodName(@PathVariable String classCode,
+            @PathVariable Long taskId,
+            Model model,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        Class classs = classService.getByCode(classCode);
+        boolean isAdmin = classService.isAdmin(classs.getId(), principal.getUser().getId());
+        model.addAttribute("classs", classs);
+        model.addAttribute("isAdmin", isAdmin);
+
+        Task task = taskService.getTaskById(taskId);
+        model.addAttribute("task", task);
+
+        // 🌟 DI SINI PERUBAHAN UTAMANYA: Menggunakan method penampung baru
+        var comments = commentService.getComments(taskId, principal.getUser());
+        model.addAttribute("comments", comments);
+        model.addAttribute("currentUserId", principal.getUser().getId());
+
+        return "pages/Task/Detail";
     }
 }
