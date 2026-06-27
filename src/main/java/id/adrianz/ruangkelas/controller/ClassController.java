@@ -3,6 +3,7 @@ package id.adrianz.ruangkelas.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,6 +28,9 @@ import id.adrianz.ruangkelas.service.ClassService;
 import id.adrianz.ruangkelas.service.ScheduleService; // Tambahkan import ini
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import id.adrianz.ruangkelas.service.DocumentService;
+import id.adrianz.ruangkelas.service.TaskService;
+import id.adrianz.ruangkelas.model.Task;
 
 @Controller
 @RequestMapping("/class")
@@ -35,6 +39,8 @@ public class ClassController {
 
     private final ClassService classService;
     private final ScheduleService scheduleService; // Tambahkan ini
+    private final DocumentService documentService;
+    private final TaskService taskService;
 
     // ================= INDEX =================
 

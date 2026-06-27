@@ -18,13 +18,14 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final ClassRepository classRepository;
 
-    public Schedule createSchedule(Long classId, LocalDateTime dateTime, String place) {
+    public Schedule createSchedule(Long classId, LocalDateTime dateTime, LocalDateTime endDateTime, String place) {
         id.adrianz.ruangkelas.model.Class kelas = classRepository.findByIdWithCourse(classId)
                 .orElseThrow(() -> new RuntimeException("Kelas tidak ditemukan"));
 
         Schedule schedule = new Schedule();
         schedule.setKelas(kelas);
         schedule.setDateTime(dateTime);
+        schedule.setEndDateTime(endDateTime);
         schedule.setPlace(place);
         return scheduleRepository.save(schedule);
     }
@@ -37,11 +38,12 @@ public class ScheduleService {
         return scheduleRepository.findById(id);
     }
 
-    public Schedule updateSchedule(Long id, LocalDateTime dateTime, String place) {
+    public Schedule updateSchedule(Long id, LocalDateTime dateTime, LocalDateTime endDateTime, String place) {
         Schedule schedule = scheduleRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Jadwal tidak ditemukan dengan id: " + id));
 
         schedule.setDateTime(dateTime);
+        schedule.setEndDateTime(endDateTime);
         schedule.setPlace(place);
 
         return scheduleRepository.save(schedule);

@@ -22,6 +22,9 @@ public class Schedule {
     @Column(name = "datetime")
     private LocalDateTime dateTime;
 
+    @Column(name = "end_datetime")
+    private LocalDateTime endDateTime;
+
     @Column(name = "place", length = 100)
     private String place;
 

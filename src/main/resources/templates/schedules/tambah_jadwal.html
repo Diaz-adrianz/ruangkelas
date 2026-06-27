@@ -1,0 +1,225 @@
+<!doctype html>
+<html
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/Home}"
+>
+<head>
+    <title>Tambah Jadwal</title>
+    <style>
+        .form-page {
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 20px 24px 48px;
+        }
+
+        /* ── breadcrumb ── */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #687079;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+        }
+        .breadcrumb a { color: #687079; text-decoration: none; }
+        .breadcrumb a:hover { color: #009ca4; }
+        .breadcrumb-sep { color: #b4bac0; }
+        .breadcrumb span { color: #050505; font-weight: 500; }
+
+        /* ── page heading ── */
+        .form-heading {
+            font-size: 26px;
+            font-weight: 800;
+            color: #050505;
+            margin: 14px 0 28px;
+            line-height: 1.2;
+        }
+
+        /* ── card ── */
+        .form-card {
+            background: #fff;
+            border: 1px solid #e2e6ea;
+            border-radius: 14px;
+            padding: 32px 36px 36px;
+        }
+
+        /* ── field ── */
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .field-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #454c54;
+            margin-bottom: 7px;
+        }
+
+        .field-input {
+            width: 100%;
+            height: 42px;
+            padding: 0 14px;
+            border: 1px solid #c6ccd2;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #050505;
+            background: #fff;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.15s;
+            font-family: inherit;
+        }
+
+        .field-input:focus {
+            border-color: #009ca4;
+            box-shadow: 0 0 0 3px rgba(0, 156, 164, 0.12);
+        }
+
+        /* ── actions ── */
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 12px;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #f0f2f4;
+        }
+
+        .btn-cancel {
+            height: 40px;
+            padding: 0 20px;
+            border-radius: 8px;
+            border: 1px solid #c6ccd2;
+            background: #fff;
+            color: #454c54;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+        .btn-cancel:hover { background: #f5f7f9; }
+
+        .btn-save {
+            height: 40px;
+            padding: 0 22px;
+            border-radius: 8px;
+            border: 0;
+            background: #009ca4;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-save:hover { background: #007f87; }
+
+        @media (max-width: 600px) {
+            .form-page { padding: 14px 12px 36px; }
+            .form-card { padding: 22px 18px 24px; }
+            .form-heading { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content" class="form-page">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <a th:href="@{/}">Beranda</a>
+        <span class="breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <a th:href="@{/class/{code}(code=${classs.classCode})}" th:text="${classs.name}">Kelas</a>
+        <span class="breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <a th:href="@{/class/{code}/jadwal(code=${classs.classCode})}">Jadwal</a>
+        <span class="breadcrumb-sep"><i class="ri-arrow-right-s-line"></i></span>
+        <span>Tambah Jadwal</span>
+    </nav>
+
+    <h1 class="form-heading"
+        th:text="'Tambah Jadwal ' + ${classs.name}">
+        Tambah Jadwal Kelas A
+    </h1>
+
+    <div class="form-card">
+        <form th:action="@{/admin/jadwal/save}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <input type="hidden" name="classId" th:value="${classs.id}" />
+
+            <div class="field-group">
+
+                <!-- Jam Mulai -->
+                <div>
+                    <label class="field-label" for="dateTime">Jam Mulai</label>
+                    <input
+                        id="dateTime"
+                        type="datetime-local"
+                        name="dateTime"
+                        class="field-input"
+                        required
+                    />
+                </div>
+
+                <!-- Jam Selesai -->
+                <div>
+                    <label class="field-label" for="endDateTime">Jam Selesai</label>
+                    <input
+                        id="endDateTime"
+                        type="datetime-local"
+                        name="endDateTime"
+                        class="field-input"
+                        required
+                    />
+                </div>
+
+                <!-- Lokasi -->
+                <div>
+                    <label class="field-label" for="place">Lokasi</label>
+                    <input
+                        id="place"
+                        type="text"
+                        name="place"
+                        class="field-input"
+                        placeholder="Contoh: FG TR 4.10"
+                        required
+                    />
+                </div>
+
+            </div>
+
+            <div class="form-actions">
+                <a class="btn-cancel"
+                   th:href="@{/class/{code}/jadwal(code=${classs.classCode})}">
+                    Batal
+                </a>
+                <button type="submit" class="btn-save">
+                    <i class="ri-save-line"></i>
+                    Simpan
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Pastikan Jam Selesai tidak lebih awal dari Jam Mulai
+        const startInput = document.getElementById('dateTime');
+        const endInput = document.getElementById('endDateTime');
+        startInput.addEventListener('change', () => {
+            endInput.min = startInput.value;
+            if (endInput.value && endInput.value < startInput.value) {
+                endInput.value = startInput.value;
+            }
+        });
+    </script>
+
+</div>
+</body>
+</html>

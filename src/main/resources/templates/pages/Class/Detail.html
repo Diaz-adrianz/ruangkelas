@@ -110,6 +110,7 @@
             font-size: 13px; font-weight: 700;
             cursor: pointer;
             display: inline-flex; align-items: center; gap: 7px;
+            text-decoration: none;
         }
         .add-sched-btn:hover { background: #007f87; }
 
@@ -179,42 +180,6 @@
         ══════════════════════════════ */
         .rk-dialog { border: 0; border-radius: 16px; padding: 0; box-shadow: 0 8px 48px rgba(0,0,0,.18); }
         .rk-dialog::backdrop { background: rgba(0,0,0,.45); }
-
-        /* add modal */
-        .modal-add { max-width: 440px; width: 95vw; }
-
-        .modal-hd { padding: 22px 24px 0; }
-        .modal-hd h3 { font-size: 19px; font-weight: 800; color: #050505; margin: 0 0 3px; }
-        .modal-hd p  { font-size: 13px; color: #687079; margin: 0 0 20px; }
-
-        .modal-bd { padding: 0 24px; }
-
-        .mfield { margin-bottom: 15px; }
-        .mfield label { display: block; font-size: 13px; font-weight: 600; color: #454c54; margin-bottom: 6px; }
-        .mfield input {
-            width: 100%; height: 42px; padding: 0 14px;
-            border: 1px solid #c6ccd2; border-radius: 8px;
-            font-size: 14px; color: #050505; background: #fff;
-            box-sizing: border-box; outline: none; font-family: inherit;
-        }
-        .mfield input:focus { border-color: #009ca4; box-shadow: 0 0 0 3px rgba(0,156,164,.12); }
-
-        .modal-ft {
-            display: flex; justify-content: flex-end; gap: 10px;
-            padding: 18px 24px; border-top: 1px solid #f0f2f4; margin-top: 8px;
-        }
-
-        .btn-cancel-m {
-            height: 40px; padding: 0 20px; border-radius: 8px;
-            border: 1px solid #c6ccd2; background: #fff;
-            color: #454c54; font-size: 14px; font-weight: 600; cursor: pointer;
-        }
-        .btn-save-m {
-            height: 40px; padding: 0 22px; border-radius: 8px;
-            border: 0; background: #009ca4; color: #fff;
-            font-size: 14px; font-weight: 700; cursor: pointer;
-        }
-        .btn-save-m:hover { background: #007f87; }
 
         /* detail modal */
         .modal-detail { max-width: 400px; width: 95vw; }
@@ -396,11 +361,11 @@
             </div>
 
             <!-- Tombol Tambah hanya tampil untuk admin -->
-            <button th:if="${isAdmin}"
-                    type="button" class="add-sched-btn"
-                    onclick="document.getElementById('addSchedModal').showModal()">
+            <a th:if="${isAdmin}"
+               class="add-sched-btn"
+               th:href="@{/admin/jadwal/create/{code}(code=${classs.classCode})}">
                 <i class="ri-add-line"></i> Tambah Jadwal
-            </button>
+            </a>
         </div>
 
         <!-- calendar -->
@@ -493,33 +458,6 @@
             </div>
         </div>
     </div>
-
-    <!-- ═══════════ MODAL: Tambah Jadwal ═══════════ -->
-    <dialog id="addSchedModal" class="rk-dialog modal-add">
-        <div class="modal-hd">
-            <h3>Tambah Jadwal <span th:text="${classs.name}">Kelas</span></h3>
-            <p>Isi informasi jadwal perkuliahan baru.</p>
-        </div>
-        <form th:action="@{/admin/jadwal/save}" method="post">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-            <input type="hidden" name="classId" th:value="${classs.id}" />
-            <div class="modal-bd">
-                <div class="mfield">
-                    <label for="addDT">Jam Mulai</label>
-                    <input id="addDT" type="datetime-local" name="dateTime" required />
-                </div>
-                <div class="mfield">
-                    <label for="addPlace">Lokasi</label>
-                    <input id="addPlace" type="text" name="place" placeholder="Contoh: FG TR 4.10" required />
-                </div>
-            </div>
-            <div class="modal-ft">
-                <button type="button" class="btn-cancel-m"
-                        onclick="document.getElementById('addSchedModal').close()">Batal</button>
-                <button type="submit" class="btn-save-m">Simpan</button>
-            </div>
-        </form>
-    </dialog>
 
     <!-- ═══════════ MODAL: Detail Jadwal ═══════════ -->
     <dialog id="detailSchedModal" class="rk-dialog modal-detail">
@@ -633,7 +571,7 @@
                         const chip = document.createElement("button");
                         chip.type = "button";
                         chip.className = "ev-chip";
-                        chip.innerHTML = `<span class="ev-time">${fmtTime(s.date)}</span>
+                        chip.innerHTML = `<span class="ev-time">${s.endDate ? fmtTime(s.date) + " - " + fmtTime(s.endDate) : fmtTime(s.date)}</span>
                                           <span class="ev-place">${s.place}</span>`;
                         chip.addEventListener("click", () => openDetail(s));
                         cell.appendChild(chip);
@@ -646,7 +584,9 @@
         function openDetail(s) {
             document.getElementById("dDayName").textContent = DAYS[s.date.getDay()];
             document.getElementById("dDate").textContent    = fmtDate(s.date);
-            document.getElementById("dTime").textContent    = fmtTime(s.date);
+            document.getElementById("dTime").textContent    = s.endDate
+                ? `${fmtTime(s.date)} - ${fmtTime(s.endDate)}`
+                : fmtTime(s.date);
             document.getElementById("dPlace").textContent   = s.place;
             document.getElementById("dEditBtn").href        = `/admin/jadwal/edit/${s.id}`;
             document.getElementById("dDeleteBtn").href      = `/admin/jadwal/delete/${s.id}`;
@@ -661,7 +601,8 @@
                     .filter(i => i.start)
                     .map(i => {
                         const date = new Date(i.start);
-                        return { id: i.id, date, key: toKey(date), place: i.place || "Ruangan" };
+                        const endDate = i.end ? new Date(i.end) : null;
+                        return { id: i.id, date, endDate, key: toKey(date), place: i.place || "Ruangan" };
                     });
             } catch(e) { schedules = []; }
             renderCal();

@@ -38,6 +38,7 @@ public class ScheduleApiController {
             event.put("id", s.getId());        
             event.put("title", s.getEffectivePlace());
             event.put("start", dateTime.toString());
+            event.put("end", s.getEndDateTime() != null ? s.getEndDateTime().toString() : null);
             event.put("place", s.getEffectivePlace());
             event.put("time", dateTime.toLocalTime().toString());
 
