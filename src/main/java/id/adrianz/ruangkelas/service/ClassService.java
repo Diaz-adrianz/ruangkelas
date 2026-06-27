@@ -3,6 +3,7 @@ package id.adrianz.ruangkelas.service;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
  
 import org.springframework.stereotype.Service;
  
@@ -32,7 +33,7 @@ public class ClassService {
     }
  
     public Class getById(Long id) {
-        return classRepository.findById(id)
+        return classRepository.findByIdWithCourse(id)
                 .orElseThrow(() -> new RuntimeException("Kelas tidak ditemukan"));
     }
  
@@ -107,7 +108,8 @@ public class ClassService {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Matkul tidak ditemukan"));
  
-        boolean changed = !existing.getCourse().getId().equals(courseId)
+        Long existingCourseId = existing.getCourse() != null ? existing.getCourse().getId() : null;
+        boolean changed = !Objects.equals(existingCourseId, courseId)
                 || !existing.getName().equals(name)
                 || !existing.getYear().equals(year)
                 || existing.getSemester() != semester;

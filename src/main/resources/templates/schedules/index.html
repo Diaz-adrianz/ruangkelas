@@ -1,0 +1,39 @@
+<!doctype html>
+<html
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/Home}"
+>
+<head>
+    <title>Daftar Jadwal</title>
+</head>
+<body>
+<div layout:fragment="content" class="mx-auto max-w-5xl p-6">
+    <h1 class="typo-heading-lg mb-6">Daftar Jadwal</h1>
+
+    <div class="overflow-x-auto bg-base-100 border border-base-300 rounded-box">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>No</th>
+                <th>Kelas</th>
+                <th>Tanggal dan jam</th>
+                <th>Ruangan</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="schedule, iterStat : ${schedules}">
+                <td th:text="${iterStat.count}">1</td>
+                <td th:text="${schedule.kelas != null ? schedule.kelas.name : '-'}">Kelas</td>
+                <td th:text="${schedule.effectiveDateTime != null ? #temporals.format(schedule.effectiveDateTime, 'dd MMMM yyyy HH:mm') : '-'}">Tanggal</td>
+                <td th:text="${schedule.effectivePlace}">Ruangan</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(schedules)}">
+                <td colspan="4" class="text-center text-base-content/60">Belum ada jadwal.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
