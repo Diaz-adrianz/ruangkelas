@@ -40,7 +40,6 @@ public class SecurityConfig {
                 )
                 .formLogin(form -> form
                 .loginPage("/auth/login")
-                .defaultSuccessUrl("/", true)
                 .failureHandler((request, response, exception) -> {
                     String message;
                     if (exception instanceof BadCredentialsException) {

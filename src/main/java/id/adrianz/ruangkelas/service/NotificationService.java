@@ -54,9 +54,9 @@ public class NotificationService {
         notification.setReferenceType(referenceType);
         notification.setIsRead(false);
 
-        notificationRepository.save(notification);
+        Notification notif = notificationRepository.save(notification);
 
-        sendToUser(user, title, body, referenceId, referenceType);
+        sendToUser(user, title, body, referenceId, referenceType, notif.getId());
     }
 
     public boolean alreadyNotifiedToday(Long userId, Long referenceId, String referenceType, NotificationType type) {
@@ -67,7 +67,7 @@ public class NotificationService {
                 userId, referenceId, referenceType, type, startOfDay, endOfDay);
     }
 
-    private void sendToUser(User user, String title, String body, Long referenceId, String referenceType) {
+    private void sendToUser(User user, String title, String body, Long referenceId, String referenceType, Integer notifId) {
         List<DeviceToken> tokens = deviceTokenRepository.findByUser(user);
         if (tokens.isEmpty()) {
             log.warn(">>> User {} gak punya device token terdaftar, push dilewati", user.getId());
@@ -77,18 +77,18 @@ public class NotificationService {
         List<String> tokenStrings = tokens.stream().map(DeviceToken::getToken).toList();
 
         if (tokenStrings.size() == 1) {
-            sendToToken(tokenStrings.get(0), title, body, referenceId, referenceType);
+            sendToToken(tokenStrings.get(0), title, body, referenceId, referenceType, notifId);
         } else {
-            sendMulticastNotification(tokenStrings, title, body, referenceId, referenceType);
+            sendMulticastNotification(tokenStrings, title, body, referenceId, referenceType, notifId);
         }
     }
 
     private void sendMulticastNotification(List<String> tokens, String title, String body,
-                                           Long referenceId, String referenceType) {
+                                           Long referenceId, String referenceType, Integer notifId) {
         
         // Membentuk URL redirect berdasarkan tipe dan ID
-        String clickUrl = (referenceId != null && referenceType != null) 
-                ? baseUrl + "/notifications/redirect?type=" + referenceType + "&id=" + referenceId 
+        String clickUrl = notifId != null 
+                ? baseUrl + "/notification/redirect/" + notifId 
                 : baseUrl + "/";
 
         MulticastMessage.Builder builder = MulticastMessage.builder()
@@ -100,7 +100,7 @@ public class NotificationService {
                         .build())
                 .addAllTokens(tokens);
 
-        putReferenceData(builder, title, body, referenceId, referenceType);
+        putReferenceData(builder, title, body, referenceId, referenceType, notifId);
 
         MulticastMessage message = builder.build();
 
@@ -122,14 +122,14 @@ public class NotificationService {
     }
 
     public void sendToToken(String token, String title, String body) {
-        sendToToken(token, title, body, null, null);
+        sendToToken(token, title, body, null, null, null);
     }
 
-    public void sendToToken(String token, String title, String body, Long referenceId, String referenceType) {
+    public void sendToToken(String token, String title, String body, Long referenceId, String referenceType, Integer notifId) {
         
         // Membentuk URL redirect berdasarkan tipe dan ID
-        String clickUrl = (referenceId != null && referenceType != null) 
-                ? baseUrl + "/notifications/redirect?type=" + referenceType + "&id=" + referenceId 
+        String clickUrl = notifId != null 
+                ? baseUrl + "/notification/redirect/" + notifId 
                 : baseUrl + "/";
 
         Message.Builder builder = Message.builder()
@@ -141,7 +141,7 @@ public class NotificationService {
                         .build())
                 .setToken(token);
 
-        putReferenceData(builder, title, body, referenceId, referenceType);
+        putReferenceData(builder, title, body, referenceId, referenceType, notifId);
 
         Message message = builder.build();
 
@@ -154,19 +154,21 @@ public class NotificationService {
     }
 
     private void putReferenceData(Message.Builder builder, String title, String body,
-                                  Long referenceId, String referenceType) {
+                                  Long referenceId, String referenceType, Integer notifId) {
         builder.putData("title", title);
         builder.putData("body", body);
         if (referenceType != null) builder.putData("referenceType", referenceType);
         if (referenceId != null) builder.putData("referenceId", referenceId.toString());
+        if (notifId != null) builder.putData("id", notifId.toString());
     }
 
     private void putReferenceData(MulticastMessage.Builder builder, String title, String body,
-                                  Long referenceId, String referenceType) {
+                                  Long referenceId, String referenceType, Integer notifId) {
         builder.putData("title", title);
         builder.putData("body", body);
         if (referenceType != null) builder.putData("referenceType", referenceType);
         if (referenceId != null) builder.putData("referenceId", referenceId.toString());
+        if (notifId != null) builder.putData("id", notifId.toString());
     }
 
     @Transactional // Memastikan query delete custom berjalan dengan aman
@@ -200,27 +202,14 @@ public class NotificationService {
         emailNotification.setReferenceId(referenceId);
         emailNotification.setReferenceType(referenceType);
         emailNotification.setIsRead(false);
-        notificationRepository.save(emailNotification);  
+        Notification notif = notificationRepository.save(emailNotification);  
         
         Context context = new Context();
         context.setVariable("title", subject);
         context.setVariable("content", messageContent);
+        context.setVariable("redirectUrl", baseUrl + "/notification/redirect/" + notif.getId());
 
-        emailService.sendTemplateMessage(emailTarget, subject, "email/email-template", context);
-
-        // 2. Proses Save & Kirim Push Notification (Fitur dipertahankan & diperbaiki variabelnya)
-        PushNotification pushNotification = new PushNotification();
-        pushNotification.setUserId(user.getId());
-        pushNotification.setTitle(subject); // Menyesuaikan dari parameter subject
-        pushNotification.setMessage(messageContent); // Menyesuaikan dari parameter messageContent
-        pushNotification.setType(type);
-        pushNotification.setReferenceId(referenceId);
-        pushNotification.setReferenceType(referenceType);
-        pushNotification.setIsRead(false);
-        
-        notificationRepository.save(pushNotification);
-
-        sendToUser(user, subject, messageContent, referenceId, referenceType);
+        emailService.sendTemplateMessage(emailTarget, subject, "email/Notification", context);
     }
 
     public List<Notification> getAllNotificationsByUserId(Long userId) {

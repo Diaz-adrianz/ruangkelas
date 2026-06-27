@@ -78,8 +78,8 @@ self.addEventListener('notificationclick', (event) => {
       targetUrl = payload.fcmOptions.link;
   } else if (payload.FCM_MSG?.fcmOptions?.link) {
       targetUrl = payload.FCM_MSG.fcmOptions.link;
-  } else if (dataBlock.referenceType && dataBlock.referenceId) {
-      targetUrl = `/notifications/redirect?type=${dataBlock.referenceType}&id=${dataBlock.referenceId}`;
+  } else if (dataBlock.id) {
+      targetUrl = `/notification/redirect/${dataBlock.id}`;
   }
   console.log('[notificationclick] targetUrl:', targetUrl);
   const finalUrl = new URL(targetUrl, self.location.origin).href;

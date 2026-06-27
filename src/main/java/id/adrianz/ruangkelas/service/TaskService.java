@@ -41,7 +41,7 @@ public class TaskService {
                     user,
                     user.getEmail(),
                     "Tugas Baru: " + savedTask.getTitle(),
-                    "Ada tugas baru '" + savedTask.getTitle() + "' di kelas Anda. Segera cek sistem!",
+                    "Ada tugas baru '" + savedTask.getTitle() + "' di kelas Kamu. Segera cek sistem!",
                     NotificationType.TASK_CREATED,
                     savedTask.getId(),
                     "TASK"
