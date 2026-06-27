@@ -25,8 +25,22 @@ public interface ClassRepository extends JpaRepository<Class, Long> {
             @Param("userId") Long userId,
             @Param("status") UserClass.Status status);
 
+    @Query("""
+            SELECT c
+            FROM Class c
+            LEFT JOIN FETCH c.course
+            WHERE c.id = :id
+            """)
+    Optional<Class> findByIdWithCourse(@Param("id") Long id);
+
     // Tambahkan di sini
-    Optional<Class> findByClassCode(String classCode);
+    @Query("""
+            SELECT c
+            FROM Class c
+            LEFT JOIN FETCH c.course
+            WHERE c.classCode = :classCode
+            """)
+    Optional<Class> findByClassCode(@Param("classCode") String classCode);
 
     boolean existsByClassCode(String classCode);
 }

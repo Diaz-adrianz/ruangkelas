@@ -1,71 +1,39 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Daftar Jadwal Kuliah</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-</head>
-<body class="container mt-5">
-
-    <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-            <h3 class="mb-0">Daftar Jadwal Kuliah</h3>
-        </div>
-        <div class="card-body">
-            
-            <table class="table table-bordered table-striped mt-3">
-                <thead class="table-dark">
-                    <tr>
-                        <th>No</th>
-                        <th>Nama Mata Kuliah</th>
-                        <th>Jam Kuliah</th>
-                        <th>Ruangan</th>
-                        <th>Nama Dosen</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="schedule, iterStat : ${schedules}">
-                        <td th:text="${iterStat.count}">1</td>
-                        <td th:text="${schedule.namaMatkul}">Nama Matkul</td>
-                        <td th:text="${schedule.jamMatkul}">Jam Matkul</td>
-                        <td th:text="${schedule.ruangan}">Ruangan</td>
-                        <td th:text="${schedule.namaDosen}">Nama Dosen</td>
-                    </tr>
-                    <tr th:if="${#lists.isEmpty(schedules)}">
-                        <td colspan="5" class="text-center text-muted">Belum ada jadwal kuliah yang terdaftar.</td>
-                    </tr>
-                </tbody>
-            </table>
-
-        </div>
-    </div>
-
-</body>
-</html><!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<!doctype html>
+<html
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/Home}"
+>
 <head>
     <title>Daftar Jadwal</title>
 </head>
 <body>
-    <h1>Daftar Jadwal Kuliah</h1>
+<div layout:fragment="content" class="mx-auto max-w-5xl p-6">
+    <h1 class="typo-heading-lg mb-6">Daftar Jadwal</h1>
 
-    <section>
-        <h2>Tambah Jadwal Baru</h2>
-        <form th:action="@{/schedules/save}" th:object="${schedule}" method="post">
-            <input type="text" th:field="*{namaMatkul}" placeholder="Nama Matkul" required>
-            <input type="date" th:field="*{tanggalKuliah}" required>
-            <input type="text" th:field="*{hari}" placeholder="Hari" required>
-            <input type="time" th:field="*{jamMulai}" required>
-            <input type="time" th:field="*{jamSelesai}" required>
-            <input type="text" th:field="*{ruangan}" placeholder="Ruangan" required>
-            <input type="text" th:field="*{namaDosen}" placeholder="Nama Dosen" required>
-            <button type="submit">Simpan Jadwal</button>
-        </form>
-    </section>
-
-    <hr>
-
-    <table>
+    <div class="overflow-x-auto bg-base-100 border border-base-300 rounded-box">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>No</th>
+                <th>Kelas</th>
+                <th>Tanggal dan jam</th>
+                <th>Ruangan</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="schedule, iterStat : ${schedules}">
+                <td th:text="${iterStat.count}">1</td>
+                <td th:text="${schedule.kelas != null ? schedule.kelas.name : '-'}">Kelas</td>
+                <td th:text="${schedule.effectiveDateTime != null ? #temporals.format(schedule.effectiveDateTime, 'dd MMMM yyyy HH:mm') : '-'}">Tanggal</td>
+                <td th:text="${schedule.effectivePlace}">Ruangan</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(schedules)}">
+                <td colspan="4" class="text-center text-base-content/60">Belum ada jadwal.</td>
+            </tr>
+            </tbody>
         </table>
+    </div>
+</div>
 </body>
 </html>

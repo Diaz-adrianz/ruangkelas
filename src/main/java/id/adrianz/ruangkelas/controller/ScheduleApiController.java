@@ -2,17 +2,19 @@ package id.adrianz.ruangkelas.controller;
 
 import id.adrianz.ruangkelas.model.Schedule;
 import id.adrianz.ruangkelas.service.ScheduleService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
 @RequestMapping("/api/jadwal")
+@RequiredArgsConstructor
 public class ScheduleApiController {
 
-    @Autowired
-    private ScheduleService scheduleService;
+    private final ScheduleService scheduleService;
 
     @GetMapping("/data")
     public List<Map<String, Object>> getJadwal(
@@ -25,20 +27,19 @@ public class ScheduleApiController {
                 new ArrayList<>();
 
         for (Schedule s : schedules) {
+            LocalDateTime dateTime = s.getEffectiveDateTime();
+            if (dateTime == null) {
+                continue;
+            }
 
             Map<String, Object> event =
                     new HashMap<>();
 
             event.put("id", s.getId());        
-
-            event.put("title", s.getNamaMatkul());
-
-            event.put("start", s.getTanggalKuliah().toString());
-
-            event.put("jamMulai", s.getJamMulai());
-            event.put("jamSelesai", s.getJamSelesai());
-            event.put("ruangan", s.getRuangan());
-            event.put("dosen", s.getNamaDosen());
+            event.put("title", s.getEffectivePlace());
+            event.put("start", dateTime.toString());
+            event.put("place", s.getEffectivePlace());
+            event.put("time", dateTime.toLocalTime().toString());
 
             events.add(event);
         }

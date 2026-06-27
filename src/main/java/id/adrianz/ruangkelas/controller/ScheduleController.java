@@ -4,40 +4,41 @@ import id.adrianz.ruangkelas.model.Schedule;
 import id.adrianz.ruangkelas.repository.ClassRepository;
 import id.adrianz.ruangkelas.model.Class;
 import id.adrianz.ruangkelas.service.ScheduleService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
+
+import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Controller
 @RequestMapping("/admin/jadwal")
+@RequiredArgsConstructor
 public class ScheduleController {
 
-    @Autowired
-    private ScheduleService scheduleService;
-    @Autowired
-    private ClassRepository classRepository;
+    private final ScheduleService scheduleService;
+    private final ClassRepository classRepository;
 
     // READ: Tampil semua jadwal (bisa untuk member & admin)
     @GetMapping
     public String showJadwal(Model model) {
         model.addAttribute("schedules", scheduleService.getAllSchedules());
-        return "schedules/jadwal_list";
+        return "schedules/index";
     }
 
     // CREATE: Proses simpan jadwal baru
-   @PostMapping("/save")
-    public String saveJadwal(@ModelAttribute Schedule schedule) {
+    @PostMapping("/save")
+    public String saveJadwal(
+            @RequestParam Long classId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime dateTime,
+            @RequestParam String place) {
 
-        Long classId = schedule.getKelas().getId();
+        Class kelas = classRepository.findByIdWithCourse(classId)
+                .orElseThrow(() -> new RuntimeException("Kelas tidak ditemukan"));
 
-        Class kelas = classRepository.findById(classId)
-                .orElseThrow(() ->
-                        new RuntimeException("Kelas tidak ditemukan"));
-
-        schedule.setKelas(kelas);
-
-        scheduleService.saveSchedule(schedule);
+        scheduleService.createSchedule(classId, dateTime, place);
 
         return "redirect:/class/" +
                 kelas.getClassCode() +
@@ -46,7 +47,8 @@ public class ScheduleController {
     // UPDATE: Proses simpan perubahan
     @PostMapping("/update/{id}")
     public String updateJadwal(@PathVariable Long id,
-                            @ModelAttribute Schedule schedule) {
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime dateTime,
+            @RequestParam String place) {
 
         Schedule oldSchedule = scheduleService.getScheduleById(id)
                 .orElseThrow(() ->
@@ -54,7 +56,7 @@ public class ScheduleController {
 
         String classCode = oldSchedule.getKelas().getClassCode();
 
-        scheduleService.updateSchedule(id, schedule);
+        scheduleService.updateSchedule(id, dateTime, place);
 
         return "redirect:/class/" + classCode + "/jadwal";
     }

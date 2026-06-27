@@ -48,7 +48,7 @@
 							<div class="flex gap-2 flex-wrap">
 								<span class="badge badge-soft badge-primary">
 									<i class="ri-file-marked-line"></i>
-									<span th:text="${kelas.course.name}"></span>
+									<span th:text="${kelas.course != null ? kelas.course.name : 'Mata kuliah tidak tersedia'}"></span>
 								</span>
 								<span class="badge badge-soft badge-primary">
 									<i class="ri-calendar-2-line"></i>

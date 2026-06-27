@@ -3,6 +3,8 @@ package id.adrianz.ruangkelas.model;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
@@ -44,6 +46,7 @@ public class Class {
 
     @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
     private Course course;
 
     @Column(nullable = false, length = 100)

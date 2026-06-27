@@ -1,60 +1,57 @@
 package id.adrianz.ruangkelas.service;
 
 import id.adrianz.ruangkelas.model.Schedule;
+import id.adrianz.ruangkelas.repository.ClassRepository;
 import id.adrianz.ruangkelas.repository.ScheduleRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ScheduleService {
 
-    @Autowired
-    private ScheduleRepository scheduleRepository;
+    private final ScheduleRepository scheduleRepository;
+    private final ClassRepository classRepository;
 
-    // Menambah jadwal baru
-    public Schedule saveSchedule(Schedule schedule) {
+    public Schedule createSchedule(Long classId, LocalDateTime dateTime, String place) {
+        id.adrianz.ruangkelas.model.Class kelas = classRepository.findByIdWithCourse(classId)
+                .orElseThrow(() -> new RuntimeException("Kelas tidak ditemukan"));
+
+        Schedule schedule = new Schedule();
+        schedule.setKelas(kelas);
+        schedule.setDateTime(dateTime);
+        schedule.setPlace(place);
         return scheduleRepository.save(schedule);
     }
 
-    // Mengambil semua jadwal
     public List<Schedule> getAllSchedules() {
         return scheduleRepository.findAll();
     }
 
-    
-
-    // Mengambil jadwal berdasarkan ID
     public Optional<Schedule> getScheduleById(Long id) {
         return scheduleRepository.findById(id);
     }
 
-    // Mengupdate jadwal
-    public Schedule updateSchedule(Long id, Schedule scheduleDetails) {
+    public Schedule updateSchedule(Long id, LocalDateTime dateTime, String place) {
         Schedule schedule = scheduleRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Jadwal tidak ditemukan dengan id: " + id));
 
-        schedule.setNamaMatkul(scheduleDetails.getNamaMatkul());
-        schedule.setTanggalKuliah(scheduleDetails.getTanggalKuliah());
-        schedule.setHari(scheduleDetails.getHari());
-        schedule.setJamMulai(scheduleDetails.getJamMulai());
-        schedule.setJamSelesai(scheduleDetails.getJamSelesai());
-        schedule.setRuangan(scheduleDetails.getRuangan());
-        schedule.setNamaDosen(scheduleDetails.getNamaDosen());
+        schedule.setDateTime(dateTime);
+        schedule.setPlace(place);
 
         return scheduleRepository.save(schedule);
     }
 
-    // Menghapus jadwal
     public void deleteSchedule(Long id) {
         scheduleRepository.deleteById(id);
     }
 
-    // Tambahkan method ini di dalam kelas ScheduleService
-public List<Schedule> getSchedulesByClassCode(Long classId) {
-    // Pastikan Anda memiliki repository yang mendukung pencarian ini
-    return scheduleRepository.findByKelas_Id(classId);
-}
+    public List<Schedule> getSchedulesByClassCode(Long classId) {
+        return scheduleRepository.findByKelas_IdOrderByDateTimeAsc(classId);
+    }
 }
