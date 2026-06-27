@@ -1,0 +1,103 @@
+<!doctype html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/Home}"
+>
+  <head>
+    <title th:text="'Jadwal - ' + ${classs.name}">Jadwal Kelas</title>
+  </head>
+
+  <body>
+    <div layout:fragment="content" class="mx-auto max-w-5xl p-4">
+      <!-- breadcrumb -->
+      <div class="breadcrumbs text-sm mb-4">
+        <ul>
+          <li><a href="/">Beranda</a></li>
+          <li>
+            <a th:href="@{/class/{classCode}(classCode=${classs.classCode})}" th:text="${classs.name}"></a>
+          </li>
+          <li>Jadwal</li>
+        </ul>
+      </div>
+
+      <!-- success / error -->
+      <div th:if="${success}" class="alert alert-soft alert-success mb-4">
+        <span th:text="${success}"></span>
+      </div>
+
+      <div th:if="${error}" class="alert alert-soft alert-error mb-4">
+        <span th:text="${error}"></span>
+      </div>
+
+      <!-- header -->
+      <div class="flex items-center justify-between flex-wrap gap-4 mb-4">
+        <h1 class="typo-heading-xl" th:text="${classs.name} + ' &ndash; ' + ${classs.course.name}"></h1>
+
+        <a
+          th:if="${isAdmin}"
+          th:href="@{/class/{classCode}/schedule/create(classCode=${classs.classCode})}"
+          class="btn btn-primary btn-sm"
+        >
+          <i class="ri-add-large-line"></i>
+          Tambah Jadwal
+        </a>
+      </div>
+
+      <!-- navigasi bulan -->
+      <div class="flex items-center justify-center gap-2 mb-4">
+        <a
+          th:href="@{/class/{classCode}/schedule(classCode=${classs.classCode}, year=${prevYearMonth.year}, month=${prevYearMonth.monthValue})}"
+          class="btn btn-ghost btn-sm btn-circle"
+        >
+          <i class="ri-arrow-left-s-line"></i>
+        </a>
+
+        <p class="typo-label w-44 text-center" th:text="${currentMonthLabel}"></p>
+
+        <a
+          th:href="@{/class/{classCode}/schedule(classCode=${classs.classCode}, year=${nextYearMonth.year}, month=${nextYearMonth.monthValue})}"
+          class="btn btn-ghost btn-sm btn-circle"
+        >
+          <i class="ri-arrow-right-s-line"></i>
+        </a>
+      </div>
+
+      <!-- grid kalender -->
+      <div class="overflow-x-auto">
+        <table class="table table-fixed border border-base-300 rounded-box">
+          <thead>
+            <tr class="bg-base-200">
+              <th class="text-center">Senin</th>
+              <th class="text-center">Selasa</th>
+              <th class="text-center">Rabu</th>
+              <th class="text-center">Kamis</th>
+              <th class="text-center">Jumat</th>
+              <th class="text-center">Sabtu</th>
+              <th class="text-center">Minggu</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="week : ${calendarWeeks}">
+              <td
+                th:each="day : ${week}"
+                class="align-top h-24 p-1 border border-base-200"
+              >
+                <div th:if="${day.date != null}" class="flex flex-col h-full">
+                  <span class="typo-caption opacity-60" th:text="${day.date.dayOfMonth}"></span>
+
+                  <a
+                    th:each="schedule : ${day.schedules}"
+                    th:href="@{/class/{classCode}/schedule/{scheduleId}(classCode=${classs.classCode}, scheduleId=${schedule.id})}"
+                    class="mt-1 rounded px-1 py-0.5 text-[11px] leading-tight truncate bg-primary text-primary-content hover:opacity-90"
+                    th:text="${#temporals.format(schedule.startTime, 'HH:mm')} + ' ' + ${schedule.place}"
+                  ></a>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>
