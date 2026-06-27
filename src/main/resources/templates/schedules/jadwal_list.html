@@ -474,7 +474,7 @@
                 <i class="ri-arrow-right-s-line"></i>
             </button>
         </div>
-        <a class="add-button"
+        <a th:if="${isAdmin}" class="add-button"
            th:href="@{/admin/jadwal/create/{code}(code=${classs.classCode})}">
             <i class="ri-add-line"></i>
             Tambah Jadwal

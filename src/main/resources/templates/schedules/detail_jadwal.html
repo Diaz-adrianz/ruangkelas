@@ -327,19 +327,22 @@
 
         <!-- Action buttons -->
         <div class="detail-actions">
-            <!-- Delete -->
-            <button type="button" class="btn-delete"
+            <!-- Delete — hanya admin -->
+            <button th:if="${isAdmin}" type="button" class="btn-delete"
                     onclick="document.getElementById('deleteDialog').showModal()">
                 <i class="ri-delete-bin-line"></i>
                 Hapus
             </button>
+            <!-- Spacer agar Kembali tetap di kanan saat bukan admin -->
+            <span th:unless="${isAdmin}"></span>
 
             <div class="btn-group-right">
                 <a class="btn-back"
                    th:href="@{/class/{code}/jadwal(code=${schedule.kelas.classCode})}">
                     Kembali
                 </a>
-                <a class="btn-edit"
+                <!-- Edit — hanya admin -->
+                <a th:if="${isAdmin}" class="btn-edit"
                    th:href="@{/admin/jadwal/edit/{id}(id=${schedule.id})}">
                     <i class="ri-pencil-line"></i>
                     Edit
@@ -348,8 +351,8 @@
         </div>
     </div>
 
-    <!-- Delete confirmation dialog -->
-    <dialog id="deleteDialog" class="confirm-dialog">
+    <!-- Delete confirmation dialog — hanya admin -->
+    <dialog th:if="${isAdmin}" id="deleteDialog" class="confirm-dialog">
         <h3>Hapus Jadwal?</h3>
         <p>Jadwal yang dihapus tidak dapat dikembalikan. Yakin ingin melanjutkan?</p>
         <div class="confirm-actions">

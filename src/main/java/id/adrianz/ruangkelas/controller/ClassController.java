@@ -184,16 +184,19 @@ public class ClassController {
     }
 
     @GetMapping("/{classCode}/jadwal")
-public String jadwalDetail(@PathVariable String classCode, Model model) {
-    Class classs = classService.getByCode(classCode);
-    List<Schedule> schedules = scheduleService.getSchedulesByClassCode(classs.getId());
-    
-    model.addAttribute("classs", classs);
-    model.addAttribute("schedules", schedules);
-    
-    // Ganti dengan nama file HTML halaman jadwal Anda
-    return "schedules/jadwal_list";
-}
+    public String jadwalDetail(@PathVariable String classCode,
+                               @AuthenticationPrincipal UserPrincipal principal,
+                               Model model) {
+        Class classs = classService.getByCode(classCode);
+        List<Schedule> schedules = scheduleService.getSchedulesByClassCode(classs.getId());
+        boolean isAdmin = classService.isAdmin(classs.getId(), principal.getUser().getId());
+
+        model.addAttribute("classs", classs);
+        model.addAttribute("schedules", schedules);
+        model.addAttribute("isAdmin", isAdmin);
+
+        return "schedules/jadwal_list";
+    }
 
 
 
