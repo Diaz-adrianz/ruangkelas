@@ -9,7 +9,7 @@
   </head>
 
   <body>
-    <div layout:fragment="content" class="mx-auto max-w-3xl p-4">
+    <div layout:fragment="content" class="mx-auto max-w-5xl p-4">
       <!-- breadcrumb -->
       <div class="breadcrumbs text-sm mb-4">
         <ul>
@@ -18,7 +18,7 @@
             <a th:href="@{/class/{classCode}(classCode=${classs.classCode})}" th:text="${classs.name}"></a>
           </li>
           <li>
-            <a th:href="@{/class/{classCode}/schedule(classCode=${classs.classCode})}">Jadwal</a>
+            <a th:href="@{/class/{classCode}#schedules(classCode=${classs.classCode})}">Jadwal</a>
           </li>
           <li th:text="${#temporals.format(schedule.startTime, 'EEEE, dd MMM yyyy')}"></li>
         </ul>
