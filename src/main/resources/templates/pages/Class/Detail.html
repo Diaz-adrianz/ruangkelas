@@ -47,6 +47,7 @@
       <div class="flex items-center justify-between flex-wrap gap-4 mb-4">
         <h1
           class="typo-heading-xl"
+          id="classTitle"
           th:text="${classs.name} + ' - ' + ${classs.course.name}"
         ></h1>
 
@@ -565,13 +566,17 @@
 
       <script>
         async function copyClassCode() {
+          const title = document.getElementById("classTitle").innerText;
           const code = document.getElementById("classCode").innerText;
 
-          const text = `📚 Yuk gabung ke kelas saya!
-Masukkan kode kelas berikut untuk bergabung:
+          const text = `📚 Kamu diundang ke kelas "${title}"
 
-🔑 Kode kelas: *${code}*
-🌐 Aplikasi: https://ruangkelas.adrianz.me
+━━━━━━━━━━━━━━━
+🔑 Kode Kelas: *${code}*
+🌐 https://ruangkelas.adrianz.me
+━━━━━━━━━━━━━━━
+
+Masukkan kode tersebut pada aplikasi untuk bergabung.
 
 Sampai jumpa di kelas! 🚀`;
           await navigator.clipboard.writeText(text);
