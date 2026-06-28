@@ -5,6 +5,8 @@ import java.beans.Transient;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Entity;
@@ -35,6 +37,7 @@ public class Document {
 
     @ManyToOne
     @JoinColumn(name = "class_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Class clazz;
 
     private String title;

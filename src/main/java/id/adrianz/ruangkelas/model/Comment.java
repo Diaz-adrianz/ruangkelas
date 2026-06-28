@@ -41,10 +41,12 @@ public class Comment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_class_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private UserClass userClass;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Task task;
 
     @ManyToOne(fetch = FetchType.LAZY)

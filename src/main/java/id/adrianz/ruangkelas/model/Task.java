@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
@@ -45,11 +47,13 @@ public class Task {
     // Relasi ke kelas
     @ManyToOne
     @JoinColumn(name = "class_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Class classe;
 
     // User yang membuat tugas
     @ManyToOne
-    @JoinColumn(name = "created_by", nullable = false)
+    @JoinColumn(name = "created_by", nullable = true)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private User createdBy;
 
     @Column(nullable = false, length = 255)

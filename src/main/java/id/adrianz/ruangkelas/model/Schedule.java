@@ -3,6 +3,8 @@ package id.adrianz.ruangkelas.model;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
@@ -34,6 +36,7 @@ public class Schedule {
 
     @ManyToOne
     @JoinColumn(name = "class_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Class classe;
 
     // Selalu di tanggal yang sama dengan startTime
