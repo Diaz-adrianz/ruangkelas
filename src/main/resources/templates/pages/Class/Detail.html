@@ -317,9 +317,9 @@
 
           <div class="flex flex-col gap-2">
             <div th:each="document : ${documents}" class="card bg-base-100 border border-base-300">
-              <div class="card-body flex-row items-center justify-between p-4">
+              <div class="card-body flex-row items-center justify-between group p-4">
                 <div>
-                  <p class="typo-body-md" th:text="${document.title}"></p>
+                  <a th:href="@{/document/view/{id}(id=${document.id})}" class="typo-body-md group-hover:underline block" th:text="${document.title}"></a>
                   <span 
                     class="typo-small text-base-content/60" 
                     th:text="|${document.fileType} - ${document.formatFileSize()} - ${#temporals.format(document.createdAt, 'dd MMM yyyy HH:mm a')}|">
@@ -337,11 +337,6 @@
                     tabindex="0"
                     class="dropdown-content menu bg-base-100 rounded-box border border-base-300 w-44 mt-2 z-10 shadow-md"
                   >
-                    <li>
-                      <a th:href="@{/document/view/{id}(id=${document.id})}" target="_blank">
-                        Lihat
-                      </a>
-                    </li>
                     <li>
                       <a th:href="@{/document/download/{id}(id=${document.id})}">
                         Download
