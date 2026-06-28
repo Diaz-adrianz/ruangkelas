@@ -57,7 +57,7 @@ public class EmailService {
         ctx.setVariable("link", link);
         ctx.setVariable("expiry", expiresAt.format(fmt));
 
-        sendTemplateMessage(to, "Verifikasi Akun", "email/verification", ctx);
+        sendTemplateMessage(to, "Verifikasi Akun", "email/Verification", ctx);
     }
 
     public void sendResetPasswordEmail(String to, String otp, LocalDateTime expiresAt) {
@@ -67,7 +67,7 @@ public class EmailService {
         ctx.setVariable("otp", otp);
         ctx.setVariable("expiry", expiresAt.format(fmt));
 
-        sendTemplateMessage(to, "Kode OTP Reset Password", "email/resetpassword", ctx);
+        sendTemplateMessage(to, "Kode OTP Reset Password", "email/ResetPassword", ctx);
     }
 
     public void sendHtmlMessage(String to, String subject, String htmlBody) {
