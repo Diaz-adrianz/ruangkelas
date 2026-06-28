@@ -29,13 +29,14 @@
     <body class="bg-base-200 min-h-screen">
         <nav class="navbar border-b bg-base-100 border-base-300">
             <div class="w-full mx-auto max-w-5xl gap-4 flex items-center">
-                <img th:src="@{/images/LogoText.svg}" alt="Logo" class="w-40" />
+                <img th:src="@{/images/LogoText2.svg}" alt="Logo" class="w-10 sm:hidden" />
+                <img th:src="@{/images/LogoText.svg}" alt="Logo" class="w-40 not-sm:hidden" />
 
                 <div class="grow"></div>
 
                 <button id="pwa-install-btn" style="display: none;" class="btn btn-primary btn-sm">
                     <i class="ri-download-line text-sm"></i>
-                    Install App
+                    <span class="not-sm:hidden">Install App</span>
                 </button>
 
                 <div sec:authorize="isAuthenticated()" class="dropdown dropdown-end" id="user-dropdown">
