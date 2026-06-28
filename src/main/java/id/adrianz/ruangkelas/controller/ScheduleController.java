@@ -1,6 +1,5 @@
 package id.adrianz.ruangkelas.controller;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.TextStyle;
@@ -173,7 +172,7 @@ public class ScheduleController {
         }
 
         redirectAttributes.addFlashAttribute("success", "Jadwal berhasil ditambahkan");
-        return "redirect:/class/" + classCode + "/schedule";
+        return "redirect:/class/" + classCode + "#schedules";
     }
 
     // ================= EDIT =================
@@ -245,6 +244,6 @@ public class ScheduleController {
 
         scheduleService.delete(scheduleId, classCode, principal.getUser().getId());
         redirectAttributes.addFlashAttribute("success", "Jadwal berhasil dihapus");
-        return "redirect:/class/" + classCode + "/schedule";
+        return "redirect:/class/" + classCode + "#schedules";
     }
 }
