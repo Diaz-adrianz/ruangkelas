@@ -143,13 +143,10 @@
       <div class="tabs tabs-border">
 
         <!-- start: TASKS  -->
-        <label class="tab gap-2">
+        <label class="tab gap-4">
           <input type="radio" name="tabs" data-fragment="tasks" checked />
           Tugas
-          <span th:if="${#lists.size(tasks) > 0}"
-            class="flex items-center justify-center w-5 h-5 rounded-full bg-[#2B2B2B] text-white text-[11px]"
-            th:text="${#lists.size(tasks)}">
-          </span>
+					<span th:if="${#lists.size(tasks) > 0}" th:text="${#lists.size(tasks)}"></span>
         </label>
         <div class="tab-content pt-4">
 
@@ -208,24 +205,90 @@
         </div>
         <!-- end: TASKS  -->
 
-        <!-- start: SCHEDULES  -->
-        <label class="tab gap-2">
+       <!-- start: SCHEDULES  -->
+        <label class="tab gap-4">
           <input type="radio" name="tabs" data-fragment="schedules" />
           Jadwal
-          <span class="flex items-center justify-center w-5 h-5 rounded-full bg-[#2B2B2B] text-white text-[11px]">
-            0
-          </span>
+					<span th:if="${schedulesCount > 0}" th:text="${schedulesCount}"></span>
         </label>
+        
+        <div class="tab-content pt-4">
+
+          <!-- Header (Bulan & Tombol Tambah) -->
+          <div class="flex items-center justify-between flex-wrap gap-4 mb-4">
+            
+            <!-- Navigasi Bulan -->
+            <div class="flex items-center gap-4">
+              <a
+                th:href="@{/class/{classCode}(classCode=${classs.classCode}, year=${prevYearMonth.year}, month=${prevYearMonth.monthValue})} + '#schedules'"
+                class="btn btn-ghost btn-sm btn-circle"
+              >
+                <i class="ri-arrow-left-s-line text-sm"></i>
+              </a>
+
+              <p class="typo-body-md text-center max-w-32" th:text="${currentMonthLabel}"></p>
+
+              <a
+                th:href="@{/class/{classCode}(classCode=${classs.classCode}, year=${nextYearMonth.year}, month=${nextYearMonth.monthValue})} + '#schedules'"
+                class="btn btn-ghost btn-sm btn-circle"
+              >
+                <i class="ri-arrow-right-s-line text-sm"></i>
+              </a>
+            </div>
+
+            <a th:if="${isAdmin}" th:href="@{/class/{classCode}/schedule/create(classCode=${classs.classCode})}" class="btn btn-primary btn-sm">
+              <i class="ri-add-large-line"></i>
+              Tambah Jadwal
+            </a>
+          </div>
+
+          <!-- Grid Kalender -->
+          <div class="card bg-base-100 border border-base-300 overflow-hidden">
+            <div class="overflow-x-auto card-body p-0">
+              <table class="table table-fixed min-w-md">
+                <thead>
+                  <tr class="bg-base-100">
+                    <th class="text-center border-b border-base-300 ">Senin</th>
+                    <th class="text-center border-b border-base-300 ">Selasa</th>
+                    <th class="text-center border-b border-base-300 ">Rabu</th>
+                    <th class="text-center border-b border-base-300 ">Kamis</th>
+                    <th class="text-center border-b border-base-300 ">Jumat</th>
+                    <th class="text-center border-b border-base-300 ">Sabtu</th>
+                    <th class="text-center border-b border-base-300 ">Minggu</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="week : ${calendarWeeks}">
+                    <td th:each="day : ${week}" class="align-top h-28 p-0 border-b border-r border-base-300 w-[14.28%]">
+                      <div th:if="${day.date != null}" class="flex flex-col h-full">
+                        <span class="typo-caption p-2" th:text="${day.date.dayOfMonth}"></span>
+                        
+                        <!-- Looping item jadwal di tanggal tersebut -->
+                        <div class="flex flex-col gap-1 overflow-y-auto max-h-20 px-2">
+                          <a th:each="schedule : ${day.schedules}"
+                            th:href="@{/class/{classCode}/schedule/{scheduleId}(classCode=${classs.classCode}, scheduleId=${schedule.id})}"
+                            class="rounded-box px-2 py-1.5 bg-accent text-accent-content  hover:opacity-90 block"
+                          >
+                            <div class="typo-caption text-primary" th:text="${#temporals.format(schedule.startTime, 'HH.mm')} + ' - ' + ${#temporals.format(schedule.endTime, 'HH.mm')}"></div>
+                            <div class="typo-label truncate" th:text="${schedule.place}"></div>
+                          </a>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
         <!-- end: SCHEDULES  -->
 
         <!-- start: DOCUMENTS  -->
-        <label class="tab gap-2">
+        <label class="tab gap-4">
           <input type="radio" name="tabs" data-fragment="documents" />
           Materi Ajar
-          <span th:if="${#lists.size(documents) > 0}"
-            class="flex items-center justify-center w-5 h-5 rounded-full bg-[#2B2B2B] text-white text-[11px]"
-            th:text="${#lists.size(documents)}">
-          </span>
+					<span th:if="${#lists.size(documents) > 0}" th:text="${#lists.size(documents)}"></span>
         </label>
 					
         <div class="tab-content pt-4">
@@ -310,14 +373,10 @@
         </div>
 
         <!-- start: USER CLASSES  -->
-        <label class="tab gap-2">
+        <label class="tab gap-4">
           <input type="radio" name="tabs" data-fragment="members" />
           Anggota
-
-          <span th:if="${#lists.size(members) > 0}"
-            class="flex items-center justify-center w-5 h-5 rounded-full bg-[#2B2B2B] text-white text-[11px]"
-            th:text="${#lists.size(members)}">
-          </span>
+					<span th:if="${#lists.size(members) > 0}" th:text="${#lists.size(members)}"></span>
         </label>
 
         <div class="tab-content pt-4">

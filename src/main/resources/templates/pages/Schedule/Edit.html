@@ -1,0 +1,101 @@
+<!doctype html>
+<html
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/Home}"
+>
+	<head>
+		<title>Edit Jadwal</title>
+	</head>
+
+	<body>
+		<div layout:fragment="content" class="mx-auto max-w-5xl p-4">
+			<!-- breadcrumb -->
+			<div class="breadcrumbs text-sm mb-4">
+				<ul>
+					<li><a href="/">Beranda</a></li>
+					<li>
+						<a th:href="@{/class/{classCode}(classCode=${classs.classCode})}" th:text="${classs.name}"></a>
+					</li>
+					<li>
+						<a th:href="@{/class/{classCode}#schedules(classCode=${classs.classCode})}">Jadwal</a>
+					</li>
+					<li>
+						<a
+							th:href="@{/class/{classCode}/schedule/{scheduleId}(classCode=${classs.classCode}, scheduleId=${schedule.id})}"
+							th:text="${#temporals.format(schedule.startTime, 'EEEE, dd MMM yyyy')}"
+						></a>
+					</li>
+					<li>Edit</li>
+				</ul>
+			</div>
+
+			<div th:if="${error}" class="alert alert-soft alert-error mb-4">
+				<span th:text="${error}"></span>
+			</div>
+
+			<h1 class="typo-heading-xl mb-4" th:text="'Edit Jadwal ' + ${classs.name}"></h1>
+
+			<div class="card bg-base-100 border border-base-300">
+				<div class="card-body">
+					<form
+						th:action="@{/class/{classCode}/schedule/edit/{scheduleId}(classCode=${classs.classCode}, scheduleId=${schedule.id})}"
+						th:object="${updateScheduleDto}"
+						method="post"
+						class="flex flex-col"
+					>
+						<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+						<div class="flex flex-wrap space-x-4">
+							<fieldset class="fieldset min-w-60 grow">
+								<legend class="fieldset-legend">Jam mulai</legend>
+								<input th:field="*{startTime}" class="input validator w-full" required type="datetime-local" />
+								<p
+									th:if="${#fields.hasErrors('startTime')}"
+									th:errors="*{startTime}"
+									class="text-error typo-caption"
+								></p>
+								<span class="validator-hint">Wajib diisi</span>
+								<span
+									th:if="${#fields.hasErrors('startTime')}"
+									th:errors="*{startTime}"
+									class="validator-hint-s"
+								></span>
+							</fieldset>
+
+							<fieldset class="fieldset min-w-60 grow">
+								<legend class="fieldset-legend">Jam selesai</legend>
+								<input th:field="*{endTime}" class="input validator w-full" required type="datetime-local" />
+								<span class="validator-hint">Wajib diisi</span>
+								<span th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}" class="validator-hint-s"></span>
+							</fieldset>
+						</div>
+
+						<fieldset class="fieldset">
+							<legend class="fieldset-legend">Lokasi</legend>
+							<input
+								type="text"
+								th:field="*{place}"
+								placeholder="Contoh: FSTR 4.10"
+								class="input w-full validator"
+								required
+							/>
+							<span class="validator-hint">Wajib diisi</span>
+							<span th:if="${#fields.hasErrors('place')}" th:errors="*{place}" class="validator-hint-s"></span>
+						</fieldset>
+
+						<div class="flex justify-end gap-2 mt-4">
+							<a
+								th:href="@{/class/{classCode}/schedule/{scheduleId}(classCode=${classs.classCode}, scheduleId=${schedule.id})}"
+								class="btn btn-ghost"
+							>
+								Batal
+							</a>
+							<button type="submit" class="btn btn-primary">Simpan</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

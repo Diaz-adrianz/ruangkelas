@@ -1,5 +1,7 @@
 package id.adrianz.ruangkelas.controller;
 
+import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,11 +21,13 @@ import id.adrianz.ruangkelas.dto.CreateDocumentDto;
 import id.adrianz.ruangkelas.dto.JoinClassDto;
 import id.adrianz.ruangkelas.dto.UpdateClassDto;
 import id.adrianz.ruangkelas.model.Class;
+import id.adrianz.ruangkelas.model.Schedule;
 import id.adrianz.ruangkelas.model.Task;
 import id.adrianz.ruangkelas.model.UserClass;
 import id.adrianz.ruangkelas.model.UserPrincipal;
 import id.adrianz.ruangkelas.service.ClassService;
 import id.adrianz.ruangkelas.service.DocumentService;
+import id.adrianz.ruangkelas.service.ScheduleService;
 import id.adrianz.ruangkelas.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +40,7 @@ public class ClassController {
     private final ClassService classService;
     private final DocumentService documentService;
     private final TaskService taskService;
+    private final ScheduleService scheduleService;
 
     // ================= INDEX =================
 
@@ -51,6 +56,8 @@ public class ClassController {
 
     @GetMapping("/{classCode}")
     public String detail(@PathVariable String classCode,
+                         @RequestParam(required = false) Integer year,
+                         @RequestParam(required = false) Integer month,
                          @AuthenticationPrincipal UserPrincipal principal,
                          Model model) {
 
@@ -71,6 +78,21 @@ public class ClassController {
         );
         List<Task> tasks = taskService.getTasksByClassCode(classCode);
         model.addAttribute("tasks", tasks);
+
+        // --- LOGIKA KALENDER ---
+        YearMonth current = (year != null && month != null)
+                ? YearMonth.of(year, month)
+                : YearMonth.now();
+
+        List<Schedule> schedules = scheduleService.getSchedulesByClassCode(classCode);
+        
+        model.addAttribute("schedules", schedules != null ? schedules : new ArrayList<>());
+        model.addAttribute("currentYearMonth", current);
+        model.addAttribute("currentMonthLabel", scheduleService.formatMonthLabel(current));
+        model.addAttribute("prevYearMonth", current.minusMonths(1));
+        model.addAttribute("nextYearMonth", current.plusMonths(1));
+        model.addAttribute("calendarWeeks", scheduleService.buildCalendarWeeks(current, schedules));
+        model.addAttribute("schedulesCount", schedules.size());
 
 
         return "pages/Class/Detail";
