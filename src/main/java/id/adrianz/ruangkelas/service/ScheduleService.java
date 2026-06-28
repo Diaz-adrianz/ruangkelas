@@ -1,11 +1,17 @@
 package id.adrianz.ruangkelas.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.format.TextStyle;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import id.adrianz.ruangkelas.dto.CalendarDay;
 import id.adrianz.ruangkelas.model.Class;
 import id.adrianz.ruangkelas.model.Schedule;
 import id.adrianz.ruangkelas.repository.ScheduleRepository;
@@ -90,5 +96,43 @@ public class ScheduleService {
         if (!endTime.isAfter(startTime)) {
             throw new RuntimeException("Jam selesai harus setelah jam mulai");
         }
+    }
+
+    // ================= HELPER =================
+
+    public String formatMonthLabel(YearMonth yearMonth) {
+        String bulan = yearMonth.getMonth().getDisplayName(TextStyle.FULL, Locale.forLanguageTag("id-ID"));
+        bulan = bulan.substring(0, 1).toUpperCase() + bulan.substring(1);
+        return bulan + " " + yearMonth.getYear();
+    }
+
+    public List<List<CalendarDay>> buildCalendarWeeks(YearMonth yearMonth, List<Schedule> schedules) {
+        LocalDate firstDay = yearMonth.atDay(1);
+        LocalDate lastDay = yearMonth.atEndOfMonth();
+        int leadingEmpty = firstDay.getDayOfWeek().getValue() - 1;
+
+        List<CalendarDay> days = new ArrayList<>();
+        for (int i = 0; i < leadingEmpty; i++) {
+            days.add(CalendarDay.empty());
+        }
+
+        for (LocalDate date = firstDay; !date.isAfter(lastDay); date = date.plusDays(1)) {
+            final LocalDate currentDate = date;
+            List<Schedule> schedulesOnDate = schedules.stream()
+                    .filter(s -> s.getStartTime().toLocalDate().isEqual(currentDate))
+                    .collect(Collectors.toList());
+            days.add(new CalendarDay(currentDate, schedulesOnDate));
+        }
+
+        while (days.size() % 7 != 0) {
+            days.add(CalendarDay.empty());
+        }
+
+        List<List<CalendarDay>> weeks = new ArrayList<>();
+        for (int i = 0; i < days.size(); i += 7) {
+            weeks.add(days.subList(i, i + 7));
+        }
+
+        return weeks;
     }
 }

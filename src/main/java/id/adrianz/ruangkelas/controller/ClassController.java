@@ -1,12 +1,8 @@
 package id.adrianz.ruangkelas.controller;
 
-import java.time.LocalDate;
 import java.time.YearMonth;
-import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.stream.Collectors;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -20,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import id.adrianz.ruangkelas.dto.CalendarDay;
 import id.adrianz.ruangkelas.dto.CreateClassDto;
 import id.adrianz.ruangkelas.dto.CreateDocumentDto;
 import id.adrianz.ruangkelas.dto.JoinClassDto;
@@ -93,54 +88,15 @@ public class ClassController {
         
         model.addAttribute("schedules", schedules != null ? schedules : new ArrayList<>());
         model.addAttribute("currentYearMonth", current);
-        model.addAttribute("currentMonthLabel", formatMonthLabel(current));
+        model.addAttribute("currentMonthLabel", scheduleService.formatMonthLabel(current));
         model.addAttribute("prevYearMonth", current.minusMonths(1));
         model.addAttribute("nextYearMonth", current.plusMonths(1));
-        model.addAttribute("calendarWeeks", buildCalendarWeeks(current, schedules));
+        model.addAttribute("calendarWeeks", scheduleService.buildCalendarWeeks(current, schedules));
         model.addAttribute("schedulesCount", schedules.size());
 
 
         return "pages/Class/Detail";
     }
-
-    // ================= HELPER KALENDER =================
-
-    private String formatMonthLabel(YearMonth yearMonth) {
-        String bulan = yearMonth.getMonth().getDisplayName(TextStyle.FULL, Locale.forLanguageTag("id-ID"));
-        bulan = bulan.substring(0, 1).toUpperCase() + bulan.substring(1);
-        return bulan + " " + yearMonth.getYear();
-    }
-
-    private List<List<CalendarDay>> buildCalendarWeeks(YearMonth yearMonth, List<Schedule> schedules) {
-        LocalDate firstDay = yearMonth.atDay(1);
-        LocalDate lastDay = yearMonth.atEndOfMonth();
-        int leadingEmpty = firstDay.getDayOfWeek().getValue() - 1;
-
-        List<CalendarDay> days = new ArrayList<>();
-        for (int i = 0; i < leadingEmpty; i++) {
-            days.add(CalendarDay.empty());
-        }
-
-        for (LocalDate date = firstDay; !date.isAfter(lastDay); date = date.plusDays(1)) {
-            final LocalDate currentDate = date;
-            List<Schedule> schedulesOnDate = schedules.stream()
-                    .filter(s -> s.getStartTime().toLocalDate().isEqual(currentDate))
-                    .collect(Collectors.toList());
-            days.add(new CalendarDay(currentDate, schedulesOnDate));
-        }
-
-        while (days.size() % 7 != 0) {
-            days.add(CalendarDay.empty());
-        }
-
-        List<List<CalendarDay>> weeks = new ArrayList<>();
-        for (int i = 0; i < days.size(); i += 7) {
-            weeks.add(days.subList(i, i + 7));
-        }
-
-        return weeks;
-    }
-
 
     // ================= CREATE =================
 

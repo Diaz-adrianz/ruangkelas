@@ -218,21 +218,21 @@
           <div class="flex items-center justify-between flex-wrap gap-4 mb-4">
             
             <!-- Navigasi Bulan -->
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-4">
               <a
                 th:href="@{/class/{classCode}(classCode=${classs.classCode}, year=${prevYearMonth.year}, month=${prevYearMonth.monthValue})} + '#schedules'"
-                class="btn btn-ghost btn-sm btn-circle bg-base-200"
+                class="btn btn-ghost btn-sm btn-circle"
               >
-                <i class="ri-arrow-left-s-line"></i>
+                <i class="ri-arrow-left-s-line text-sm"></i>
               </a>
 
-              <p class="typo-heading-md w-32 text-center" th:text="${currentMonthLabel}"></p>
+              <p class="typo-body-md text-center max-w-32" th:text="${currentMonthLabel}"></p>
 
               <a
                 th:href="@{/class/{classCode}(classCode=${classs.classCode}, year=${nextYearMonth.year}, month=${nextYearMonth.monthValue})} + '#schedules'"
-                class="btn btn-ghost btn-sm btn-circle bg-base-200"
+                class="btn btn-ghost btn-sm btn-circle"
               >
-                <i class="ri-arrow-right-s-line"></i>
+                <i class="ri-arrow-right-s-line text-sm"></i>
               </a>
             </div>
 
@@ -243,40 +243,42 @@
           </div>
 
           <!-- Grid Kalender -->
-          <div class="overflow-x-auto mt-4">
-            <table class="table table-fixed border border-base-300 rounded-box w-full">
-              <thead>
-                <tr class="bg-base-100">
-                  <th class="text-center font-normal border-b border-base-300">Senin</th>
-                  <th class="text-center font-normal border-b border-base-300">Selasa</th>
-                  <th class="text-center font-normal border-b border-base-300">Rabu</th>
-                  <th class="text-center font-normal border-b border-base-300">Kamis</th>
-                  <th class="text-center font-normal border-b border-base-300">Jumat</th>
-                  <th class="text-center font-normal border-b border-base-300">Sabtu</th>
-                  <th class="text-center font-normal border-b border-base-300">Minggu</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr th:each="week : ${calendarWeeks}">
-                  <td th:each="day : ${week}" class="align-top h-28 p-2 border-b border-r border-base-200 w-[14.28%]">
-                    <div th:if="${day.date != null}" class="flex flex-col h-full">
-                      <span class="typo-caption mb-1" th:text="${day.date.dayOfMonth}"></span>
-                      
-                      <!-- Looping item jadwal di tanggal tersebut -->
-                      <div class="flex flex-col gap-1 overflow-y-auto max-h-[80px]">
-                        <a th:each="schedule : ${day.schedules}"
-                           th:href="@{/class/{classCode}/schedule/{scheduleId}(classCode=${classs.classCode}, scheduleId=${schedule.id})}"
-                           class="rounded px-2 py-1.5 text-[11px] leading-tight bg-primary text-primary-content hover:opacity-90 block"
-                        >
-                          <div th:text="${#temporals.format(schedule.startTime, 'HH.mm')} + ' - ' + ${#temporals.format(schedule.endTime, 'HH.mm')}"></div>
-                          <div class="font-medium truncate" th:text="${schedule.place}"></div>
-                        </a>
+          <div class="card bg-base-100 border border-base-300 overflow-hidden">
+            <div class="overflow-x-auto card-body p-0">
+              <table class="table table-fixed min-w-md">
+                <thead>
+                  <tr class="bg-base-100">
+                    <th class="text-center border-b border-base-300 ">Senin</th>
+                    <th class="text-center border-b border-base-300 ">Selasa</th>
+                    <th class="text-center border-b border-base-300 ">Rabu</th>
+                    <th class="text-center border-b border-base-300 ">Kamis</th>
+                    <th class="text-center border-b border-base-300 ">Jumat</th>
+                    <th class="text-center border-b border-base-300 ">Sabtu</th>
+                    <th class="text-center border-b border-base-300 ">Minggu</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="week : ${calendarWeeks}">
+                    <td th:each="day : ${week}" class="align-top h-28 p-0 border-b border-r border-base-300 w-[14.28%]">
+                      <div th:if="${day.date != null}" class="flex flex-col h-full">
+                        <span class="typo-caption p-2" th:text="${day.date.dayOfMonth}"></span>
+                        
+                        <!-- Looping item jadwal di tanggal tersebut -->
+                        <div class="flex flex-col gap-1 overflow-y-auto max-h-20 px-2">
+                          <a th:each="schedule : ${day.schedules}"
+                            th:href="@{/class/{classCode}/schedule/{scheduleId}(classCode=${classs.classCode}, scheduleId=${schedule.id})}"
+                            class="rounded-box px-2 py-1.5 bg-accent text-accent-content  hover:opacity-90 block"
+                          >
+                            <div class="typo-caption text-primary" th:text="${#temporals.format(schedule.startTime, 'HH.mm')} + ' - ' + ${#temporals.format(schedule.endTime, 'HH.mm')}"></div>
+                            <div class="typo-label truncate" th:text="${schedule.place}"></div>
+                          </a>
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
 
         </div>
