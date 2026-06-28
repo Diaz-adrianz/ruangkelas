@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -188,6 +189,7 @@ public class NotificationService {
     }
 
     // PERBAIKAN: Mengubah Long userId menjadi User user agar sinkron dengan fitur Push Notification di bawahnya
+    @Async
     public void createAndSendEmailNotification(User user, String emailTarget, String subject,
                                                String messageContent, NotificationType type,
                                                Long referenceId, String referenceType) {
