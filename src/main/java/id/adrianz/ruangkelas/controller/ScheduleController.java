@@ -108,7 +108,7 @@ public class ScheduleController {
         dto.setPlace(schedule.getPlace());
 
         model.addAttribute("classs", kelas);
-        model.addAttribute("scheduleId", scheduleId);
+        model.addAttribute("schedule", schedule);
         model.addAttribute("updateScheduleDto", dto);
 
         return "pages/Schedule/Edit";
@@ -124,10 +124,11 @@ public class ScheduleController {
                         RedirectAttributes redirectAttributes) {
 
         Class kelas = classService.getByCode(classCode);
+        Schedule schedule = scheduleService.getByIdAndClassCode(scheduleId, classCode);
 
         if (result.hasErrors()) {
             model.addAttribute("classs", kelas);
-            model.addAttribute("scheduleId", scheduleId);
+            model.addAttribute("schedule", schedule);
             model.addAttribute("errors", result.getFieldErrors());
             return "pages/Schedule/Edit";
         }
@@ -142,7 +143,7 @@ public class ScheduleController {
                     principal.getUser().getId());
         } catch (RuntimeException e) {
             model.addAttribute("classs", kelas);
-            model.addAttribute("scheduleId", scheduleId);
+            model.addAttribute("schedule", schedule);
             model.addAttribute("error", e.getMessage());
             return "pages/Schedule/Edit";
         }
