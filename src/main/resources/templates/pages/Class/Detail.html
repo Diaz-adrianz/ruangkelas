@@ -44,7 +44,7 @@
       </div>
 
       <!-- header -->
-      <div class="flex items-center justify-between flex-wrap gap-4 mb-4">
+      <div class="flex items-center justify-between gap-4 mb-4">
         <h1
           class="typo-heading-xl"
           id="classTitle"
@@ -62,7 +62,7 @@
 
           <ul
             tabindex="0"
-            class="dropdown-content menu bg-base-100 rounded-box border border-base-300 w-48 mt-2 z-10"
+            class="dropdown-content menu bg-base-100 rounded-box border border-base-300 w-48 mt-2 z-10 shadow-md"
           >
             <!-- MENU ADMIN (HANYA ADMIN) -->
             <th:block th:if="${isAdmin}">
@@ -335,7 +335,7 @@
                   </div>
                   <ul
                     tabindex="0"
-                    class="dropdown-content menu bg-base-100 rounded-box border border-base-300 w-44 mt-2 z-10"
+                    class="dropdown-content menu bg-base-100 rounded-box border border-base-300 w-44 mt-2 z-10 shadow-md"
                   >
                     <li>
                       <a th:href="@{/document/view/{id}(id=${document.id})}" target="_blank">
@@ -489,7 +489,7 @@
 
                   <ul
                     tabindex="0"
-                    class="dropdown-content menu bg-base-100 rounded-box border border-base-300 w-44 mt-2 z-10"
+                    class="dropdown-content menu bg-base-100 rounded-box border border-base-300 w-44 mt-2 z-10 shadow-md"
                   >
                     <li th:if="${member.role.name() != 'ADMIN'}">
                       <form

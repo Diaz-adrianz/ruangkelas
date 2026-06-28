@@ -34,7 +34,7 @@
       </div>
 
       <!-- header -->
-      <div class="flex items-center justify-between flex-wrap gap-4 mb-4">
+      <div class="flex items-center justify-between gap-4 mb-4">
         <h1
           class="typo-heading-xl"
           th:text="${#temporals.format(schedule.startTime, 'EEEE, dd MMM yyyy')}"
@@ -45,7 +45,7 @@
             <i class="ri-more-2-line text-sm"></i>
           </div>
 
-          <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box border border-base-300 w-48 mt-2 z-10">
+          <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box border border-base-300 w-48 mt-2 z-10 shadow-md">
             <li>
               <a th:href="@{/class/{classCode}/schedule/edit/{scheduleId}(classCode=${classs.classCode}, scheduleId=${schedule.id})}">
                 Edit Jadwal

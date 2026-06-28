@@ -65,7 +65,7 @@
 							</div>
 							<ul
 								tabindex="0"
-								class="dropdown-content menu bg-base-100 rounded-box border border-base-300 w-44 mt-2 z-10"
+								class="dropdown-content menu bg-base-100 rounded-box border border-base-300 w-44 mt-2 z-10 shadow-md"
 							>
 								<li>
 									<form th:if="${!notif.isRead}" th:action="@{/notification/{id}/read(id=${notif.id})}" method="post">
