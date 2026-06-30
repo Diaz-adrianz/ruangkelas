@@ -128,7 +128,6 @@ public class ClassService {
     public void delete(String classCode, Long userId) {
         Class existing = getByCode(classCode);
         ensureAdmin(existing.getId(), userId);
-        userClassRepository.deleteAll(userClassRepository.findByClasseId(existing.getId()));
         classRepository.deleteById(existing.getId());
     }
  
@@ -195,5 +194,9 @@ public class ClassService {
                 .orElseThrow(() -> new RuntimeException("Anggota tidak ditemukan"));
         userClass.setRole(UserClass.Role.MEMBER);
         userClassRepository.save(userClass);
+    }
+    public UserClass getUserClass(Long classId, Long userId) {
+    return userClassRepository.findByUserIdAndClasseId(userId, classId)
+            .orElseThrow(() -> new RuntimeException("Kamu bukan anggota kelas ini"));
     }
 }

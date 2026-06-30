@@ -51,6 +51,10 @@
 	overflow: hidden;
 }
 
+@utility validator-hint-s {
+	@apply text-error text-xs -mt-1;
+}
+
 @utility typo-display {
 	@apply font-sans text-[40px] leading-[120%] font-extrabold tracking-tight;
 }
