@@ -78,30 +78,21 @@
 						</th:block>
 
 						<!-- LEAVE CLASS (SESUAI canLeave) -->
-						<li th:if="${canLeave}">
+						<li>
 							<form th:action="@{/class/leave/{classCode}(classCode=${classs.classCode})}" method="post">
 								<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
 								<button
 									type="submit"
-									class="w-full text-left text-error"
+									th:disabled="${!canLeave}"
+									class="w-full text-left tooltip"
+									th:classappend="${canLeave} ? 'text-error' : 'text-base-content/40 cursor-not-allowed'"
+									th:attr="data-tip=${canLeave} ? '' : (${isAdmin} ? 'Kamu admin satu-satunya. Promote anggota lain dulu atau hapus kelas' : 'Kamu satu-satunya anggota kelas ini')"
 									onclick="return confirm('Yakin mau keluar kelas?');"
 								>
 									Keluar kelas
 								</button>
 							</form>
-						</li>
-
-						<li th:if="${!canLeave}" class="group relative">
-							<span class="w-full flex items-center gap-2 text-base-content/40 cursor-not-allowed">
-								<i class="ri-lock-line"></i>
-								Keluar kelas
-							</span>
-
-							<div
-								class="absolute right-full top-1/2 -translate-y-1/2 mr-2 hidden group-hover:block bg-[#2B2B2B] text-white text-xs rounded-lg px-3 py-2 w-56 z-20 shadow-lg"
-								th:text="${isAdmin} ? 'Kamu admin satu-satunya. Promote anggota lain dulu atau hapus kelas' : 'Kamu satu-satunya anggota kelas ini'"
-							></div>
 						</li>
 					</ul>
 				</div>
@@ -543,3 +534,4 @@ Sampai jumpa di kelas! 🚀`;
 		</div>
 	</body>
 </html>
+
