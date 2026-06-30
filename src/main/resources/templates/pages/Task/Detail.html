@@ -129,6 +129,8 @@
 										role="button"
 										class="typo-body-md cursor-pointer group-hover:underline"
 										th:text="${subtask.title}"
+										th:attr="data-title=${subtask.title}, data-desc=${subtask.description}, data-deadline=${#temporals.format(subtask.deadline, 'EEEE, dd MMM yyyy HH:mm')}"
+										onclick="openModalDetailSubtask(this.dataset.title, this.dataset.desc, this.dataset.deadline)"
 									></h3>
 									<p
 										class="typo-caption text-base-content/60"
@@ -207,6 +209,32 @@
 				</label>
 				<div class="tab-content pt-4">List submit</div>
 			</div>
+
+			<!-- ====== MODALS ======  -->
+			<dialog id="modal_detail_subtask" class="modal modal-bottom sm:modal-middle">
+				<div class="modal-box">
+					<span class="typo-caption text-base-content/60">Detail Sub Tugas</span>
+					<h3 class="typo-heading-md mt-2" id="modal_detail_subtask_title"></h3>
+					<p class="typo-body-md text-base-content/60" id="modal_detail_subtask_description"></p>
+					<div class="flex items-end gap-2 text-base-content/60 mt-4">
+						<i class="ri-timer-line text-sm"></i>
+						<span class="typo-caption" id="modal_detail_subtask_deadline"></span>
+					</div>
+				</div>
+				<form method="dialog" class="modal-backdrop">
+					<button>Close</button>
+				</form>
+			</dialog>
+			<!-- ====== MODALS ======  -->
+
+			<script>
+				window.openModalDetailSubtask = function (title, description, deadline) {
+					document.getElementById('modal_detail_subtask').showModal();
+					document.getElementById('modal_detail_subtask_title').textContent = title;
+					document.getElementById('modal_detail_subtask_description').textContent = description;
+					document.getElementById('modal_detail_subtask_deadline').textContent = deadline;
+				};
+			</script>
 		</div>
 	</body>
 </html>
