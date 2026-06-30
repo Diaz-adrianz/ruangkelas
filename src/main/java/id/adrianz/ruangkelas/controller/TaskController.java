@@ -83,39 +83,33 @@ public class TaskController {
         return "redirect:/class/" + classCode + "#tasks";
     }
 
-    @PostMapping("/{taskId}/submit")
-public String submitTask(
-        @PathVariable String classCode,
-        @PathVariable Long taskId,
-        @AuthenticationPrincipal UserPrincipal principal,
-        RedirectAttributes redirectAttributes) {
+@PostMapping("/{taskId}/submit")
+    public String submitTask(
+            @PathVariable String classCode,
+            @PathVariable Long taskId,
+            @AuthenticationPrincipal UserPrincipal principal,
+            RedirectAttributes redirectAttributes) {
 
-    try {
+        try {
+            // Kita tidak perlu mencari objek Task dan UserClass secara manual lagi di Controller
+            // cukup kirimkan ID-nya saja ke Service
+            taskSubmissionService.submitTask(
+                    taskId, 
+                    principal.getUser().getId()
+            );
 
-        Class classs = classService.getByCode(classCode);
+            redirectAttributes.addFlashAttribute(
+                    "success",
+                    "Tugas berhasil disubmit.");
 
-        Task task = taskService.getTaskById(taskId);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    e.getMessage());
+        }
 
-        UserClass userClass = classService.getUserClass(
-                classs.getId(),
-                principal.getUser().getId());
-
-        taskSubmissionService.submitTask(task, userClass);
-
-        redirectAttributes.addFlashAttribute(
-                "success",
-                "Tugas berhasil disubmit.");
-
-    } catch (Exception e) {
-
-        redirectAttributes.addFlashAttribute(
-                "error",
-                e.getMessage());
-
+        return "redirect:/class/" + classCode + "/tasks/" + taskId;
     }
-
-    return "redirect:/class/" + classCode + "/tasks/" + taskId;
-}
 
     @GetMapping("/{taskId}/edit")
     public String showEditForm(@PathVariable String classCode, @PathVariable Long taskId, Model model) {
