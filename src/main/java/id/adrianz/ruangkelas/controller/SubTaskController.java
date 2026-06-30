@@ -107,12 +107,16 @@ public class SubTaskController {
         public String delete(
                         @PathVariable String classCode,
                         @PathVariable Long taskId,
-                        @PathVariable Long subtaskId) {
+                        @PathVariable Long subtaskId,
+                        RedirectAttributes redirectAttributes) {
 
-                subTaskService.deleteSubtask(subtaskId);
+                try {
+                        subTaskService.deleteSubtask(subtaskId);
+                        redirectAttributes.addFlashAttribute("success", "Sub tugas berhasil dihapus");
+                } catch (RuntimeException e) {
+                        redirectAttributes.addFlashAttribute("error", e.getMessage());
+                }
 
-                return "redirect:/class/" + classCode
-                                + "/tasks/" + taskId
-                                + "/subtasks";
+                return "redirect:/class/" + classCode + "/tasks/" + taskId + "/subtasks";
         }
 }
