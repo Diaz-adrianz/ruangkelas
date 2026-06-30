@@ -5,10 +5,12 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Configuration;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.InputStream;
 
+@Slf4j
 @Configuration
 public class FirebaseConfig {
 
@@ -19,7 +21,7 @@ public class FirebaseConfig {
                 getClass().getClassLoader().getResourceAsStream("secrets/firebase-service-account.json");
 
             if (serviceAccount == null) {
-                System.out.println("Firebase service account not found, skipping initialization.");
+                log.warn("⚠️ Firebase service account not found, skipping initialization.");
                 return;
             }
 
@@ -28,6 +30,7 @@ public class FirebaseConfig {
                 .build();
 
             FirebaseApp.initializeApp(options);
+            log.info("✅ Firebase berhasil diinisialisasi");
         }
     }
 }

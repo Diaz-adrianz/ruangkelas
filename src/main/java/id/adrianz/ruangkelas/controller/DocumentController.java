@@ -64,7 +64,7 @@ public class DocumentController {
             return "pages/Document/Create";
         } 
 
-        return "redirect:/class/" + classs.getClassCode();
+        return "redirect:/class/" + classs.getClassCode() + "#documents";
     }
 
     // =====================
@@ -90,7 +90,7 @@ public class DocumentController {
 
         String classCode = classService.getById(classId).getClassCode();
 
-        return "redirect:/class/" + classCode;
+        return "redirect:/class/" + classCode + "#documents"; 
     }
 
     @GetMapping("/download/{id}")

@@ -1,5 +1,7 @@
 package id.adrianz.ruangkelas.controller;
 
+import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -7,14 +9,21 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import id.adrianz.ruangkelas.dto.CreateClassDto;
+import id.adrianz.ruangkelas.dto.CreateDocumentDto;
 import id.adrianz.ruangkelas.dto.JoinClassDto;
 import id.adrianz.ruangkelas.dto.UpdateClassDto;
 import id.adrianz.ruangkelas.model.Class;
+import id.adrianz.ruangkelas.model.Schedule;
+import id.adrianz.ruangkelas.model.Task;
 import id.adrianz.ruangkelas.model.UserClass;
 import id.adrianz.ruangkelas.model.UserPrincipal;
 import id.adrianz.ruangkelas.service.ClassService;
+import id.adrianz.ruangkelas.service.DocumentService;
+import id.adrianz.ruangkelas.service.ScheduleService;
+import id.adrianz.ruangkelas.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -24,6 +33,9 @@ import lombok.RequiredArgsConstructor;
 public class ClassController {
 
     private final ClassService classService;
+    private final DocumentService documentService;
+    private final TaskService taskService;
+    private final ScheduleService scheduleService;
 
     // ================= INDEX =================
 
@@ -38,8 +50,10 @@ public class ClassController {
 
     @GetMapping("/{classCode}")
     public String detail(@PathVariable String classCode,
-                         @AuthenticationPrincipal UserPrincipal principal,
-                         Model model) {
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month,
+            @AuthenticationPrincipal UserPrincipal principal,
+            Model model) {
 
         Class classs = classService.getByCode(classCode);
         List<UserClass> members = classService.getMembers(classs.getId());
@@ -53,6 +67,27 @@ public class ClassController {
         model.addAttribute("isAdmin", isAdmin);
         model.addAttribute("canLeave", canLeave);
         model.addAttribute("currentUserId", principal.getUser().getId());
+
+        model.addAttribute(
+                "documents",
+                documentService.getDocumentsByClass(classs.getId()));
+        List<Task> tasks = taskService.getTasksByClassCode(classCode);
+        model.addAttribute("tasks", tasks);
+
+        // --- LOGIKA KALENDER ---
+        YearMonth current = (year != null && month != null)
+                ? YearMonth.of(year, month)
+                : YearMonth.now();
+
+        List<Schedule> schedules = scheduleService.getSchedulesByClassCode(classCode);
+
+        model.addAttribute("schedules", schedules != null ? schedules : new ArrayList<>());
+        model.addAttribute("currentYearMonth", current);
+        model.addAttribute("currentMonthLabel", scheduleService.formatMonthLabel(current));
+        model.addAttribute("prevYearMonth", current.minusMonths(1));
+        model.addAttribute("nextYearMonth", current.plusMonths(1));
+        model.addAttribute("calendarWeeks", scheduleService.buildCalendarWeeks(current, schedules));
+        model.addAttribute("schedulesCount", schedules.size());
 
         return "pages/Class/Detail";
     }
@@ -69,9 +104,9 @@ public class ClassController {
 
     @PostMapping("/create")
     public String create(@Valid @ModelAttribute("createClassDto") CreateClassDto request,
-                         BindingResult result,
-                         Model model,
-                         @AuthenticationPrincipal UserPrincipal principal) {
+            BindingResult result,
+            Model model,
+            @AuthenticationPrincipal UserPrincipal principal) {
 
         if (result.hasErrors()) {
             model.addAttribute("courses", classService.getAllCourses());
@@ -87,8 +122,7 @@ public class ClassController {
                     request.getSemester(),
                     request.getCourseId(),
                     request.getLecturerName(),
-                    principal.getUser()
-            );
+                    principal.getUser());
         } catch (RuntimeException e) {
             model.addAttribute("courses", classService.getAllCourses());
             model.addAttribute("semesters", Class.Semester.values());
@@ -123,10 +157,10 @@ public class ClassController {
 
     @PostMapping("/edit/{classCode}")
     public String edit(@PathVariable String classCode,
-                       @Valid @ModelAttribute("updateClassDto") UpdateClassDto request,
-                       BindingResult result,
-                       Model model,
-                       @AuthenticationPrincipal UserPrincipal principal) {
+            @Valid @ModelAttribute("updateClassDto") UpdateClassDto request,
+            BindingResult result,
+            Model model,
+            @AuthenticationPrincipal UserPrincipal principal) {
 
         if (result.hasErrors()) {
             model.addAttribute("classCode", classCode);
@@ -144,8 +178,7 @@ public class ClassController {
                     request.getSemester(),
                     request.getCourseId(),
                     request.getLecturerName(),
-                    principal.getUser().getId()
-            );
+                    principal.getUser().getId());
         } catch (RuntimeException e) {
             model.addAttribute("classCode", classCode);
             model.addAttribute("courses", classService.getAllCourses());
@@ -161,7 +194,7 @@ public class ClassController {
 
     @PostMapping("/delete/{classCode}")
     public String delete(@PathVariable String classCode,
-                         @AuthenticationPrincipal UserPrincipal principal) {
+            @AuthenticationPrincipal UserPrincipal principal) {
 
         classService.delete(classCode, principal.getUser().getId());
         return "redirect:/";
@@ -177,10 +210,10 @@ public class ClassController {
 
     @PostMapping("/join")
     public String join(@Valid @ModelAttribute("joinClassDto") JoinClassDto request,
-                       BindingResult result,
-                       Model model,
-                       @AuthenticationPrincipal UserPrincipal principal,
-                       org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+            BindingResult result,
+            Model model,
+            @AuthenticationPrincipal UserPrincipal principal,
+            RedirectAttributes redirectAttributes) {
 
         if (result.hasErrors()) {
             model.addAttribute("errors", result.getFieldErrors());
@@ -194,38 +227,28 @@ public class ClassController {
             return "pages/Class/Join";
         }
 
-        redirectAttributes.addFlashAttribute("success", "Permintaan bergabung berhasil dikirim. Menunggu persetujuan admin");
+        redirectAttributes.addFlashAttribute("success",
+                "Permintaan bergabung berhasil dikirim. Menunggu persetujuan admin");
         return "redirect:/";
     }
 
     // ================= LEAVE =================
-
     @PostMapping("/leave/{classCode}")
     public String leaveClass(@PathVariable String classCode,
-                             @AuthenticationPrincipal UserPrincipal principal,
-                             Model model) {
+            @AuthenticationPrincipal UserPrincipal principal,
+            Model model,
+            RedirectAttributes redirectAttributes) {
 
         Class kelas = classService.getByCode(classCode);
 
         try {
             classService.leaveClass(kelas.getId(), principal.getUser().getId());
         } catch (RuntimeException e) {
-            List<UserClass> members = classService.getMembers(kelas.getId());
-            List<UserClass> pending = classService.getPendingRequests(kelas.getId());
-            boolean isAdmin = classService.isAdmin(kelas.getId(), principal.getUser().getId());
-            boolean canLeave = classService.canLeave(kelas.getId(), principal.getUser().getId());
-
-            model.addAttribute("classs", kelas);
-            model.addAttribute("members", members);
-            model.addAttribute("pendingRequests", pending);
-            model.addAttribute("isAdmin", isAdmin);
-            model.addAttribute("canLeave", canLeave);
-            model.addAttribute("currentUserId", principal.getUser().getId());
-            model.addAttribute("error", e.getMessage());
-
-            return "pages/Class/Detail";
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/class/" + classCode;
         }
 
+        redirectAttributes.addFlashAttribute("success", "Kamu telah keluar dari kelas \"" + kelas.getName() + "\"");
         return "redirect:/";
     }
 
@@ -233,49 +256,67 @@ public class ClassController {
 
     @PostMapping("/rejection/{userClassId}/dismiss")
     public String dismissRejection(@PathVariable Long userClassId,
-                                   @AuthenticationPrincipal UserPrincipal principal) {
+            @AuthenticationPrincipal UserPrincipal principal) {
         classService.dismissRejection(userClassId, principal.getUser().getId());
         return "redirect:/";
     }
 
     @PostMapping("/member/{userClassId}/approve")
     public String approve(@PathVariable Long userClassId,
-                          @RequestParam String classCode,
-                          org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+            @RequestParam String classCode,
+            RedirectAttributes redirectAttributes) {
         classService.approve(userClassId);
         redirectAttributes.addFlashAttribute("success", "Permintaan bergabung berhasil diterima");
-        return "redirect:/class/" + classCode + "#anggota";
+        return "redirect:/class/" + classCode + "#members";
     }
 
     @PostMapping("/member/{userClassId}/reject")
     public String reject(@PathVariable Long userClassId,
-                         @RequestParam String classCode) {
+            @RequestParam String classCode,
+            RedirectAttributes redirectAttributes) {
         classService.reject(userClassId);
-        return "redirect:/class/" + classCode + "#anggota";
+        redirectAttributes.addFlashAttribute("success", "Permintaan bergabung berhasil ditolak");
+        return "redirect:/class/" + classCode + "#members";
     }
 
     // ================= KICK =================
 
     @PostMapping("/member/{userClassId}/kick")
     public String kick(@PathVariable Long userClassId,
-                       @RequestParam String classCode) {
+            @RequestParam String classCode,
+            RedirectAttributes redirectAttributes) {
         classService.kick(userClassId);
-        return "redirect:/class/" + classCode + "#anggota";
+        redirectAttributes.addFlashAttribute("success", "Anggota berhasil dikeluarkan");
+        return "redirect:/class/" + classCode + "#members";
     }
 
     // ================= PROMOTE / DEMOTE =================
 
     @PostMapping("/member/{userClassId}/promote")
     public String promote(@PathVariable Long userClassId,
-                          @RequestParam String classCode) {
+            @RequestParam String classCode,
+            RedirectAttributes redirectAttributes) {
         classService.promote(userClassId);
-        return "redirect:/class/" + classCode + "#anggota";
+        redirectAttributes.addFlashAttribute("success", "Admin berhasil ditambahkan");
+        return "redirect:/class/" + classCode + "#members";
     }
 
     @PostMapping("/member/{userClassId}/demote")
     public String demote(@PathVariable Long userClassId,
-                         @RequestParam String classCode) {
+            @RequestParam String classCode,
+            RedirectAttributes redirectAttributes) {
+
         classService.demote(userClassId);
-        return "redirect:/class/" + classCode + "#anggota";
+        redirectAttributes.addFlashAttribute("success", "Admin berhasil dihapus");
+        return "redirect:/class/" + classCode + "#members";
+    }
+
+    // ================= CREATE (Relations) =================
+    @GetMapping("/{classCode}/document/upload")
+    public String showCreateForm(@PathVariable String classCode, Model model) {
+        Class classs = classService.getByCode(classCode);
+        model.addAttribute("classs", classs);
+        model.addAttribute("createDocumentDto", new CreateDocumentDto());
+        return "pages/Document/Create";
     }
 }
