@@ -1,25 +1,68 @@
 package id.adrianz.ruangkelas.model;
 
-import jakarta.persistence.*;
-import lombok.*;
+import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Table(name = "sub_tasks")
-@Data
+@Table(name = "subtasks")
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class SubTask {
 
+    @Transient
+    public long getDaysUntilDeadline() {
+        return ChronoUnit.DAYS.between(
+                LocalDate.now(),
+                deadline.toLocalDate());
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "task_id", nullable = false)
+    private Task task;
+
+    @ManyToOne
+    @JoinColumn(name = "created_by", nullable = false)
+    private User createdBy;
+
+    @Column(nullable = false, length = 255)
     private String title;
 
-    private Boolean isCompleted = false;
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "task_id")
-    private Task task;
+    @Column(nullable = false)
+    private LocalDateTime deadline;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }
