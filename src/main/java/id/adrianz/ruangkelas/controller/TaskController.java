@@ -17,6 +17,7 @@ import id.adrianz.ruangkelas.model.Class;
 import id.adrianz.ruangkelas.model.Task;
 import id.adrianz.ruangkelas.model.UserPrincipal;
 import id.adrianz.ruangkelas.service.ClassService;
+import id.adrianz.ruangkelas.service.SubTaskService;
 import id.adrianz.ruangkelas.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class TaskController {
 
     private final TaskService taskService;
     private final ClassService classService;
+    private final SubTaskService subTaskService;
 
     // 1. Tampilan Form Buat Task Baru
     @GetMapping("/create")
@@ -169,6 +171,8 @@ public class TaskController {
 
         Task task = taskService.getTaskById(taskId);
         model.addAttribute("task", task);
+
+        model.addAttribute("subtasks", subTaskService.getSubtasksByTaskId(taskId));
 
         return "pages/Task/Detail";
     }

@@ -31,24 +31,6 @@ public class SubTaskController {
         private final TaskService taskService;
         private final ClassService classService;
 
-        @GetMapping
-        public String index(
-                        @PathVariable String classCode,
-                        @PathVariable Long taskId,
-                        Model model) {
-
-                Class classs = classService.getByCode(classCode);
-                Task task = taskService.getTaskById(taskId);
-
-                model.addAttribute("classs", classs);
-                model.addAttribute("task", task);
-                model.addAttribute(
-                                "subtasks",
-                                subTaskService.getSubtasksByTaskId(taskId));
-
-                return "pages/Subtask/Index";
-        }
-
         @GetMapping("/create")
         public String createForm(
                         @PathVariable String classCode,
@@ -100,7 +82,7 @@ public class SubTaskController {
                 }
 
                 redirectAttributes.addFlashAttribute("success", "Sub tugas berhasil ditambahkan");
-                return "redirect:/class/" + classCode + "/tasks/" + taskId + "/subtasks";
+                return "redirect:/class/" + classCode + "/tasks/" + taskId + "#subtasks";
         }
 
         @PostMapping("/{subtaskId}/delete")
@@ -117,6 +99,6 @@ public class SubTaskController {
                         redirectAttributes.addFlashAttribute("error", e.getMessage());
                 }
 
-                return "redirect:/class/" + classCode + "/tasks/" + taskId + "/subtasks";
+                return "redirect:/class/" + classCode + "/tasks/" + taskId + "#subtasks";
         }
 }
