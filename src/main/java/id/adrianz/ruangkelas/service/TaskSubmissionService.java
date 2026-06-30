@@ -1,79 +1,82 @@
 package id.adrianz.ruangkelas.service;
 
-import id.adrianz.ruangkelas.model.Task;
-import id.adrianz.ruangkelas.model.TaskSubmission;
-import id.adrianz.ruangkelas.model.SubmissionStatus;
-import id.adrianz.ruangkelas.repository.TaskSubmissionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
+import id.adrianz.ruangkelas.model.SubmissionStatus;
+import id.adrianz.ruangkelas.model.Task;
+import id.adrianz.ruangkelas.model.TaskSubmission;
+import id.adrianz.ruangkelas.model.UserClass;
+import id.adrianz.ruangkelas.repository.TaskSubmissionRepository;
+import id.adrianz.ruangkelas.repository.UserClassRepository;
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class TaskSubmissionService {
 
-    @Autowired
-    private TaskSubmissionRepository submissionRepository;
+    private final TaskSubmissionRepository submissionRepository;
+    private final TaskService taskService;
+    private final UserClassRepository userClassRepository;
 
-    @Autowired
-    private TaskService taskService; 
+    public TaskSubmission submitTask(Long taskId, Long userId) {
 
-    public TaskSubmission submitTask(Long taskId, Long userId, String note) {
         Task task = taskService.getTaskById(taskId);
-        
+
+        UserClass userClass = userClassRepository
+                .findByUserIdAndClasseId(
+                        userId,
+                        task.getClasse().getId())
+                .orElseThrow(() ->
+                        new RuntimeException("Kamu bukan anggota kelas."));
+
+        if (submissionRepository
+                .findByUserClassIdAndTaskId(
+                        userClass.getId(),
+                        taskId)
+                .isPresent()) {
+
+            throw new RuntimeException("Tugas sudah pernah disubmit.");
+        }
+
         TaskSubmission submission = new TaskSubmission();
-        submission.setTask(task);
-        submission.setUserId(userId);
-        submission.setNote(note);
-        submission.setSubmittedAt(LocalDateTime.now());
+
+        submission.setTaskId(taskId);
+        submission.setUserClassId(userClass.getId());
 
         if (LocalDateTime.now().isAfter(task.getDeadline())) {
             submission.setStatus(SubmissionStatus.LATE);
         } else {
-            submission.setStatus(SubmissionStatus.SUBMITTED);
+            submission.setStatus(SubmissionStatus.ON_TIME);
         }
 
         return submissionRepository.save(submission);
     }
 
-    public TaskSubmission updateNote(Long id, String newNote) {
-        TaskSubmission submission = submissionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Submission tidak ditemukan"));
-        
-        submission.setNote(newNote);
-        submission.setUpdatedAt(LocalDateTime.now());
-        return submissionRepository.save(submission);
-    }
+    public void retractSubmission(Long id) {
 
-    public TaskSubmission markLate(Long id) {
-        TaskSubmission submission = submissionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Submission tidak ditemukan"));
-        
-        submission.setStatus(SubmissionStatus.LATE);
-        submission.setUpdatedAt(LocalDateTime.now());
-        return submissionRepository.save(submission);
-    }
+        TaskSubmission submission = getSubmissionById(id);
 
-    public Boolean retractSubmission(Long id) {
-        if (submissionRepository.existsById(id)) {
-            submissionRepository.deleteById(id);
-            return true;
-        }
-        return false;
-    }
-
-    public Boolean transitionStatus(Long id, SubmissionStatus newStatus) {
-        TaskSubmission submission = submissionRepository.findById(id).orElse(null);
-        if (submission != null) {
-            submission.setStatus(newStatus);
-            submission.setUpdatedAt(LocalDateTime.now());
-            submissionRepository.save(submission);
-            return true;
-        }
-        return false;
+        submissionRepository.delete(submission);
     }
 
     public List<TaskSubmission> getAllSubmissions() {
+
         return submissionRepository.findAll();
     }
+
+    public TaskSubmission getSubmissionById(Long id) {
+
+        return submissionRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Submission tidak ditemukan."));
+    }
+
+    public List<TaskSubmission> getSubmissionByTask(Long taskId) {
+
+        return submissionRepository.findByTaskId(taskId);
+    }
+
 }

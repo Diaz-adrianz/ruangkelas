@@ -1,12 +1,18 @@
 package id.adrianz.ruangkelas.model;
 
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "task_submissions")
+@Table(
+    name = "task_submissions",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_class_id", "task_id"})
+    }
+)
 @Getter
 @Setter
 public class TaskSubmission {
@@ -15,25 +21,35 @@ public class TaskSubmission {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @Column(name = "user_class_id", nullable = false)
+    private Long userClassId;
 
-    @ManyToOne
-    @JoinColumn(name = "task_id", nullable = false)
-    private Task task;
+    @Column(name = "task_id", nullable = false)
+    private Long taskId;
 
     @Enumerated(EnumType.STRING)
-    private SubmissionStatus status = SubmissionStatus.PENDING;
+    @Column(nullable = false)
+    private SubmissionStatus status;
 
-    @Column(columnDefinition = "TEXT")
-    private String note;
-
-    @Column(name = "submitted_at")
+    @Column(name = "submitted_at", nullable = false)
     private LocalDateTime submittedAt;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+        createdAt = now;
+        updatedAt = now;
+        submittedAt = now;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

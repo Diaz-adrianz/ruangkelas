@@ -1,2 +1,9 @@
 package id.adrianz.ruangkelas.model;
-public enum SubmissionStatus { PENDING, SUBMITTED, LATE }
+
+public enum SubmissionStatus {
+
+    ON_TIME,
+
+    LATE
+
+}
