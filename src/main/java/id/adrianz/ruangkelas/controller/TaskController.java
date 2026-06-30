@@ -18,6 +18,7 @@ import id.adrianz.ruangkelas.model.Task;
 import id.adrianz.ruangkelas.model.UserPrincipal;
 import id.adrianz.ruangkelas.service.ClassService;
 import id.adrianz.ruangkelas.service.TaskService;
+import id.adrianz.ruangkelas.service.SubTaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -28,6 +29,7 @@ public class TaskController {
 
     private final TaskService taskService;
     private final ClassService classService;
+    private final SubTaskService subTaskService;
 
     // 1. Tampilan Form Buat Task Baru
     @GetMapping("/create")
@@ -65,7 +67,7 @@ public class TaskController {
                     .deadline(request.getDeadline())
                     .createdBy(principal.getUser())
                     .build();
-    
+
             taskService.createTask(task);
         } catch (Exception e) {
             model.addAttribute("classs", classs);
@@ -97,14 +99,13 @@ public class TaskController {
 
     // 4. Proses Simpan Update Task
     @PostMapping("/{taskId}/edit")
-    public String updateTask(@PathVariable String classCode, 
+    public String updateTask(@PathVariable String classCode,
             @PathVariable Long taskId,
-            @Valid @ModelAttribute("updateTaskDto") UpdateTaskDto request, 
+            @Valid @ModelAttribute("updateTaskDto") UpdateTaskDto request,
             BindingResult result,
             Model model,
             RedirectAttributes redirectAttributes,
-            @AuthenticationPrincipal UserPrincipal principal
-        ) {
+            @AuthenticationPrincipal UserPrincipal principal) {
         Class classs = classService.getByCode(classCode);
         Task task = taskService.getTaskById(taskId);
 
@@ -117,11 +118,11 @@ public class TaskController {
 
         try {
             classService.ensureAdmin(classs.getId(), principal.getUser().getId());
-    
+
             task.setTitle(request.getTitle());
             task.setDescription(request.getDescription());
             task.setDeadline(request.getDeadline());
-    
+
             taskService.createTask(task);
         } catch (Exception e) {
             model.addAttribute("classs", classs);
@@ -137,11 +138,11 @@ public class TaskController {
 
     // 5. Proses Hapus Task
     @PostMapping("/{taskId}/delete")
-    public String deleteTask(@PathVariable String classCode, 
-                            @PathVariable Long taskId, 
-                            RedirectAttributes redirectAttributes,
-                            Model model,
-                            @AuthenticationPrincipal UserPrincipal principal) {
+    public String deleteTask(@PathVariable String classCode,
+            @PathVariable Long taskId,
+            RedirectAttributes redirectAttributes,
+            Model model,
+            @AuthenticationPrincipal UserPrincipal principal) {
         try {
             Class classs = classService.getByCode(classCode);
 
@@ -158,19 +159,36 @@ public class TaskController {
     }
 
     @GetMapping("/{taskId}")
-    public String getMethodName(@PathVariable String classCode, 
-                                @PathVariable Long taskId, 
-                                Model model, 
-                                @AuthenticationPrincipal UserPrincipal principal) {
+    public String getMethodName(
+            @PathVariable String classCode,
+            @PathVariable Long taskId,
+            Model model,
+            @AuthenticationPrincipal UserPrincipal principal) {
+
         Class classs = classService.getByCode(classCode);
-        boolean isAdmin = classService.isAdmin(classs.getId(), principal.getUser().getId());
-        model.addAttribute("classs", classs);
-        model.addAttribute("isAdmin", isAdmin);
+        boolean isAdmin = classService.isAdmin(
+                classs.getId(),
+                principal.getUser().getId());
 
         Task task = taskService.getTaskById(taskId);
+
+        model.addAttribute("classs", classs);
         model.addAttribute("task", task);
+        model.addAttribute("isAdmin", isAdmin);
+
+        // ==========================
+        // DATA SUBTASK
+        // ==========================
+
+        model.addAttribute(
+                "subtasks",
+                subTaskService.getSubtasksByTaskId(taskId));
+
+        model.addAttribute(
+                "subtaskCount",
+                subTaskService.getSubtasksByTaskId(taskId).size());
 
         return "pages/Task/Detail";
     }
-    
+
 }
