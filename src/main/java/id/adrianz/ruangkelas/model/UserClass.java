@@ -40,7 +40,7 @@ public class UserClass {
     }
 
     public enum Status {
-        PENDING, ACCEPTED
+        PENDING, ACCEPTED, REJECTED
     }
 
     @Id
