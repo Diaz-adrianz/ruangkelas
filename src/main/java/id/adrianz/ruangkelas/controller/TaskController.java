@@ -18,6 +18,7 @@ import id.adrianz.ruangkelas.model.Task;
 import id.adrianz.ruangkelas.model.UserClass;
 import id.adrianz.ruangkelas.model.UserPrincipal;
 import id.adrianz.ruangkelas.service.ClassService;
+import id.adrianz.ruangkelas.service.SubTaskService;
 import id.adrianz.ruangkelas.service.TaskService;
 import id.adrianz.ruangkelas.service.CommentService;
 import id.adrianz.ruangkelas.service.TaskSubmissionService;
@@ -32,6 +33,7 @@ public class TaskController {
 
     private final TaskService taskService;
     private final ClassService classService;
+    private final SubTaskService subTaskService;
     private final CommentService commentService;
     private final TaskSubmissionService taskSubmissionService;
 
@@ -203,6 +205,9 @@ public String submitTask(
 
         model.addAttribute("task", task);
 
+        model.addAttribute("subtasks", subTaskService.getSubtasksByTaskId(taskId));
+
+        // 🌟 DI SINI PERUBAHAN UTAMANYA: Menggunakan method penampung baru
         var comments = commentService.getComments(taskId, principal.getUser());
         model.addAttribute("comments", comments);
         model.addAttribute("currentUserId", principal.getUser().getId());
