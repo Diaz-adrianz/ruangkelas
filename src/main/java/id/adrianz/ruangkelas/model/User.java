@@ -1,5 +1,6 @@
 package id.adrianz.ruangkelas.model;
 
+import java.beans.Transient;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -48,9 +49,35 @@ public class User {
     @Column(nullable = true, length = 10)
     private String nim;
 
+    @Column(nullable = true, length = 255)
+    private String profilePicture;
+
+    @Column(nullable = true)
+    private String verificationToken;
+
+    @Column(nullable = true)
+    private LocalDateTime tokenExpiresAt;
+
+    @Column(nullable = true)
+    private String resetOtp;
+
+    @Column(nullable = true)
+    private LocalDateTime resetOtpExpiresAt;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @Transient
+    public String getInitials() {
+        String[] parts = this.getName().trim().split("\\s+");
+
+        if (parts.length == 1) {
+            return parts[0].substring(0, Math.min(2, parts[0].length())).toUpperCase();
+        }
+
+        return (parts[0].charAt(0) + "" + parts[1].charAt(0)).toUpperCase();
+    }
 }

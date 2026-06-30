@@ -2,8 +2,7 @@ package id.adrianz.ruangkelas.model;
 
 public enum SubmissionStatus {
 
-    ON_TIME,
 
-    LATE
+    ON_TIME, LATE
 
 }

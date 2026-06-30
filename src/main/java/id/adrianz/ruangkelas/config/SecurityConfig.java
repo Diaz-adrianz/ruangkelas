@@ -33,13 +33,16 @@ public class SecurityConfig {
                         "/css/**",
                         "/js/**",
                         "/images/**",
+                        "/icons/**",
+                        "/manifest.json",
+                        "/offline.html",
+                        "/favicon.ico",
                         "/api/notification/firebase-messaging-sw.js"
                 ).permitAll()
                 .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                 .loginPage("/auth/login")
-                .defaultSuccessUrl("/", true)
                 .failureHandler((request, response, exception) -> {
                     String message;
                     if (exception instanceof BadCredentialsException) {

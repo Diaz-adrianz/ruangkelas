@@ -128,13 +128,51 @@ public class ClassService {
     public void delete(String classCode, Long userId) {
         Class existing = getByCode(classCode);
         ensureAdmin(existing.getId(), userId);
-        userClassRepository.deleteAll(userClassRepository.findByClasseId(existing.getId()));
         classRepository.deleteById(existing.getId());
     }
  
+    // #26: cek apakah user boleh leave (untuk kontrol tampilan tombol di view)
+    public boolean canLeave(Long classId, Long userId) {
+        UserClass userClass = userClassRepository.findByUserIdAndClasseId(userId, classId)
+                .orElse(null);
+
+        if (userClass == null) {
+            return false;
+        }
+
+        if (userClass.getRole() != UserClass.Role.ADMIN) {
+            return true;
+        }
+
+        int totalMembers = userClassRepository.findByClasseIdAndStatus(classId, UserClass.Status.ACCEPTED).size();
+        int adminCount = userClassRepository.countAdminByClasseId(classId);
+
+        if (totalMembers <= 1) {
+            return false;
+        }
+
+        return adminCount > 1;
+    }
+
+    // #28: pesan error dirapikan -> cek "sendirian di kelas" duluan baru "admin terakhir",
+    // supaya pesan yang muncul lebih tepat sasaran (gak ketuker)
     public void leaveClass(Long classId, Long userId) {
         UserClass userClass = userClassRepository.findByUserIdAndClasseId(userId, classId)
                 .orElseThrow(() -> new RuntimeException("Kamu bukan anggota kelas ini"));
+
+        if (userClass.getRole() == UserClass.Role.ADMIN) {
+            int totalMembers = userClassRepository.findByClasseIdAndStatus(classId, UserClass.Status.ACCEPTED).size();
+            int adminCount = userClassRepository.countAdminByClasseId(classId);
+
+            if (totalMembers <= 1) {
+                throw new RuntimeException("Kamu satu-satunya anggota di kelas ini. Hapus kelas jika ingin keluar");
+            }
+
+            if (adminCount <= 1) {
+                throw new RuntimeException("Kamu admin satu-satunya di kelas ini. Jadikan anggota lain admin dulu sebelum keluar");
+            }
+        }
+
         userClassRepository.delete(userClass);
     }
  
@@ -145,11 +183,19 @@ public class ClassService {
     // #25: gabung kelas pakai kode, bukan pilih dari daftar
     public void joinByCode(String classCode, User user) {
         Class kelas = getByCode(classCode);
- 
-        if (userClassRepository.existsByUserIdAndClasseId(user.getId(), kelas.getId())) {
-            throw new RuntimeException("Kamu sudah bergabung di kelas " + kelas.getName());
+
+        var existing = userClassRepository.findByUserIdAndClasseId(user.getId(), kelas.getId());
+
+        if (existing.isPresent()) {
+            UserClass.Status status = existing.get().getStatus();
+            if (status == UserClass.Status.REJECTED) {
+                // sudah pernah ditolak sebelumnya, hapus dulu lalu izinkan join ulang
+                userClassRepository.delete(existing.get());
+            } else {
+                throw new RuntimeException("Kamu sudah bergabung di kelas " + kelas.getName());
+            }
         }
- 
+
         UserClass userClass = UserClass.builder()
                 .classe(kelas)
                 .user(user)
@@ -176,7 +222,29 @@ public class ClassService {
     }
  
     public void reject(Long userClassId) {
-        userClassRepository.deleteById(userClassId);
+        UserClass userClass = userClassRepository.findById(userClassId)
+                .orElseThrow(() -> new RuntimeException("Permintaan tidak ditemukan"));
+        userClass.setStatus(UserClass.Status.REJECTED);
+        userClassRepository.save(userClass);
+    }
+
+    // #27: cek apakah user punya notifikasi penolakan yang belum dilihat untuk kelas tertentu
+    public List<UserClass> getRejectedForUser(Long userId) {
+        return userClassRepository.findByUserId(userId).stream()
+                .filter(uc -> uc.getStatus() == UserClass.Status.REJECTED)
+                .toList();
+    }
+
+    // #27: tandai notifikasi penolakan sudah dilihat (hapus record-nya)
+    public void dismissRejection(Long userClassId, Long userId) {
+        UserClass userClass = userClassRepository.findById(userClassId)
+                .orElseThrow(() -> new RuntimeException("Notifikasi tidak ditemukan"));
+
+        if (!userClass.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Kamu tidak punya akses ke notifikasi ini");
+        }
+
+        userClassRepository.delete(userClass);
     }
  
     public void kick(Long userClassId) {
@@ -195,5 +263,9 @@ public class ClassService {
                 .orElseThrow(() -> new RuntimeException("Anggota tidak ditemukan"));
         userClass.setRole(UserClass.Role.MEMBER);
         userClassRepository.save(userClass);
+    }
+    public UserClass getUserClass(Long classId, Long userId) {
+    return userClassRepository.findByUserIdAndClasseId(userId, classId)
+            .orElseThrow(() -> new RuntimeException("Kamu bukan anggota kelas ini"));
     }
 }

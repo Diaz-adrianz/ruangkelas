@@ -1,0 +1,136 @@
+<!doctype html>
+<html
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/Home}"
+>
+	<head>
+		<title>Edit Sub Tugas</title>
+	</head>
+
+	<body>
+		<div layout:fragment="content" class="mx-auto max-w-5xl p-4">
+			<!-- Breadcrumb -->
+			<div class="breadcrumbs text-sm mb-4">
+				<ul>
+					<li>
+						<a href="/">Beranda</a>
+					</li>
+					<li>
+						<a th:href="@{/class/{classCode}(classCode=${classs.classCode})}" th:text="${classs.name}"></a>
+					</li>
+					<li>
+						<a th:href="@{/class/{classCode}#tasks(classCode=${classs.classCode})}">Tugas</a>
+					</li>
+					<li>
+						<a
+							th:href="@{/class/{classCode}/tasks/{taskId}(classCode=${classs.classCode}, taskId=${task.id})}"
+							th:text="${task.title}"
+						></a>
+					</li>
+					<li>
+						<a th:href="@{/class/{classCode}/tasks/{taskId}#subtasks(classCode=${classCode}, taskId=${taskId})}">
+							Sub tugas
+						</a>
+					</li>
+					<li>
+						<a
+							th:href="@{/class/{classCode}/tasks/{taskId}#subtasks(classCode=${classCode}, taskId=${taskId})}"
+							th:text="${subtask.title}"
+						></a>
+					</li>
+					<li>Edit</li>
+				</ul>
+			</div>
+
+			<!-- ================= Alert ================= -->
+			<div th:if="${error}" class="alert alert-soft alert-error mb-4">
+				<span th:text="${error}"></span>
+			</div>
+			<!-- ================= Header ================= -->
+
+			<div class="flex items-center justify-between mb-4">
+				<h1 class="typo-heading-xl">Edit Sub Tugas</h1>
+			</div>
+
+			<!-- ================= Card ================= -->
+
+			<div class="card bg-base-100 border border-base-300">
+				<div class="card-body">
+					<form
+						th:action="@{/class/{classCode}/tasks/{taskId}/subtasks/{subtaskId}/update(classCode=${classs.classCode},taskId=${task.id},subtaskId=${subtask.id})}"
+						th:object="${updateSubTaskDto}"
+						method="post"
+						class="flex flex-col"
+					>
+						<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+						<!-- ================= Judul ================= -->
+
+						<fieldset class="fieldset">
+							<legend class="fieldset-legend">Judul</legend>
+
+							<input
+								th:field="*{title}"
+								class="input validator w-full"
+								required
+								type="text"
+								minlength="3"
+								maxlength="255"
+								placeholder="Contoh : Membuat Use Case Diagram"
+							/>
+							<span class="validator-hint">3 - 255 karakter</span>
+							<span th:if="${#fields.hasErrors('title')}" th:errors="*{title}" class="validator-hint-s"></span>
+						</fieldset>
+
+						<!-- ================= Deskripsi ================= -->
+
+						<fieldset class="fieldset">
+							<legend class="fieldset-legend">Deskripsi</legend>
+
+							<textarea
+								th:field="*{description}"
+								class="textarea validator w-full"
+								maxlength="500"
+								placeholder="Tuliskan detail sub tugas..."
+							></textarea>
+
+							<span class="typo-caption text-base-content/60">Opsional</span>
+							<span class="validator-hint">Maks 500 karakter</span>
+							<span
+								th:if="${#fields.hasErrors('description')}"
+								th:errors="*{description}"
+								class="validator-hint-s"
+							></span>
+						</fieldset>
+
+						<!-- ================= Deadline ================= -->
+
+						<fieldset class="fieldset">
+							<legend class="fieldset-legend">Deadline</legend>
+
+							<input th:field="*{deadline}" class="input validator w-full" type="datetime-local" required />
+
+							<span class="validator-hint">Wajib diisi</span>
+							<span th:if="${#fields.hasErrors('deadline')}" th:errors="*{deadline}" class="validator-hint-s"></span>
+						</fieldset>
+
+						<!-- ================= Tombol ================= -->
+
+						<div class="flex justify-end gap-2 mt-4">
+							<a
+								th:href="@{/class/{classCode}/tasks/{taskId}#subtasks(classCode=${classs.classCode},taskId=${task.id})}"
+								class="btn btn-ghost"
+							>
+								Batal
+							</a>
+
+							<button type="submit" class="btn btn-primary">Simpan</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
+

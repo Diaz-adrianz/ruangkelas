@@ -3,6 +3,8 @@ package id.adrianz.ruangkelas.model;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
@@ -24,7 +26,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "user_classes", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"user_id", "class_id"})
+        @UniqueConstraint(columnNames = { "user_id", "class_id" })
 })
 @Getter
 @Setter
@@ -38,7 +40,7 @@ public class UserClass {
     }
 
     public enum Status {
-        PENDING, ACCEPTED
+        PENDING, ACCEPTED, REJECTED
     }
 
     @Id
@@ -47,10 +49,12 @@ public class UserClass {
 
     @ManyToOne
     @JoinColumn(name = "class_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Class classe;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
 
     @Enumerated(EnumType.STRING)
