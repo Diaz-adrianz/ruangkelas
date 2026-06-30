@@ -1,5 +1,7 @@
 package id.adrianz.ruangkelas.controller;
 
+import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,13 +17,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import id.adrianz.ruangkelas.dto.CreateClassDto;
+import id.adrianz.ruangkelas.dto.CreateDocumentDto;
 import id.adrianz.ruangkelas.dto.JoinClassDto;
 import id.adrianz.ruangkelas.dto.UpdateClassDto;
 import id.adrianz.ruangkelas.model.Class;
+import id.adrianz.ruangkelas.model.Schedule;
 import id.adrianz.ruangkelas.model.Task;
 import id.adrianz.ruangkelas.model.UserClass;
 import id.adrianz.ruangkelas.model.UserPrincipal;
 import id.adrianz.ruangkelas.service.ClassService;
+import id.adrianz.ruangkelas.service.DocumentService;
+import id.adrianz.ruangkelas.service.ScheduleService;
 import id.adrianz.ruangkelas.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +38,9 @@ import lombok.RequiredArgsConstructor;
 public class ClassController {
 
     private final ClassService classService;
+    private final DocumentService documentService;
     private final TaskService taskService;
+    private final ScheduleService scheduleService;
 
     // ================= INDEX =================
 
@@ -48,6 +56,8 @@ public class ClassController {
 
     @GetMapping("/{classCode}")
     public String detail(@PathVariable String classCode,
+                         @RequestParam(required = false) Integer year,
+                         @RequestParam(required = false) Integer month,
                          @AuthenticationPrincipal UserPrincipal principal,
                          Model model) {
 
@@ -62,8 +72,28 @@ public class ClassController {
         model.addAttribute("isAdmin", isAdmin);
         model.addAttribute("currentUserId", principal.getUser().getId());
 
+        model.addAttribute(
+            "documents",
+            documentService.getDocumentsByClass(classs.getId())
+        );
         List<Task> tasks = taskService.getTasksByClassCode(classCode);
         model.addAttribute("tasks", tasks);
+
+        // --- LOGIKA KALENDER ---
+        YearMonth current = (year != null && month != null)
+                ? YearMonth.of(year, month)
+                : YearMonth.now();
+
+        List<Schedule> schedules = scheduleService.getSchedulesByClassCode(classCode);
+        
+        model.addAttribute("schedules", schedules != null ? schedules : new ArrayList<>());
+        model.addAttribute("currentYearMonth", current);
+        model.addAttribute("currentMonthLabel", scheduleService.formatMonthLabel(current));
+        model.addAttribute("prevYearMonth", current.minusMonths(1));
+        model.addAttribute("nextYearMonth", current.plusMonths(1));
+        model.addAttribute("calendarWeeks", scheduleService.buildCalendarWeeks(current, schedules));
+        model.addAttribute("schedulesCount", schedules.size());
+
 
         return "pages/Class/Detail";
     }
@@ -234,7 +264,7 @@ public class ClassController {
                           RedirectAttributes redirectAttributes) {
         classService.approve(userClassId);
         redirectAttributes.addFlashAttribute("success", "Permintaan bergabung berhasil diterima");
-        return "redirect:/class/" + classCode + "#anggota";
+        return "redirect:/class/" + classCode + "#members";
     }
 
     @PostMapping("/member/{userClassId}/reject")
@@ -243,7 +273,7 @@ public class ClassController {
                         RedirectAttributes redirectAttributes) {
         classService.reject(userClassId);
         redirectAttributes.addFlashAttribute("success", "Permintaan bergabung berhasil ditolak");
-        return "redirect:/class/" + classCode + "#anggota";
+        return "redirect:/class/" + classCode + "#members";
     }
 
     // ================= KICK =================
@@ -254,7 +284,7 @@ public class ClassController {
                         RedirectAttributes redirectAttributes) {
         classService.kick(userClassId);
         redirectAttributes.addFlashAttribute("success", "Anggota berhasil dikeluarkan");
-        return "redirect:/class/" + classCode + "#anggota";
+        return "redirect:/class/" + classCode + "#members";
     }
 
     // ================= PROMOTE / DEMOTE =================
@@ -265,7 +295,7 @@ public class ClassController {
                             RedirectAttributes redirectAttributes) {
         classService.promote(userClassId);
         redirectAttributes.addFlashAttribute("success", "Admin berhasil ditambahkan");
-        return "redirect:/class/" + classCode + "#anggota";
+        return "redirect:/class/" + classCode + "#members";
     }
 
     @PostMapping("/member/{userClassId}/demote")
@@ -274,6 +304,15 @@ public class ClassController {
                             RedirectAttributes redirectAttributes) {
         classService.demote(userClassId);
         redirectAttributes.addFlashAttribute("success", "Admin berhasil dihapus");
-        return "redirect:/class/" + classCode + "#anggota";
+        return "redirect:/class/" + classCode + "#members";
+    }
+
+    // ================= CREATE (Relations) =================
+    @GetMapping("/{classCode}/document/upload")
+    public String showCreateForm(@PathVariable String classCode, Model model) {
+        Class classs = classService.getByCode(classCode);
+        model.addAttribute("classs", classs);
+        model.addAttribute("createDocumentDto", new CreateDocumentDto());
+        return "pages/Document/Create";
     }
 }

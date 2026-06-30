@@ -19,7 +19,6 @@
 				</ul>
 			</div>
 
-			<!-- ====== ALERTS ======  -->
 			<div th:if="${success}" class="alert alert-soft alert-success mb-4">
 				<span th:text="${success}"></span>
 			</div>
@@ -27,27 +26,17 @@
 			<div th:if="${error}" class="alert alert-soft alert-error mb-4">
 				<span th:text="${error}"></span>
 			</div>
-			<!-- ====== ALERTS ======  -->
 
-			<div class="flex items-center flex-wrap gap-4 mb-4">
+			<div class="flex items-center gap-4 mb-4">
 				<h1 class="typo-heading-xl grow" th:text="${task.title}"></h1>
-				<div th:if="${task.daysUntilDeadline >= 4 and task.daysUntilDeadline <= 7}" class="badge badge-info ps-2">
-					<i class="ri-timer-line"></i>
-					<span th:text="'H-' + ${task.daysUntilDeadline}"></span>
-				</div>
-				<div th:if="${task.daysUntilDeadline >= 2 and task.daysUntilDeadline <= 3}" class="badge badge-warning ps-2">
-					<i class="ri-timer-line"></i>
-					<span th:text="'H-' + ${task.daysUntilDeadline}"></span>
-				</div>
-				<div th:if="${task.daysUntilDeadline >= 0 and task.daysUntilDeadline <= 1}" class="badge badge-error ps-2">
-					<i class="ri-timer-line"></i>
-					<span th:text="'H-' + ${task.daysUntilDeadline}"></span>
-				</div>
 				<div th:if="${isAdmin}" class="dropdown dropdown-end">
 					<div tabindex="0" role="button" class="btn btn-ghost btn-circle btn-sm">
 						<i class="ri-more-2-line text-sm"></i>
 					</div>
-					<ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box border border-base-300 w-48 mt-2 z-10">
+					<ul
+						tabindex="0"
+						class="dropdown-content menu bg-base-100 rounded-box border border-base-300 w-48 mt-2 z-10 shadow-md"
+					>
 						<li>
 							<a th:href="@{/class/{classCode}/tasks/{taskId}/edit(classCode=${classs.classCode}, taskId=${task.id})}">
 								Edit tugas
@@ -70,6 +59,28 @@
 						</li>
 					</ul>
 				</div>
+			</div>
+
+			<div
+				th:if="${task.daysUntilDeadline >= 4 and task.daysUntilDeadline <= 7}"
+				class="badge whitespace-nowrap badge-info ps-2 mb-4"
+			>
+				<i class="ri-timer-line"></i>
+				<span th:text="'H-' + ${task.daysUntilDeadline}"></span>
+			</div>
+			<div
+				th:if="${task.daysUntilDeadline >= 2 and task.daysUntilDeadline <= 3}"
+				class="badge whitespace-nowrap badge-warning ps-2 mb-4"
+			>
+				<i class="ri-timer-line"></i>
+				<span th:text="'H-' + ${task.daysUntilDeadline}"></span>
+			</div>
+			<div
+				th:if="${task.daysUntilDeadline >= 0 and task.daysUntilDeadline <= 1}"
+				class="badge whitespace-nowrap badge-error ps-2 mb-4"
+			>
+				<i class="ri-timer-line"></i>
+				<span th:text="'H-' + ${task.daysUntilDeadline}"></span>
 			</div>
 
 			<div class="flex flex-col gap-2">
@@ -102,7 +113,7 @@
 
 			<div class="mt-8 tabs tabs-border">
 				<label class="tab has-[input:checked]:text-primary gap-4">
-					<input type="radio" name="tabs" checked />
+					<input type="radio" name="tabs" data-fragment="subtasks" checked />
 					Sub tugas
 					<div th:text="${subtasks != null ? #lists.size(subtasks) : 0}">0</div>
 				</label>
@@ -196,14 +207,179 @@
 				</div>
 
 				<label class="tab has-[input:checked]:text-primary gap-4">
-					<input type="radio" name="tabs" />
+					<input type="radio" name="tabs" data-fragment="comments" />
 					Komentar
-					<div>0</div>
+					<div th:text="${comments != null ? #lists.size(comments) : 0}">0</div>
 				</label>
-				<div class="tab-content pt-4">List komentar</div>
+				<div class="tab-content pt-4">
+					<div class="flex justify-end mb-4">
+						<a
+							th:href="@{/class/{classCode}/tasks/{taskId}/comments/create(classCode=${classs.classCode}, taskId=${task.id})}"
+							class="btn btn-primary btn-sm"
+						>
+							<i class="ri-add-large-line"></i>
+							Tambah komentar
+						</a>
+					</div>
+
+					<div
+						th:if="${comments == null or #lists.isEmpty(comments)}"
+						class="text-center py-12 text-base-content/60 typo-body-md"
+					>
+						Belum ada komentar.
+					</div>
+
+					<div th:if="${comments != null and !#lists.isEmpty(comments)}" class="flex flex-col gap-3">
+						<div th:each="comment : ${comments}" class="card bg-base-100 border border-base-300">
+							<div class="card-body p-4 gap-0">
+								<div class="flex flex-row gap-4 items-start relative">
+									<div
+										th:if="${(comment.replies != null and !#lists.isEmpty(comment.replies)) or isAdmin}"
+										class="w-px h-full absolute left-5 top-0 bg-base-300"
+									></div>
+
+									<div class="size-10 rounded-full overflow-hidden relative">
+										<img
+											th:if="${comment.userClass.user.profilePicture != null}"
+											th:src="${comment.userClass.user.profilePicture}"
+											alt="Profile Picture"
+											class="w-full h-full object-cover"
+										/>
+										<div
+											th:unless="${comment.userClass.user.profilePicture != null}"
+											class="bg-neutral text-neutral-content size-full rounded-full flex items-center justify-center"
+										>
+											<span th:text="${comment.userClass.user.getInitials()}"></span>
+										</div>
+									</div>
+
+									<div class="flex-1">
+										<div class="flex items-center flex-wrap gap-2">
+											<span class="typo-body-md">
+												<span th:text="${comment.userClass.user.name}"></span>
+												<span th:if="${comment.userClass.user.id == currentUserId}">(Saya)</span>
+											</span>
+											<div th:if="${comment.userClass.role.name() == 'ADMIN'}" class="badge badge-xs badge-primary">
+												Admin
+											</div>
+											<span
+												class="typo-caption text-base-content/60"
+												th:text="${#temporals.format(comment.createdAt, 'dd MMM yyyy HH:mm')}"
+											>
+												Waktu
+											</span>
+										</div>
+										<p class="typo-body-md text-base-content/60" th:text="${comment.content}">Isi komentar.</p>
+									</div>
+
+									<div class="dropdown dropdown-end" th:if="${isAdmin or comment.userClass.user.id == currentUserId}">
+										<div tabindex="0" role="button" class="btn btn-ghost btn-circle btn-sm">
+											<i class="ri-more-2-line text-sm"></i>
+										</div>
+										<ul
+											tabindex="0"
+											class="dropdown-content menu bg-base-100 rounded-box border border-base-300 w-44 mt-2 z-10 shadow-md"
+										>
+											<li>
+												<form
+													th:action="@{/class/{classCode}/tasks/{taskId}/comments/{commentId}/delete(classCode=${classs.classCode}, taskId=${task.id}, commentId=${comment.id})}"
+													method="post"
+												>
+													<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+													<button type="submit" onclick="return confirm('Hapus komentar ini?');" class="text-error">
+														Hapus
+													</button>
+												</form>
+											</li>
+										</ul>
+									</div>
+								</div>
+
+								<!-- Replies -->
+								<div class="flex flex-col gap-4 ps-14 relative">
+									<div
+										th:if="${(comment.replies != null and !#lists.isEmpty(comment.replies)) or isAdmin}"
+										class="w-10 absolute left-5 top-0 bottom-6 border-l border-b rounded-bl-box border-base-300"
+									></div>
+
+									<div
+										th:if="${comment.replies != null and !#lists.isEmpty(comment.replies)}"
+										class="flex flex-col gap-2 pt-2"
+									>
+										<div th:each="reply : ${comment.replies}" class="flex flex-row gap-2 pt-4 items-start">
+											<div class="size-8 rounded-full overflow-hidden relative">
+												<img
+													th:if="${reply.userClass.user.profilePicture != null}"
+													th:src="${reply.userClass.user.profilePicture}"
+													alt="Profile Picture"
+													class="w-full h-full object-cover"
+												/>
+												<div
+													th:unless="${reply.userClass.user.profilePicture != null}"
+													class="bg-neutral text-neutral-content size-full rounded-full flex items-center justify-center"
+												>
+													<span th:text="${reply.userClass.user.getInitials()}"></span>
+												</div>
+											</div>
+
+											<div class="flex-1">
+												<div class="flex items-center flex-wrap gap-2">
+													<span class="typo-label">
+														<span th:text="${reply.userClass.user.name}"></span>
+														<span th:if="${reply.userClass.user.id == currentUserId}">(Saya)</span>
+													</span>
+													<div th:if="${reply.userClass.role.name() == 'ADMIN'}" class="badge badge-xs badge-primary">
+														Admin
+													</div>
+													<span
+														class="typo-caption text-base-content/60"
+														th:text="${#temporals.format(reply.createdAt, 'dd MMM yyyy HH:mm')}"
+													>
+														Waktu
+													</span>
+												</div>
+												<p class="typo-body-md text-base-content/60" th:text="${reply.content}">Isi balasan.</p>
+											</div>
+
+											<div class="dropdown dropdown-end" th:if="${isAdmin or reply.userClass.user.id == currentUserId}">
+												<div tabindex="0" role="button" class="btn btn-ghost btn-circle btn-sm">
+													<i class="ri-more-2-line text-sm"></i>
+												</div>
+												<ul
+													tabindex="0"
+													class="dropdown-content menu bg-base-100 rounded-box border border-base-300 w-44 mt-2 z-10 shadow-md"
+												>
+													<li>
+														<form
+															th:action="@{/class/{classCode}/tasks/{taskId}/comments/{commentId}/delete(classCode=${classs.classCode}, taskId=${task.id}, commentId=${reply.id})}"
+															method="post"
+														>
+															<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+															<button type="submit" onclick="return confirm('Hapus balasan ini?');" class="text-error">
+																Hapus
+															</button>
+														</form>
+													</li>
+												</ul>
+											</div>
+										</div>
+									</div>
+
+									<a
+										th:if="${isAdmin}"
+										th:href="@{/class/{classCode}/tasks/{taskId}/comments/create?commentId={commentId}(classCode=${classs.classCode}, taskId=${task.id}, commentId=${comment.id})}"
+										class="btn btn-primary btn-soft btn-sm w-fit relative my-2"
+									>
+										Balas
+									</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 
 				<label class="tab has-[input:checked]:text-primary gap-4">
-					<input type="radio" name="tabs" />
+					<input type="radio" name="tabs" data-fragment="submissions" />
 					Submit
 					<div>0</div>
 				</label>
@@ -234,6 +410,28 @@
 					document.getElementById('modal_detail_subtask_description').textContent = description;
 					document.getElementById('modal_detail_subtask_deadline').textContent = deadline;
 				};
+			</script>
+
+			<script>
+				function syncTabFromFragment() {
+					const fragment = location.hash.replace('#', '');
+					if (!fragment) return;
+
+					const match = document.querySelector(`input[data-fragment="${fragment}"]`);
+					if (match) match.checked = true;
+				}
+
+				function bindTabsToFragment() {
+					document.querySelectorAll('input[type="radio"][name="tabs"]').forEach((input) => {
+						input.addEventListener('change', () => {
+							const frag = input.dataset.fragment;
+							if (frag) history.replaceState(null, '', `#${frag}`);
+						});
+					});
+				}
+
+				syncTabFromFragment();
+				bindTabsToFragment();
 			</script>
 		</div>
 	</body>

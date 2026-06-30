@@ -1,157 +1,236 @@
 <!doctype html>
 <html
-	xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-	data-theme="light"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+    data-theme="light"
 >
-	<head>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title layout:title-pattern="$CONTENT_TITLE | RuangKelas">RuangKelas</title>
-		<link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title layout:title-pattern="$CONTENT_TITLE | RuangKelas">RuangKelas</title>
+        <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+        <link rel="stylesheet" th:href="@{/css/styles.css}" />
 
-		<!-- fonts  -->
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link
-			href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
-			rel="stylesheet"
-		/>
-		<link href="https://cdn.jsdelivr.net/npm/remixicon@4.9.0/fonts/remixicon.css" rel="stylesheet" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+            rel="stylesheet"
+        />
+        <link href="https://cdn.jsdelivr.net/npm/remixicon@4.9.0/fonts/remixicon.css" rel="stylesheet" />
 
-		<meta name="_csrf" th:content="${_csrf.token}" />
-		<meta name="_csrf_header" th:content="${_csrf.headerName}" />
-	</head>
-	<body class="bg-base-200 min-h-screen">
-		<nav class="navbar border-b bg-base-100 border-base-300">
-			<div class="w-full mx-auto max-w-5xl justify-between flex items-center">
-				<img th:src="@{/images/LogoText.svg}" alt="Logo" class="w-40" />
+        <link rel="manifest" th:href="@{/manifest.json}" />
+		<meta name="theme-color" content="#009CA4" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
 
-				<div sec:authorize="isAuthenticated()" class="dropdown dropdown-end">
-					<div tabindex="0" role="button" class="btn btn-ghost btn-circle">
-						<div class="avatar avatar-placeholder">
-							<div class="bg-neutral text-neutral-content w-10 rounded-full">
-								<span sec:authentication="principal.initials"></span>
+        <meta name="_csrf" th:content="${_csrf.token}" />
+        <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    </head>
+    <body class="bg-base-200 min-h-screen">
+        <nav class="navbar border-b bg-base-100 border-base-300">
+            <div class="w-full mx-auto max-w-5xl gap-4 flex items-center">
+                <img th:src="@{/images/LogoText2.svg}" alt="Logo" class="w-10 sm:hidden" />
+                <img th:src="@{/images/LogoText.svg}" alt="Logo" class="w-40 not-sm:hidden" />
+
+                <div class="grow"></div>
+
+                <button id="pwa-install-btn" style="display: none;" class="btn btn-primary btn-sm">
+                    <i class="ri-download-line text-sm"></i>
+                    <span class="not-sm:hidden">Install App</span>
+                </button>
+
+                <div sec:authorize="isAuthenticated()" class="dropdown dropdown-end" id="user-dropdown">
+                    <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+                        <div class="avatar">
+							<div class="w-10 rounded-full overflow-hidden">
+								<img
+									th:if="${#authentication.principal.user.profilePicture != null}"
+									th:src="${#authentication.principal.user.profilePicture}"
+									alt="Profile Picture"
+									class="w-full h-full object-cover"
+								/>
+								<div
+									th:unless="${#authentication.principal.user.profilePicture != null}"
+									class="bg-neutral text-neutral-content w-10 h-10 rounded-full flex items-center justify-center"
+								>
+									<span sec:authentication="principal.initials"></span>
+								</div>
 							</div>
 						</div>
-					</div>
-					<div tabindex="0" class="dropdown-content rounded-box border mt-2 border-base-300 bg-base-100 w-52 z-10">
-						<div class="px-4 py-2 border-b border-base-300 grid -space-y-px">
-							<p sec:authentication="principal.name" class="text-lg font-bold"></p>
-							<span th:text="'@' + ${#authentication.principal.username}" class="text-sm text-base-content/60"></span>
-						</div>
-						<ul class="menu w-full">
-							<li><a href="/profile">Profil</a></li>
-							<li class="text-error">
-								<form method="post" th:action="@{/auth/logout}">
-									<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-									<button type="submit">Keluar</button>
-								</form>
-							</li>
-						</ul>
-					</div>
-				</div>
-			</div>
-		</nav>
-		<main layout:fragment="content"></main>
+                    </div>
+                    <div tabindex="0" class="dropdown-content rounded-box border mt-2 border-base-300 bg-base-100 w-52 z-10 shadow-md">
+                        <div class="px-4 py-2 border-b border-base-300 grid -space-y-px">
+                            <p sec:authentication="principal.name" class="text-lg font-bold"></p>
+                            <span th:text="'@' + ${#authentication.principal.username}" class="text-sm text-base-content/60"></span>
+                        </div>
+                        <ul class="menu w-full">
+                            <li><a href="/profile">Profil</a></li>
+                            <li><a th:href="@{/notification}">Notifikasi</a></li>
+                            <li class="text-error">
+                                <form method="post" th:action="@{/auth/logout}">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                    <button type="submit">Keluar</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <main layout:fragment="content"></main>
 
-		<script th:inline="javascript">
-			const firebaseConfig = {
-				apiKey: /*[[${firebaseConfig.apiKey}]]*/ '',
-				authDomain: /*[[${firebaseConfig.authDomain}]]*/ '',
-				projectId: /*[[${firebaseConfig.projectId}]]*/ '',
-				storageBucket: /*[[${firebaseConfig.storageBucket}]]*/ '',
-				messagingSenderId: /*[[${firebaseConfig.messagingSenderId}]]*/ '',
-				appId: /*[[${firebaseConfig.appId}]]*/ '',
-			};
-			const vapidKey = /*[[${firebaseConfig.vapidKey}]]*/ '';
+        <script th:inline="javascript">
+            const firebaseConfig = {
+                apiKey: /*[[${@firebaseConfigProperties.apiKey}]]*/ '',
+                authDomain: /*[[${@firebaseConfigProperties.authDomain}]]*/ '',
+                projectId: /*[[${@firebaseConfigProperties.projectId}]]*/ '',
+                storageBucket: /*[[${@firebaseConfigProperties.storageBucket}]]*/ '',
+                messagingSenderId: /*[[${@firebaseConfigProperties.messagingSenderId}]]*/ '',
+                appId: /*[[${@firebaseConfigProperties.appId}]]*/ ''
+            };
+            const vapidKey = /*[[${@firebaseConfigProperties.vapidKey}]]*/ '';
+        </script>
+
+        <script type="module">
+            import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+            import {
+                getMessaging,
+                getToken,
+                onMessage,
+            } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';
+
+            const app = initializeApp(firebaseConfig);
+            const messaging = getMessaging(app);
+
+            async function setupPushNotification() {
+                if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
+
+                try {
+                    const permission = await Notification.requestPermission();
+                    if (permission !== 'granted') {
+                        console.warn("Izin notifikasi ditolak oleh user.");
+                        return;
+                    }
+
+                    const swUrl = '/api/notification/firebase-messaging-sw.js';
+
+                    let registration = await navigator.serviceWorker.getRegistration('/');
+                    if (!registration || registration.active?.scriptURL.indexOf(swUrl) === -1) {
+                        registration = await navigator.serviceWorker.register(swUrl, {
+                            scope: '/',
+                        });
+                    }
+
+                    await navigator.serviceWorker.ready;
+
+                    const token = await getToken(messaging, {
+                        vapidKey: vapidKey,
+                        serviceWorkerRegistration: registration,
+                    });
+
+                    if (token) {
+                        console.log("Token didapat:", token);
+                        await saveToken(token);
+                    } else {
+                        console.warn("Gagal mendapatkan token dari Firebase.");
+                    }
+
+                    onMessage(messaging, (payload) => {
+                        console.log('Pesan diterima saat tab aktif (foreground):', payload);
+
+                        const title = payload.notification?.title || payload.data?.title || 'Notifikasi RuangKelas';
+                        const options = {
+                            body: payload.notification?.body || payload.data?.body || '',
+                            icon: '/images/Logo.svg',
+                        };
+
+                        const notification = new Notification(title, options);
+
+                        notification.onclick = function(event) {
+                            event.preventDefault();
+                            notification.close();
+
+                            const id = payload.data?.id;
+
+                            let redirectPath = '/';
+                            if (id) {
+                                redirectPath = `/notification/redirect/${id}`;
+                            }
+
+                            window.location.href = redirectPath;
+                        };
+                    });
+
+                } catch (e) {
+                    console.error("Gagal setup FCM:", e);
+                }
+            }
+
+            async function saveToken(token) {
+                try {
+                    const csrf = document.querySelector('meta[name="_csrf"]')?.content;
+                    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+
+                    if (!csrf || !csrfHeader) {
+                        console.error("CSRF token tidak ditemukan di meta tags!");
+                        return;
+                    }
+
+                    const response = await fetch('/api/notification/register-token', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            [csrfHeader]: csrf,
+                        },
+                        body: JSON.stringify({ token }),
+                    });
+
+                    if (response.ok) {
+                        console.log("Token FCM berhasil disimpan ke DB.");
+                    } else {
+                        console.error("Gagal menyimpan token ke DB:", await response.text());
+                    }
+                } catch (e) {
+                    console.error("Error saat fetch API simpan token:", e);
+                }
+            }
+
+            const isUserLoggedIn = document.getElementById('user-dropdown') !== null;
+            if (isUserLoggedIn) {
+                setupPushNotification();
+            }
+        </script>
+
+        <script>
+			if ('serviceWorker' in navigator) {
+				navigator.serviceWorker.register('/js/sw.js');
+			}
 		</script>
 
-		<script type="module">
-			import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-			import {
-				getMessaging,
-				getToken,
-				onMessage,
-			} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';
+         <script>
+            let deferredPrompt;
 
-			const app = initializeApp(firebaseConfig);
-			const messaging = getMessaging(app);
+            window.addEventListener("beforeinstallprompt", (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                document.getElementById("pwa-install-btn").style.display = "block";
+            });
 
-			async function setupPushNotification() {
-				// Cek support browser
-				if (!('serviceWorker' in navigator) || !('Notification' in window)) {
-					return;
-				}
+            document.getElementById("pwa-install-btn").addEventListener("click", () => {
+                if (!deferredPrompt) return;
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((result) => {
+                    if (result.outcome === "accepted") {
+                        document.getElementById("pwa-install-btn").style.display = "none";
+                    }
+                    deferredPrompt = null;
+                });
+            });
 
-				try {
-					// Minta izin notifikasi
-					const permission = await Notification.requestPermission();
-					if (permission !== 'granted') {
-						return;
-					}
-
-					// Register service worker
-					let registration = await navigator.serviceWorker.getRegistration('/');
-					if (!registration) {
-						registration = await navigator.serviceWorker.register('/api/notification/firebase-messaging-sw.js', {
-							scope: '/',
-						});
-					}
-
-					await navigator.serviceWorker.ready;
-
-					// Ambil FCM token
-					const token = await getToken(messaging, {
-						vapidKey: vapidKey,
-						serviceWorkerRegistration: registration,
-					});
-
-					if (token) {
-						await saveToken(token);
-					}
-				} catch {
-					// silent
-				}
-			}
-
-			// Kirim token ke backend Spring Boot
-			async function saveToken(token) {
-				try {
-					const csrf = document.querySelector('meta[name="_csrf"]').content;
-					const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
-
-					const response = await fetch('/api/notification/register-token', {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-							[csrfHeader]: csrf,
-						},
-						body: JSON.stringify({ token }),
-					});
-				} catch {
-					// silent
-				}
-			}
-
-			// Handle notifikasi saat app sedang aktif (foreground)
-			onMessage(messaging, (payload) => {
-				const title = payload.notification?.title || 'Notifikasi Baru';
-				const body = payload.notification?.body || '';
-
-				if (Notification.permission === 'granted') {
-					navigator.serviceWorker.ready.then((registration) => {
-						registration.showNotification(title, {
-							body,
-							icon: '/images/Logo.svg',
-						});
-					});
-				}
-			});
-
-			// Jalankan
-			setupPushNotification();
-		</script>
-	</body>
+            window.addEventListener("appinstalled", () => {
+                document.getElementById("pwa-install-btn").style.display = "none";
+                deferredPrompt = null;
+            });
+        </script>
+    </body>
 </html>
-

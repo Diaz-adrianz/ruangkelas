@@ -128,7 +128,6 @@ public class ClassService {
     public void delete(String classCode, Long userId) {
         Class existing = getByCode(classCode);
         ensureAdmin(existing.getId(), userId);
-        userClassRepository.deleteAll(userClassRepository.findByClasseId(existing.getId()));
         classRepository.deleteById(existing.getId());
     }
  

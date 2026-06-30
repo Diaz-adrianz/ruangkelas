@@ -1,0 +1,88 @@
+<!doctype html>
+<html
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/Home}"
+>
+	<head>
+		<title>Notifikasi Saya</title>
+	</head>
+	<body>
+		<div layout:fragment="content" class="max-w-5xl mx-auto p-4">
+			<div class="breadcrumbs text-sm mb-4">
+				<ul>
+					<li><a href="/">Beranda</a></li>
+					<li>Notifikasi</li>
+				</ul>
+			</div>
+
+			<!-- ALERT -->
+			<div th:if="${success}" class="alert alert-soft alert-success mb-4">
+				<span th:text="${success}"></span>
+			</div>
+
+			<div th:if="${error}" class="alert alert-soft alert-error mb-4">
+				<span th:text="${error}"></span>
+			</div>
+
+			<div class="flex items-center justify-between mb-6">
+				<h1 class="typo-heading-xl" th:text="'Notifikasi (' + ${notifications.?[!isRead].size()} + ')'"></h1>
+			</div>
+
+			<div th:if="${notifications.empty}" class="text-center py-12 text-base-content/60 typo-body-md">
+				Belum ada notifikasi saat ini.
+			</div>
+
+			<div class="flex flex-col gap-2">
+				<div
+					th:each="notif : ${notifications}"
+					th:classappend="${notif.isRead} ? '' : 'bg-primary/10 border-primary'"
+					class="card bg-base-100 border border-base-300 group hover:shadow-lg transition-shadow"
+				>
+					<div class="card-body p-4 flex-row items-center justify-between">
+						<div>
+							<span
+								class="typo-caption text-primary"
+								th:text="${#temporals.format(notif.createdAt, 'EEEE, dd MMM yyyy HH:mm')}"
+							></span>
+							<a th:href="@{/notification/redirect/{id}(id=${notif.id})}" class="group-hover:underline">
+								<h4
+									th:classappend="${notif.isRead} ? '' : 'font-bold'"
+									class="typo-body-md"
+									th:text="${notif.subject}"
+								></h4>
+							</a>
+							<p
+								th:classappend="${notif.isRead} ? '' : 'text-base-content/100'"
+								class="typo-label text-base-content/60"
+								th:text="${notif.message}"
+							></p>
+						</div>
+
+						<div class="dropdown dropdown-end">
+							<div tabindex="0" role="button" class="btn btn-ghost btn-circle btn-sm">
+								<i class="ri-more-2-line text-sm"></i>
+							</div>
+							<ul
+								tabindex="0"
+								class="dropdown-content menu bg-base-100 rounded-box border border-base-300 w-44 mt-2 z-10 shadow-md"
+							>
+								<li>
+									<form th:if="${!notif.isRead}" th:action="@{/notification/{id}/read(id=${notif.id})}" method="post">
+										<button type="submit">Tandai dibaca</button>
+									</form>
+								</li>
+								<li>
+									<form th:action="@{/notification/{id}/delete(id=${notif.id})}" method="post">
+										<button type="submit" class="text-error">Hapus</button>
+									</form>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
+
