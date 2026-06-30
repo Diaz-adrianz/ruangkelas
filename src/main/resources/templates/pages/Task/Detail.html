@@ -379,23 +379,20 @@
 				</div>
 
 				<label class="tab has-[input:checked]:text-primary gap-4">
-						<input type="radio" name="tabs" data-fragment="submissions" />
-    						Submit
-						 <div th:text="${submissions != null ? #lists.size(submissions) : 0}">
-   						  0 
-						</div>
-					</label>
-				<div class="tab-content pt-4">
+    <input type="radio" name="tabs" data-fragment="submissions" />
+    Submit
+    <div th:text="${submissions != null ? #lists.size(submissions) : 0}">
+        0
+    </div>
+</label>
+
+<div class="tab-content pt-4">
 
     <form
-        th:action="@{/submissions/submit}"
-        method="post"
-        class="flex flex-col gap-4">
-
-        <input
-            type="hidden"
-            name="taskId"
-            th:value="${task.id}" />
+        th:action="@{/class/{classCode}/tasks/{taskId}/submit(
+            classCode=${classs.classCode},
+            taskId=${task.id})}"
+        method="post">
 
         <input
             type="hidden"
@@ -411,6 +408,32 @@
         </button>
 
     </form>
+
+    <div
+        th:if="${#lists.isEmpty(submissions)}"
+        class="text-center py-6 text-base-content/60">
+
+        Belum ada submission.
+
+    </div>
+
+    <div
+        th:each="submission : ${submissions}"
+        class="card bg-base-100 border border-base-300 mt-3">
+
+        <div class="card-body">
+
+            <h3 th:text="${submission.name}"></h3>
+
+            <p th:text="${submission.status}"></p>
+
+            <p
+                th:text="${#temporals.format(submission.submittedAt,'dd MMM yyyy HH:mm')}">
+            </p>
+
+        </div>
+
+    </div>
 
 </div>
 			</div>

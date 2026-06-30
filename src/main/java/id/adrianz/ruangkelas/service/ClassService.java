@@ -264,8 +264,4 @@ public class ClassService {
         userClass.setRole(UserClass.Role.MEMBER);
         userClassRepository.save(userClass);
     }
-    public UserClass getUserClass(Long classId, Long userId) {
-    return userClassRepository.findByUserIdAndClasseId(userId, classId)
-            .orElseThrow(() -> new RuntimeException("Kamu bukan anggota kelas ini"));
-    }
 }

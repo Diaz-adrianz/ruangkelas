@@ -10,8 +10,10 @@ import java.util.Optional;
 
 public interface TaskSubmissionRepository extends JpaRepository<TaskSubmission, Long> {
 
-    List<TaskSubmission> findByTask(Task task);
+    List<TaskSubmission> findByTaskId(Long taskId);
 
-    Optional<TaskSubmission> findByTaskAndUserClass(Task task, UserClass userClass);
+    List<TaskSubmission>findByTaskIdOrderBySubmittedAtDesc(Long taskId);
+
+    Optional<TaskSubmission> findByUserClassIdAndTaskId(Long userClassId, Long taskId);
 
 }

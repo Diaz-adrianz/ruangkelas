@@ -10,45 +10,98 @@ import id.adrianz.ruangkelas.model.Task;
 import id.adrianz.ruangkelas.model.TaskSubmission;
 import id.adrianz.ruangkelas.model.UserClass;
 import id.adrianz.ruangkelas.repository.TaskSubmissionRepository;
+import id.adrianz.ruangkelas.repository.UserClassRepository;
 import lombok.RequiredArgsConstructor;
+import java.util.stream.Collectors;
+import id.adrianz.ruangkelas.dto.TaskSubmissionView;
 
 @Service
 @RequiredArgsConstructor
 public class TaskSubmissionService {
 
     private final TaskSubmissionRepository submissionRepository;
+    private final TaskService taskService;
+    private final UserClassRepository userClassRepository;
 
-    public TaskSubmission submitTask(Task task, UserClass userClass) {
+    public TaskSubmission submitTask(Long taskId, Long userId) {
 
-        if (submissionRepository.findByTaskAndUserClass(task, userClass).isPresent()) {
-            throw new RuntimeException("Kamu sudah submit tugas ini.");
+        Task task = taskService.getTaskById(taskId);
+
+        UserClass userClass = userClassRepository
+                .findByUserIdAndClasseId(
+                        userId,
+                        task.getClasse().getId())
+                .orElseThrow(() ->
+                        new RuntimeException("Kamu bukan anggota kelas."));
+
+        if (submissionRepository
+                .findByUserClassIdAndTaskId(
+                        userClass.getId(),
+                        taskId)
+                .isPresent()) {
+
+            throw new RuntimeException("Tugas sudah pernah disubmit.");
         }
 
-        SubmissionStatus status;
+        TaskSubmission submission = new TaskSubmission();
+
+        submission.setTaskId(taskId);
+        submission.setUserClassId(userClass.getId());
+        submission.setSubmittedAt(LocalDateTime.now());
 
         if (LocalDateTime.now().isAfter(task.getDeadline())) {
-            status = SubmissionStatus.LATE;
+            submission.setStatus(SubmissionStatus.LATE);
         } else {
-            status = SubmissionStatus.ON_TIME;
+            submission.setStatus(SubmissionStatus.ON_TIME);
         }
-
-        TaskSubmission submission = TaskSubmission.builder()
-                .task(task)
-                .userClass(userClass)
-                .status(status)
-                .submittedAt(LocalDateTime.now())
-                .build();
 
         return submissionRepository.save(submission);
     }
 
+    public void retractSubmission(Long id) {
+
+        TaskSubmission submission = getSubmissionById(id);
+
+        submissionRepository.delete(submission);
+    }
+
     public List<TaskSubmission> getAllSubmissions() {
+
         return submissionRepository.findAll();
     }
 
-    public List<TaskSubmission> getSubmissionByTask(Long taskId) {
-        return submissionRepository.findByTask(
-                Task.builder().id(taskId).build()
-        );
+    public TaskSubmission getSubmissionById(Long id) {
+
+        return submissionRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Submission tidak ditemukan."));
     }
+
+    public List<TaskSubmission> getSubmissionByTask(Long taskId) {
+
+        return submissionRepository.findByTaskIdOrderBySubmittedAtDesc(taskId);
+    }
+    
+
+    public List<TaskSubmissionView> getSubmissionViews(Long taskId) {
+
+    return submissionRepository
+            .findByTaskIdOrderBySubmittedAtDesc(taskId)
+            .stream()
+            .map(submission -> {
+
+                UserClass userClass = userClassRepository
+                        .findById(submission.getUserClassId())
+                        .orElseThrow(() ->
+                                new RuntimeException("UserClass tidak ditemukan."));
+
+                return new TaskSubmissionView(
+                        userClass.getUser().getName(),
+                        submission.getStatus(),
+                        submission.getSubmittedAt());
+
+            })
+            .collect(Collectors.toList());
+}
+
 }
