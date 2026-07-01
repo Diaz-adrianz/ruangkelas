@@ -24,16 +24,16 @@ public class HomeController {
 
     @GetMapping
     public String index(Model model, @AuthenticationPrincipal UserPrincipal principal) {
+        Long userId = principal.getUser().getId();
+
+        // Ambil data kelas
+        List<Class> classes = classService.getAllForUser(userId);
+        List<UserClass> rejections = classService.getRejectedForUser(userId);
+
+        model.addAttribute("classes", classes);
+        model.addAttribute("rejections", rejections);
+
         try {
-            Long userId = principal.getUser().getId();
-            
-            // Ambil data kelas
-            List<Class> classes = classService.getAllForUser(userId);
-            List<UserClass> rejections = classService.getRejectedForUser(userId);
-
-            model.addAttribute("classes", classes);
-            model.addAttribute("rejections", rejections);
-
             // ================= START: DASHBOARD WIDGETS =================
             Map<String, Object> widgets = dashboardService.getDashboardWidgetsData(userId);
             model.addAllAttributes(widgets);
