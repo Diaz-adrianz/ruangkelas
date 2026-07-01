@@ -42,7 +42,7 @@ public class TaskSubmissionService {
                         taskId)
                 .isPresent()) {
 
-            throw new RuntimeException("Tugas sudah pernah disubmit.");
+            throw new RuntimeException("Kamu sudah submit tugas ini");
         }
 
         TaskSubmission submission = new TaskSubmission();
@@ -97,6 +97,7 @@ public class TaskSubmissionService {
                             .orElseThrow(() -> new RuntimeException("UserClass tidak ditemukan."));
 
                     return new TaskSubmissionView(
+                            userClass.getUser().getId(),
                             userClass.getUser().getName(),
                             submission.getStatus(),
                             submission.getSubmittedAt());

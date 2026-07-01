@@ -403,13 +403,28 @@
 						Belum ada submit
 					</div>
 
-					<div th:each="submission : ${submissions}" class="card bg-base-100 border border-base-300 mt-3">
-						<div class="card-body">
-							<h3 th:text="${submission.name}"></h3>
+					<div th:if="${!#lists.isEmpty(submissions)}" class="flex flex-col gap-2">
+						<div th:each="submission : ${submissions}" class="card bg-base-100 border border-base-300">
+							<div class="card-body p-4 flex-row items-center gap-4">
+								<div class="flex-1">
+									<h3 class="typo-body-md">
+										<span th:text="${submission.name}"></span>
+										<span th:if="${submission.userId == currentUserId}">(Saya)</span>
+									</h3>
+									<p
+										class="typo-caption text-base-content/60"
+										th:text="${#temporals.format(submission.submittedAt,'dd MMM yyyy HH:mm')}"
+									></p>
+								</div>
 
-							<p th:text="${submission.status}"></p>
+								<div th:if="${submission.status.name() == 'ON_TIME'}" class="badge badge-success badge-soft">
+									<span>Tepat waktu</span>
+								</div>
 
-							<p th:text="${#temporals.format(submission.submittedAt,'dd MMM yyyy HH:mm')}"></p>
+								<div th:if="${submission.status.name() == 'LATE'}" class="badge badge-error badge-soft">
+									<span>Terlambat</span>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
