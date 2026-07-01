@@ -47,8 +47,8 @@ public class TaskSubmissionService {
 
         TaskSubmission submission = new TaskSubmission();
 
-        submission.setTaskId(taskId);
-        submission.setUserClassId(userClass.getId());
+        submission.setTask(task);
+        submission.setUserClass(userClass);
         submission.setSubmittedAt(LocalDateTime.now());
 
         if (LocalDateTime.now().isAfter(task.getDeadline())) {
@@ -93,7 +93,7 @@ public class TaskSubmissionService {
                 .map(submission -> {
 
                     UserClass userClass = userClassRepository
-                            .findById(submission.getUserClassId())
+                            .findById(submission.getUserClass().getId())
                             .orElseThrow(() -> new RuntimeException("UserClass tidak ditemukan."));
 
                     return new TaskSubmissionView(

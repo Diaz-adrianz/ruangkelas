@@ -26,11 +26,13 @@ public class TaskSubmission {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_class_id", nullable = false)
-    private Long userClassId;
+    @ManyToOne
+    @JoinColumn(name = "user_class_id", nullable = false)
+    private UserClass userClass;
 
-    @Column(name = "task_id", nullable = false)
-    private Long taskId;
+    @ManyToOne
+    @JoinColumn(name = "task_id", nullable = false)
+    private Task task;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
