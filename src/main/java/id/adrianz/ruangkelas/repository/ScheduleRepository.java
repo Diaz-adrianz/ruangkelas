@@ -31,4 +31,8 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     Optional<Schedule> findByIdAndClasseClassCode(
             @Param("id") Long id,
             @Param("classCode") String classCode);
+
+            
+   @Query(value = "SELECT s.* FROM schedules s JOIN classes c ON s.class_id = c.id JOIN user_classes uc ON uc.class_id = c.id WHERE uc.user_id = :userId AND s.start_time > :now ORDER BY s.start_time ASC LIMIT 1", nativeQuery = true)
+    Optional<Schedule> findNextScheduleForUser(@Param("userId") Long userId, @Param("now") LocalDateTime now);
 }
