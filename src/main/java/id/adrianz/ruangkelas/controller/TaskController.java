@@ -25,7 +25,6 @@ import id.adrianz.ruangkelas.service.TaskSubmissionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-
 @Controller
 @RequestMapping("/class/{classCode}/tasks")
 @RequiredArgsConstructor
@@ -84,30 +83,32 @@ public class TaskController {
     }
 
     @PostMapping("/{taskId}/submit")
-public String submitTask(
-        @PathVariable String classCode,
-        @PathVariable Long taskId,
-        @AuthenticationPrincipal UserPrincipal principal,
-        RedirectAttributes redirectAttributes) {
+    public String submitTask(
+            @PathVariable String classCode,
+            @PathVariable Long taskId,
+            @AuthenticationPrincipal UserPrincipal principal,
+            RedirectAttributes redirectAttributes) {
 
-    try {
+        try {
+            // Kita tidak perlu mencari objek Task dan UserClass secara manual lagi di
+            // Controller
+            // cukup kirimkan ID-nya saja ke Service
+            taskSubmissionService.submitTask(
+                    taskId,
+                    principal.getUser().getId());
 
-        taskSubmissionService.submitTask(taskId, principal.getUser().getId());
+            redirectAttributes.addFlashAttribute(
+                    "success",
+                    "Tugas berhasil disubmit.");
 
-        redirectAttributes.addFlashAttribute(
-                "success",
-                "Tugas berhasil disubmit.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    e.getMessage());
+        }
 
-    } catch (Exception e) {
-
-        redirectAttributes.addFlashAttribute(
-                "error",
-                e.getMessage());
-
+        return "redirect:/class/" + classCode + "/tasks/" + taskId;
     }
-
-    return "redirect:/class/" + classCode + "/tasks/" + taskId;
-}
 
     @GetMapping("/{taskId}/edit")
     public String showEditForm(@PathVariable String classCode, @PathVariable Long taskId, Model model) {
@@ -204,8 +205,8 @@ public String submitTask(
         model.addAttribute("currentUserId", principal.getUser().getId());
 
         model.addAttribute(
-            "submissions",
-            taskSubmissionService.getSubmissionViews(taskId));
+                "submissions",
+                taskSubmissionService.getSubmissionViews(taskId));
 
         return "pages/Task/Detail";
     }

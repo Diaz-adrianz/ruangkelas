@@ -6,6 +6,7 @@
 	<body>
 		<div layout:fragment="content">
 			<div class="mx-auto max-w-5xl p-4">
+				<!-- ================= BAGIAN ASLI: ALERTS & NOTIF ================= -->
 				<!-- ALERT SUCCESS -->
 				<div th:if="${success}" class="alert alert-success alert-soft mb-4">
 					<span th:text="${success}"></span>
@@ -27,6 +28,147 @@
 					</form>
 				</div>
 
+				<!-- ================= START: DASHBOARD WIDGETS (BARU) ================= -->
+				<div class="mb-4">
+					<h1 class="typo-heading-xl">
+						Selamat Datang,
+						<span sec:authentication="principal.name"></span>
+						!
+					</h1>
+					<p class="text-base-content/60 typo-body-md">Berikut adalah ringkasan aktivitas kelas dan tugasmu.</p>
+				</div>
+
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+					<!-- Widget 1: Task Completion Rate -->
+					<div class="card bg-base-100 border border-base-300">
+						<div class="card-body p-4">
+							<div class="flex items-center gap-2">
+								<div class="size-9 bg-primary/10 rounded-box text-primary flex items-center justify-center">
+									<i class="ri-pie-chart-2-line text-lg"></i>
+								</div>
+								<h3 class="typo-label text-base-content/60">Penyelesaian Tugas</h3>
+							</div>
+							<div class="flex items-end gap-2 mt-2">
+								<span class="text-3xl font-bold" th:text="${completionRate != null ? completionRate : 0} + '%'">
+									0%
+								</span>
+								<span class="text-sm text-base-content/60 mb-1">selesai</span>
+							</div>
+							<progress
+								class="progress progress-primary w-full mt-2"
+								th:value="${completionRate != null ? completionRate : 0}"
+								max="100"
+							></progress>
+						</div>
+					</div>
+
+					<!-- Widget 2: Overdue Tasks -->
+					<div class="card bg-base-100 border border-base-300">
+						<div class="card-body p-4">
+							<div class="flex items-center gap-2">
+								<div class="size-9 bg-error/10 rounded-box text-error flex items-center justify-center">
+									<i class="ri-error-warning-line text-lg"></i>
+								</div>
+								<h3 class="typo-label text-base-content/60">Tugas Terlambat</h3>
+							</div>
+							<div class="flex items-end gap-2 mt-2">
+								<span class="text-3xl font-bold text-error" th:text="${overdueCount != null ? overdueCount : 0}">
+									0
+								</span>
+								<span class="text-sm text-base-content/60 mb-1">belum dikumpulkan</span>
+							</div>
+							<div class="typo-caption text-base-content/60">*Melewati batas tenggat waktu</div>
+						</div>
+					</div>
+
+					<!-- Widget 3: Next Schedule -->
+					<div class="card bg-base-100 border border-base-300">
+						<div class="card-body p-4">
+							<div class="flex items-center gap-2">
+								<div class="size-9 bg-info/10 rounded-box text-info flex items-center justify-center">
+									<i class="ri-calendar-event-line text-lg"></i>
+								</div>
+								<h3 class="typo-label text-base-content/60">Jadwal Terdekat</h3>
+							</div>
+
+							<div th:if="${nextSchedule != null}" class="mt-2">
+								<h4 class="typo-body-lg font-bold truncate" th:text="${nextSchedule.classe.name}">Nama Kelas</h4>
+								<div class="flex items-center gap-2 mt-1 text-sm text-base-content/60">
+									<i class="ri-map-pin-line"></i>
+									<span class="truncate" th:text="${nextSchedule.place}">Ruangan</span>
+								</div>
+								<div class="flex items-center gap-2 mt-2">
+									<span class="badge badge-info badge-sm" th:text="${nextScheduleText}"></span>
+									<span
+										class="text-xs text-base-content/60"
+										th:text="${#temporals.format(nextSchedule.startTime, 'EEEE, dd MMM HH:mm')}"
+									>
+										Waktu
+									</span>
+								</div>
+							</div>
+
+							<div
+								th:if="${nextSchedule == null}"
+								class="flex items-center justify-center h-full typo-caption text-base-content/60 mt-4"
+							>
+								Tidak ada jadwal kelas dalam waktu dekat.
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Widget 4: Upcoming Deadlines (List Card) -->
+				<div class="card bg-base-100 border border-base-300 mb-8">
+					<div class="card-body p-4">
+						<div class="flex justify-between items-center flex-wrap gap-2 mb-2">
+							<h3 class="typo-heading-md">Tenggat Waktu Mendekat</h3>
+							<span
+								class="badge badge-warning badge-sm"
+								th:text="${upcomingDeadlines != null ? #lists.size(upcomingDeadlines) : 0} + ' Tugas (7 Hari ke depan)'"
+							></span>
+						</div>
+
+						<div
+							th:if="${upcomingDeadlines == null or #lists.isEmpty(upcomingDeadlines)}"
+							class="p-12 text-center flex flex-col items-center justify-center"
+						>
+							<div class="size-14 bg-success/10 text-success rounded-full flex">
+								<i class="ri-check-double-line text-3xl m-auto"></i>
+							</div>
+							<p class="typo-body-md font-medium mt-4">Hore! Semuanya aman.</p>
+							<p class="typo-caption text-base-content/60">Tidak ada tugas yang mendekati tenggat waktu.</p>
+						</div>
+
+						<div
+							th:if="${upcomingDeadlines != null and !#lists.isEmpty(upcomingDeadlines)}"
+							class="flex flex-col gap-2 p-2"
+						>
+							<div th:each="task : ${upcomingDeadlines}" class="card group">
+								<div class="card-body p-0 flex-row items-center gap-4">
+									<div class="size-9 bg-warning/10 rounded-box text-warning flex items-center justify-center">
+										<i class="ri-timer-line text-lg"></i>
+									</div>
+									<div class="flex-1">
+										<a
+											th:href="@{/class/{classCode}/tasks/{taskId}(classCode=${task.classe.classCode}, taskId=${task.id})}"
+											class="typo-body-md group-hover:underline truncate"
+											th:text="${task.title}"
+										></a>
+										<p class="typo-caption text-base-content/60 truncate" th:text="${task.classe.name}"></p>
+									</div>
+									<div class="text-right">
+										<p class="typo-label" th:text="${#temporals.format(task.deadline, 'dd MMM yyyy, HH:mm')}"></p>
+										<p class="typo-caption text-error">Harus segera dikerjakan</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- ================= END: DASHBOARD WIDGETS ================= -->
+
+				<!-- ================= BAGIAN ASLI: LIST KELAS ================= -->
 				<div class="flex items-center justify-between mb-4">
 					<h1 class="typo-heading-lg">Kelas Saya</h1>
 
@@ -73,3 +215,4 @@
 		</div>
 	</body>
 </html>
+

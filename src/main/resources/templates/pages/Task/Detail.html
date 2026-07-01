@@ -379,64 +379,87 @@
 				</div>
 
 				<label class="tab has-[input:checked]:text-primary gap-4">
-    <input type="radio" name="tabs" data-fragment="submissions" />
-    Submit
-    <div th:text="${submissions != null ? #lists.size(submissions) : 0}">
-        0
-    </div>
-</label>
+					<input type="radio" name="tabs" data-fragment="submissions" />
+					Submit
+					<div th:text="${submissions != null ? #lists.size(submissions) : 0}">0</div>
+				</label>
 
-<div class="tab-content pt-4">
-
-    <form
-        th:action="@{/class/{classCode}/tasks/{taskId}/submit(
+				<div class="tab-content pt-4">
+					<form
+						th:action="@{/class/{classCode}/tasks/{taskId}/submit(
             classCode=${classs.classCode},
             taskId=${task.id})}"
-        method="post">
+						method="post"
+					>
+						<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-        <input
-            type="hidden"
-            th:name="${_csrf.parameterName}"
-            th:value="${_csrf.token}" />
+						<button type="submit" class="btn btn-primary">Submit Tugas</button>
+					</form>
 
-        <button
-            type="submit"
-            class="btn btn-primary">
+					<div th:if="${#lists.isEmpty(submissions)}" class="text-center py-6 text-base-content/60">
+						Belum ada submission.
+					</div>
 
-            Submit Tugas
+					<div th:each="submission : ${submissions}" class="card bg-base-100 border border-base-300 mt-3">
+						<div class="card-body">
+							<h3 th:text="${submission.name}"></h3>
 
-        </button>
+							<p th:text="${submission.status}"></p>
 
-    </form>
-
-    <div
-        th:if="${#lists.isEmpty(submissions)}"
-        class="text-center py-6 text-base-content/60">
-
-        Belum ada submission.
-
-    </div>
-
-    <div
-        th:each="submission : ${submissions}"
-        class="card bg-base-100 border border-base-300 mt-3">
-
-        <div class="card-body">
-
-            <h3 th:text="${submission.name}"></h3>
-
-            <p th:text="${submission.status}"></p>
-
-            <p
-                th:text="${#temporals.format(submission.submittedAt,'dd MMM yyyy HH:mm')}">
-            </p>
-
-        </div>
-
-    </div>
-
-</div>
+							<p th:text="${#temporals.format(submission.submittedAt,'dd MMM yyyy HH:mm')}"></p>
+						</div>
+					</div>
+				</div>
 			</div>
+
+			<!-- ====== MODALS ======  -->
+			<dialog id="modal_detail_subtask" class="modal modal-bottom sm:modal-middle">
+				<div class="modal-box">
+					<span class="typo-caption text-base-content/60">Detail Sub Tugas</span>
+					<h3 class="typo-heading-md mt-2" id="modal_detail_subtask_title"></h3>
+					<p class="typo-body-md text-base-content/60" id="modal_detail_subtask_description"></p>
+					<div class="flex items-end gap-2 text-base-content/60 mt-4">
+						<i class="ri-timer-line text-sm"></i>
+						<span class="typo-caption" id="modal_detail_subtask_deadline"></span>
+					</div>
+				</div>
+				<form method="dialog" class="modal-backdrop">
+					<button>Close</button>
+				</form>
+			</dialog>
+			<!-- ====== MODALS ======  -->
+
+			<script>
+				window.openModalDetailSubtask = function (title, description, deadline) {
+					document.getElementById('modal_detail_subtask').showModal();
+					document.getElementById('modal_detail_subtask_title').textContent = title;
+					document.getElementById('modal_detail_subtask_description').textContent = description;
+					document.getElementById('modal_detail_subtask_deadline').textContent = deadline;
+				};
+			</script>
+
+			<script>
+				function syncTabFromFragment() {
+					const fragment = location.hash.replace('#', '');
+					if (!fragment) return;
+
+					const match = document.querySelector(`input[data-fragment="${fragment}"]`);
+					if (match) match.checked = true;
+				}
+
+				function bindTabsToFragment() {
+					document.querySelectorAll('input[type="radio"][name="tabs"]').forEach((input) => {
+						input.addEventListener('change', () => {
+							const frag = input.dataset.fragment;
+							if (frag) history.replaceState(null, '', `#${frag}`);
+						});
+					});
+				}
+
+				syncTabFromFragment();
+				bindTabsToFragment();
+			</script>
 		</div>
 	</body>
 </html>
+
