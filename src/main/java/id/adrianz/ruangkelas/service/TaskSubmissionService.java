@@ -2,9 +2,11 @@ package id.adrianz.ruangkelas.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import id.adrianz.ruangkelas.dto.TaskSubmissionView;
 import id.adrianz.ruangkelas.model.SubmissionStatus;
 import id.adrianz.ruangkelas.model.Task;
 import id.adrianz.ruangkelas.model.TaskSubmission;
@@ -22,7 +24,8 @@ public class TaskSubmissionService {
     private final TaskRepository taskRepository; // Tambahan untuk mencari Task
     private final UserClassRepository userClassRepository; // Tambahan untuk mencari UserClass
 
-    // Parameter diubah menjadi (Long taskId, Long userId) agar sesuai dengan Controller
+    // Parameter diubah menjadi (Long taskId, Long userId) agar sesuai dengan
+    // Controller
     public TaskSubmission submitTask(Long taskId, Long userId) {
 
         // 1. Cari Task berdasarkan ID
@@ -33,29 +36,32 @@ public class TaskSubmissionService {
         UserClass userClass = userClassRepository.findByUserIdAndClasseId(userId, task.getClasse().getId())
                 .orElseThrow(() -> new RuntimeException("Kamu bukan anggota kelas ini"));
 
-        if (submissionRepository.findByTaskAndUserClass(task, userClass).isPresent()) {
-            throw new RuntimeException("Kamu sudah submit tugas ini.");
+        if (submissionRepository
+                .findByUserClassIdAndTaskId(
+                        userClass.getId(),
+                        taskId)
+                .isPresent()) {
+
+            throw new RuntimeException("Kamu sudah submit tugas ini");
         }
 
-        SubmissionStatus status;
+        TaskSubmission submission = new TaskSubmission();
+
+        submission.setTask(task);
+        submission.setUserClass(userClass);
+        submission.setSubmittedAt(LocalDateTime.now());
 
         if (LocalDateTime.now().isAfter(task.getDeadline())) {
-            status = SubmissionStatus.LATE;
+            submission.setStatus(SubmissionStatus.LATE);
         } else {
-            status = SubmissionStatus.ON_TIME;
+            submission.setStatus(SubmissionStatus.ON_TIME);
         }
-
-        TaskSubmission submission = TaskSubmission.builder()
-                .task(task)
-                .userClass(userClass)
-                .status(status)
-                .submittedAt(LocalDateTime.now())
-                .build();
 
         return submissionRepository.save(submission);
     }
 
-    // --- TAMBAHAN: Fungsi untuk membatalkan submission yang dipanggil Controller ---
+    // --- TAMBAHAN: Fungsi untuk membatalkan submission yang dipanggil Controller
+    // ---
     public void retractSubmission(Long id) {
         if (!submissionRepository.existsById(id)) {
             throw new RuntimeException("Submission tidak ditemukan.");
@@ -64,12 +70,41 @@ public class TaskSubmissionService {
     }
 
     public List<TaskSubmission> getAllSubmissions() {
+
         return submissionRepository.findAll();
     }
 
-    public List<TaskSubmission> getSubmissionByTask(Long taskId) {
-        return submissionRepository.findByTask(
-                Task.builder().id(taskId).build()
-        );
+    public TaskSubmission getSubmissionById(Long id) {
+
+        return submissionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Submission tidak ditemukan."));
     }
+
+    public List<TaskSubmission> getSubmissionByTask(Long taskId) {
+
+        return submissionRepository.findByTaskIdOrderBySubmittedAtDesc(taskId);
+    }
+
+    public List<TaskSubmissionView> getSubmissionViews(Long taskId) {
+
+        return submissionRepository
+                .findByTaskIdOrderBySubmittedAtDesc(taskId)
+                .stream()
+                .map(submission -> {
+
+                    UserClass userClass = userClassRepository
+                            .findById(submission.getUserClass().getId())
+                            .orElseThrow(() -> new RuntimeException("UserClass tidak ditemukan."));
+
+                    return new TaskSubmissionView(
+                            submission.getId(),
+                            userClass.getUser().getId(),
+                            userClass.getUser().getName(),
+                            submission.getStatus(),
+                            submission.getSubmittedAt());
+
+                })
+                .collect(Collectors.toList());
+    }
+
 }

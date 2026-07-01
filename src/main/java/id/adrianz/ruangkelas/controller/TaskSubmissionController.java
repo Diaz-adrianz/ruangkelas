@@ -2,8 +2,9 @@ package id.adrianz.ruangkelas.controller;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import id.adrianz.ruangkelas.model.UserPrincipal;
@@ -11,7 +12,7 @@ import id.adrianz.ruangkelas.service.TaskSubmissionService;
 import lombok.RequiredArgsConstructor;
 
 @Controller
-@RequestMapping("/submissions")
+@RequestMapping("/class/{classCode}/tasks/{taskId}/submissions")
 @RequiredArgsConstructor
 public class TaskSubmissionController {
 
@@ -19,14 +20,10 @@ public class TaskSubmissionController {
 
     @PostMapping("/submit")
     public String submit(
-
-            @RequestParam Long taskId,
-
+            @PathVariable String classCode,
+            @PathVariable Long taskId,
             @AuthenticationPrincipal UserPrincipal principal,
-
-            RedirectAttributes redirectAttributes
-
-    ) {
+            RedirectAttributes redirectAttributes) {
 
         try {
 
@@ -46,14 +43,14 @@ public class TaskSubmissionController {
 
         }
 
-        return "redirect:/";
+        return "redirect:/class/" + classCode + "/tasks/" + taskId + "#submissions";
     }
 
     @PostMapping("/{id}/retract")
     public String retract(
-
+            @PathVariable String classCode,
+            @PathVariable Long taskId,
             @PathVariable Long id,
-
             RedirectAttributes redirectAttributes
 
     ) {
@@ -64,7 +61,7 @@ public class TaskSubmissionController {
 
             redirectAttributes.addFlashAttribute(
                     "success",
-                    "Submission berhasil dibatalkan.");
+                    "Submission berhasil ditarik.");
 
         } catch (Exception e) {
 
@@ -74,7 +71,7 @@ public class TaskSubmissionController {
 
         }
 
-        return "redirect:/";
+        return "redirect:/class/" + classCode + "/tasks/" + taskId + "#submissions";
     }
 
 }

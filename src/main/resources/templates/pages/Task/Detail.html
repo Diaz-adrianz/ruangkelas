@@ -383,14 +383,67 @@
 					Submit
 					<div th:text="${submissions != null ? #lists.size(submissions) : 0}">0</div>
 				</label>
+
 				<div class="tab-content pt-4">
-					<form th:action="@{/submissions/submit}" method="post" class="flex flex-col gap-4">
-						<input type="hidden" name="taskId" th:value="${task.id}" />
+					<div class="flex justify-end mb-4">
+						<form
+							th:action="@{/class/{classCode}/tasks/{taskId}/submissions/submit(classCode=${classs.classCode},taskId=${task.id})}"
+							method="post"
+						>
+							<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-						<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+							<button type="submit" class="btn btn-primary btn-sm" onclick="return confirm('Yakin submit tugas ini?');">
+								<i class="ri-check-double-line text-sm"></i>
+								Submit Tugas
+							</button>
+						</form>
+					</div>
 
-						<button type="submit" class="btn btn-primary">Submit Tugas</button>
-					</form>
+					<div th:if="${#lists.isEmpty(submissions)}" class="text-center py-12 text-base-content/60 typo-body-md">
+						Belum ada submit
+					</div>
+
+					<div th:if="${!#lists.isEmpty(submissions)}" class="flex flex-col gap-2">
+						<div th:each="submission : ${submissions}" class="card bg-base-100 border border-base-300">
+							<div class="card-body p-4 flex-row items-center gap-4">
+								<div class="flex-1">
+									<h3 class="typo-body-md">
+										<span th:text="${submission.name}"></span>
+										<span th:if="${submission.userId == currentUserId}">(Saya)</span>
+									</h3>
+									<p
+										class="typo-caption text-base-content/60"
+										th:text="${#temporals.format(submission.submittedAt,'dd MMM yyyy HH:mm')}"
+									></p>
+								</div>
+
+								<div th:if="${submission.status.name() == 'ON_TIME'}" class="badge badge-success badge-soft">
+									<span>Tepat waktu</span>
+								</div>
+
+								<div th:if="${submission.status.name() == 'LATE'}" class="badge badge-error badge-soft">
+									<span>Terlambat</span>
+								</div>
+
+								<form
+									th:if="${submission.userId == currentUserId}"
+									th:action="@{/class/{classCode}/tasks/{taskId}/submissions/{id}/retract(classCode=${classs.classCode},taskId=${task.id},id=${submission.id})}"
+									method="post"
+								>
+									<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+									<button
+										type="submit"
+										class="btn btn-ghost tooltip btn-sm btn-circle"
+										data-tip="Tarik kembali submit"
+										onclick="return confirm('Yakin menarik kembali submit tugas ini?');"
+									>
+										<i class="ri-arrow-go-back-line text-sm"></i>
+									</button>
+								</form>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 

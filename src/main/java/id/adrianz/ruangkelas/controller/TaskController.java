@@ -15,14 +15,12 @@ import id.adrianz.ruangkelas.dto.CreateTaskDto;
 import id.adrianz.ruangkelas.dto.UpdateTaskDto;
 import id.adrianz.ruangkelas.model.Class;
 import id.adrianz.ruangkelas.model.Task;
-import id.adrianz.ruangkelas.model.UserClass;
 import id.adrianz.ruangkelas.model.UserPrincipal;
 import id.adrianz.ruangkelas.service.ClassService;
+import id.adrianz.ruangkelas.service.CommentService;
 import id.adrianz.ruangkelas.service.SubTaskService;
 import id.adrianz.ruangkelas.service.TaskService;
-import id.adrianz.ruangkelas.service.CommentService;
 import id.adrianz.ruangkelas.service.TaskSubmissionService;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -81,34 +79,6 @@ public class TaskController {
 
         redirectAttributes.addFlashAttribute("success", "Tugas berhasil ditambahkan");
         return "redirect:/class/" + classCode + "#tasks";
-    }
-
-@PostMapping("/{taskId}/submit")
-    public String submitTask(
-            @PathVariable String classCode,
-            @PathVariable Long taskId,
-            @AuthenticationPrincipal UserPrincipal principal,
-            RedirectAttributes redirectAttributes) {
-
-        try {
-            // Kita tidak perlu mencari objek Task dan UserClass secara manual lagi di Controller
-            // cukup kirimkan ID-nya saja ke Service
-            taskSubmissionService.submitTask(
-                    taskId, 
-                    principal.getUser().getId()
-            );
-
-            redirectAttributes.addFlashAttribute(
-                    "success",
-                    "Tugas berhasil disubmit.");
-
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute(
-                    "error",
-                    e.getMessage());
-        }
-
-        return "redirect:/class/" + classCode + "/tasks/" + taskId;
     }
 
     @GetMapping("/{taskId}/edit")
@@ -201,12 +171,13 @@ public class TaskController {
 
         model.addAttribute("subtasks", subTaskService.getSubtasksByTaskId(taskId));
 
-        // 🌟 DI SINI PERUBAHAN UTAMANYA: Menggunakan method penampung baru
         var comments = commentService.getComments(taskId, principal.getUser());
         model.addAttribute("comments", comments);
         model.addAttribute("currentUserId", principal.getUser().getId());
 
-        model.addAttribute("submissions", taskSubmissionService.getSubmissionByTask(taskId));
+        model.addAttribute(
+                "submissions",
+                taskSubmissionService.getSubmissionViews(taskId));
 
         return "pages/Task/Detail";
     }
