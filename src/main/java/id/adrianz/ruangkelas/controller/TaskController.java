@@ -15,6 +15,7 @@ import id.adrianz.ruangkelas.dto.CreateTaskDto;
 import id.adrianz.ruangkelas.dto.UpdateTaskDto;
 import id.adrianz.ruangkelas.model.Class;
 import id.adrianz.ruangkelas.model.Task;
+import id.adrianz.ruangkelas.model.TaskSubmission;
 import id.adrianz.ruangkelas.model.UserPrincipal;
 import id.adrianz.ruangkelas.service.ClassService;
 import id.adrianz.ruangkelas.service.SubTaskService;
@@ -203,10 +204,20 @@ public String submitTask(
         model.addAttribute("comments", comments);
         model.addAttribute("currentUserId", principal.getUser().getId());
 
-        model.addAttribute(
-            "submissions",
-            taskSubmissionService.getSubmissionViews(taskId));
 
+        model.addAttribute(
+        "submissions",
+        taskSubmissionService.getSubmissionViews(taskId));
+        TaskSubmission mySubmission =
+        taskSubmissionService.getSubmission(
+                taskId,
+                principal.getUser().getId());
+
+                System.out.println("USER LOGIN = " + principal.getUser().getName());
+                System.out.println("SUBMISSION = " + mySubmission);
+                model.addAttribute("mySubmission", mySubmission);
+                model.addAttribute("alreadySubmitted", mySubmission != null);
+        
         return "pages/Task/Detail";
     }
 }

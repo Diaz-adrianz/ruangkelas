@@ -43,21 +43,23 @@ public class TaskSubmissionService {
             throw new RuntimeException("Tugas sudah pernah disubmit.");
         }
 
-        TaskSubmission submission = new TaskSubmission();
+      TaskSubmission submission = new TaskSubmission();
+
+        LocalDateTime waktuSekarang = LocalDateTime.now();
 
         submission.setTaskId(taskId);
         submission.setUserClassId(userClass.getId());
-        submission.setSubmittedAt(LocalDateTime.now());
+        submission.setSubmittedAt(waktuSekarang);
 
-        if (LocalDateTime.now().isAfter(task.getDeadline())) {
+        if (submission.getSubmittedAt().isAfter(task.getDeadline())) {
             submission.setStatus(SubmissionStatus.LATE);
         } else {
             submission.setStatus(SubmissionStatus.ON_TIME);
         }
 
         return submissionRepository.save(submission);
-    }
-
+    } 
+        
     public void retractSubmission(Long id) {
 
         TaskSubmission submission = getSubmissionById(id);
@@ -84,7 +86,6 @@ public class TaskSubmissionService {
     
 
     public List<TaskSubmissionView> getSubmissionViews(Long taskId) {
-
     return submissionRepository
             .findByTaskIdOrderBySubmittedAtDesc(taskId)
             .stream()
@@ -102,6 +103,27 @@ public class TaskSubmissionService {
 
             })
             .collect(Collectors.toList());
+}
+
+            public TaskSubmission getSubmission(Long taskId, Long userId) {
+
+    Task task = taskService.getTaskById(taskId);
+
+    UserClass userClass = userClassRepository
+            .findByUserIdAndClasseId(
+                    userId,
+                    task.getClasse().getId())
+            .orElse(null);
+
+    if (userClass == null) {
+        return null;
+    }
+
+    return submissionRepository
+            .findByUserClassIdAndTaskId(
+                    userClass.getId(),
+                    taskId)
+            .orElse(null);
 }
 
 }
