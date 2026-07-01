@@ -10,6 +10,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class TaskSubmissionView {
 
+    private Long id;
     private Long userId;
     private String name;
     private SubmissionStatus status;

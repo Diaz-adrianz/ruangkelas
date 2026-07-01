@@ -424,6 +424,23 @@
 								<div th:if="${submission.status.name() == 'LATE'}" class="badge badge-error badge-soft">
 									<span>Terlambat</span>
 								</div>
+
+								<form
+									th:if="${submission.userId == currentUserId}"
+									th:action="@{/class/{classCode}/tasks/{taskId}/submissions/{id}/retract(classCode=${classs.classCode},taskId=${task.id},id=${submission.id})}"
+									method="post"
+								>
+									<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+									<button
+										type="submit"
+										class="btn btn-ghost tooltip btn-sm btn-circle"
+										data-tip="Tarik kembali submit"
+										onclick="return confirm('Yakin menarik kembali submit tugas ini?');"
+									>
+										<i class="ri-arrow-go-back-line text-sm"></i>
+									</button>
+								</form>
 							</div>
 						</div>
 					</div>

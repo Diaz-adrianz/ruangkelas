@@ -97,6 +97,7 @@ public class TaskSubmissionService {
                             .orElseThrow(() -> new RuntimeException("UserClass tidak ditemukan."));
 
                     return new TaskSubmissionView(
+                            submission.getId(),
                             userClass.getUser().getId(),
                             userClass.getUser().getName(),
                             submission.getStatus(),
