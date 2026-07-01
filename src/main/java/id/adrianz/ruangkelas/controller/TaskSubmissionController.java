@@ -11,7 +11,7 @@ import id.adrianz.ruangkelas.service.TaskSubmissionService;
 import lombok.RequiredArgsConstructor;
 
 @Controller
-@RequestMapping("/submissions")
+@RequestMapping("/class/{classCode}/tasks/{taskId}/submissions")
 @RequiredArgsConstructor
 public class TaskSubmissionController {
 
@@ -19,13 +19,10 @@ public class TaskSubmissionController {
 
     @PostMapping("/submit")
     public String submit(
-
-            @RequestParam Long taskId,
-
+            @PathVariable String classCode,
+            @PathVariable Long taskId,
             @AuthenticationPrincipal UserPrincipal principal,
-
             RedirectAttributes redirectAttributes
-
     ) {
 
         try {
@@ -46,7 +43,7 @@ public class TaskSubmissionController {
 
         }
 
-        return "redirect:/";
+        return "redirect:/class/" + classCode + "/tasks/" + taskId + "#submissions";
     }
 
     @PostMapping("/{id}/retract")
