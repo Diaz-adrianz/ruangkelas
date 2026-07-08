@@ -7,6 +7,7 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Configuration;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -19,6 +20,14 @@ public class FirebaseConfig {
         if (FirebaseApp.getApps().isEmpty()) {
             InputStream serviceAccount =
                 getClass().getClassLoader().getResourceAsStream("secrets/firebase-service-account.json");
+
+	    if (serviceAccount == null) {
+                try {
+                    serviceAccount = new FileInputStream("/app/secrets/firebase-service-account.json");
+                } catch (IOException e) {
+                    serviceAccount = null;
+                }
+            }
 
             if (serviceAccount == null) {
                 log.warn("⚠️ Firebase service account not found, skipping initialization.");
